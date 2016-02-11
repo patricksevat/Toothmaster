@@ -1,0 +1,18 @@
+<ion-view view-title="Safety slide">
+  <ion-content>
+    <div class="card"  id="safety-slide-card" on-swipe-left="swipeRightToLeft()" >
+      <div class="item item-divider">
+          {{slides[i].title}}
+
+      </div>
+      <div class="item item-text-wrap text-justify" ng-bind-html="trustAsHtml(slides[i].description)">
+
+
+      </div>
+    </div>
+    <button ng-hide="prevHide()" class="button button-calm" id="prev-safety-slide" on-tap="prev()"><i class="glyphicon glyphicon-chevron-left"></i>Prev</button>
+    <button ng-hide="nextHide()" class="button button-calm" id="next-safety-slide" on-tap="next()">Next<i class="glyphicon glyphicon-chevron-right"></i></button>
+    <button ng-hide="safetyReadHide()" class="button button-balanced" id="safety-read-button" ui-sref="app.home">I have read the safety instructions<i class="glyphicon glyphicon-ok"></i></button>
+  </ion-content>
+</ion-view>
+<script src="js/toothmaster.js"></script>

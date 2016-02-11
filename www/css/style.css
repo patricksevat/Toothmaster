@@ -1,0 +1,43 @@
+/* Empty. Add your own CSS if you like */
+
+ion-content {
+  text-align: center;
+}
+
+.card {
+  min-height: 200px;
+}
+
+#warning {
+  font-size: 1.2em;
+  color: red;
+}
+
+.warning-sign {
+  float:left;
+  font-size: 2em;
+  margin-right: 15px;
+
+
+}
+.item {
+  overflow: hidden;
+
+}
+
+.glyphicon-exclamation-sign {
+  padding-top:5px;
+  color: #ffbb59;
+}
+
+.red-warning {
+  color: red;
+}
+
+.glyphicon-ok-sign {
+  color: green;
+}
+
+.padding {
+  text-align: center;
+}
