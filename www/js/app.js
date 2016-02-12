@@ -6,7 +6,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('Toothmaster', ['ionic', 'starter.controllers'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $rootScope, $state) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -18,6 +18,28 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
     if (window.StatusBar) {
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
+    }
+
+  });
+
+  //check if app.safety-slide has been completed, if not redirect to app.safety
+  $rootScope.$on( "$locationChangeStart", function(event, toState, fromState) {
+    console.log(event);
+    if ( window.localStorage.getItem("Safety") !== "Completed") {
+      console.log("safety not completed");
+
+      // no safety slides checked, redirect to Safety
+      if (toState.name == "app.safety") {
+        console.log("no redirect needed");
+        // already going to safety.html, no redirect needed
+
+      }
+      else {
+        // not going to safety.html, we should redirect now
+        console.log("redirecting to safety");
+        $state.go("app.safety");
+
+      }
     }
   });
 })
@@ -39,6 +61,8 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
         templateUrl: 'templates/settings.html'
       }
     }
+
+
   })
 
   .state('app.home', {
