@@ -1,44 +1,10 @@
 angular.module('starter.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
+.controller('AppCtrl', function($scope) {
+  $scope.ClearLocalStor = function() {
+    localStorage.removeItem('Safety');
+  }
 
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
-
-  // Form data for the login modal
-  $scope.loginData = {};
-
-  // Create the login modal that we will use later
-  $ionicModal.fromTemplateUrl('templates/login.html', {
-    scope: $scope
-  }).then(function(modal) {
-    $scope.modal = modal;
-  });
-
-  // Triggered in the login modal to close it
-  $scope.closeLogin = function() {
-    $scope.modal.hide();
-  };
-
-  // Open the login modal
-  $scope.login = function() {
-    $scope.modal.show();
-  };
-
-  // Perform the login action when the user submits the login form
-  $scope.doLogin = function() {
-    console.log('Doing login', $scope.loginData);
-
-    // Simulate a login delay. Remove this and replace with your login
-    // code if using a login system
-    $timeout(function() {
-      $scope.closeLogin();
-    }, 1000);
-  };
 })
 
 .controller('PlaylistsCtrl', function($scope) {
@@ -53,11 +19,12 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('SafetySlides', function($scope, $sce) {
+.controller('SafetySlides', function($scope, $sce, $ionicModal) {
   $scope.i = 0;
   $scope.hidePrev = false;
 
   $scope.slides = [
+    { title: 'Start safety instructions', description: '<div class="safety-text"><h4>Dear customer, before you start using the program in your application, please read this note on safety, health and responsibilities.</h4></div>', id: 0 },
     { title: 'Usage', description: '<div class="safety-text">Toothmaster contains functionality that can be used in an application/ product to make a <u>mortise tenon connection.</u> You will have to add other components or jiggs to saw or mill a <u>mortise tenon connection.</u> You might even have to make modifications to your existing machinery.  <br><br><h2 style="color:red; font-size: 1.2em;">For this reason we cannot take responsibility that your mortise tenon solution will be safe and complies with all norms.</h2> <br>Toothmaster requires other components to create safe mortise tenon connections as is explained next.</div>', id: 1 },
     { title: 'Caution!', description: '<div class="safety-text">You will use Toothmaster to create precise movements in order to enable an operator to make a precision cut. There is a chance (explained below) that there will be unexpected movements while the operator makes the cut. These movements could lead to damage to persons, your workpiece or machinery. For this reason, you have to take additional safety measures</div>', id: 2 },
     { title: 'Causes of unexpected movements: ', description: '<div class="item item-text-wrap row"><div class="warning-sign col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">Android/iOS is no Opereating System for safety applications</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div> <div class="safety-text col-75">Toothmaster software is not developed to aim for a certain so-called SIL(Safety Integrity Level).</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75"> You might drop something on your phone and then Toothmaster will order the stepmotor to move.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">You or somebody else might by coincidence click on the continue button while making a precision cut.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">There might be interference from other applications with Toothmaster.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">Your phone memory might be bad. Leading to bit rot, causing inadvertant movement.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">There might be Electro Magnetic Interference in your workplace (for instance if you start a heavy motor), leading to bit rot, causing inadvertant movement.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">Toothmaster uses the soundcard to steer the step motor. If you play a song/ an application does beep, there is inadvertant movement.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75"> etc.</div></div>', id: 3 },
@@ -68,7 +35,7 @@ angular.module('starter.controllers', [])
   ];
 
   $scope.swipeRightToLeft = function() {
-    if ($scope.i <6) {
+    if ($scope.i <7) {
     console.log('swiping right');
     $scope.i ++;
     }
@@ -98,16 +65,44 @@ angular.module('starter.controllers', [])
   }
 
   $scope.nextHide = function() {
-    if ($scope.i === 6 ) {return true;}
+    if ($scope.i === 7 ) {return true;}
     else {return false;}
   }
 
   $scope.safetyReadHide = function() {
-    if ($scope.i === 6 ) {return false;}
+    if ($scope.i === 7 ) {return false;}
     else {return true;}
   }
 
-  //on slide.id = 6, add photo of scheme
-  //on slide.id = 7, add read button
+  $scope.showScheme = function() {
+    if ($scope.i === 6) {
+      return true;
+    }
+  }
 
+  $ionicModal.fromTemplateUrl('scheme-modal.html', {
+    scope: $scope,
+    animation: 'slide-in-up'
+  }).then(function(modal) {
+    $scope.modal = modal;
+  });
+  $scope.openModal = function() {
+    $scope.modal.show();
+    window.screen.lockOrientation('landscape');
+  };
+  $scope.closeModal = function() {
+    $scope.modal.hide();
+    window.screen.unlockOrientation();
+  };
+  //Cleanup the modal when we're done with it!
+  $scope.$on('$destroy', function() {
+    $scope.modal.remove();
+  });
+
+
+
+  //on slide.id = 7, add read-safety-instruction button
+  $scope.setLocalStorageSafety = function() {
+    window.localStorage.setItem("Safety", "Completed");
+  }
 })

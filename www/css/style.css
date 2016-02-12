@@ -41,3 +41,11 @@ ion-content {
 .padding {
   text-align: center;
 }
+
+#safety-slide-buttons-div {
+  text-align: center;
+}
+
+.remove-button {
+  float: right;
+}

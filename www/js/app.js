@@ -6,7 +6,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('Toothmaster', ['ionic', 'starter.controllers'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $rootScope, $state) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -18,6 +18,28 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
     if (window.StatusBar) {
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
+    }
+
+  });
+
+  //check if app.safety-slide has been completed, if not redirect to app.safety
+  $rootScope.$on( "$locationChangeStart", function(event, toState, fromState) {
+    console.log(event);
+    if ( (window.localStorage.getItem("Safety") !== "Completed") ) {
+      console.log("safety not completed");
+
+      // no safety slides checked, redirect to Safety
+      if (toState.name === "app.safety") {
+        console.log("no redirect needed");
+        // already going to safety.html, no redirect needed
+        return;
+      }
+      else {
+        // not going to safety.html, we should redirect now
+        console.log("redirecting to safety");
+        $state.go("app.safety-slide");
+
+      }
     }
   });
 })
@@ -33,12 +55,15 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
   })
 
   .state('app.settings', {
+    name: 'settings',
     url: '/settings',
     views: {
       'menuContent': {
         templateUrl: 'templates/settings.html'
       }
     }
+
+
   })
 
   .state('app.home', {
@@ -61,6 +86,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
 
     .state('app.safety-slide', {
       url: '/safety-slide',
+      name: 'app.safety-slide',
       views: {
         'menuContent': {
           templateUrl: 'templates/safety-slide.html',
@@ -99,6 +125,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
     }
   });
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/home');
+  $urlRouterProvider.otherwise('/app/safety-slide');
 });
 
