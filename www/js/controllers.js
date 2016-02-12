@@ -24,6 +24,7 @@ angular.module('starter.controllers', [])
   $scope.hidePrev = false;
 
   $scope.slides = [
+    { title: 'Start safety instructions', description: '<div class="safety-text"><h4>Dear customer, before you start using the program in your application, please read this note on safety, health and responsibilities.</h4></div>', id: 0 },
     { title: 'Usage', description: '<div class="safety-text">Toothmaster contains functionality that can be used in an application/ product to make a <u>mortise tenon connection.</u> You will have to add other components or jiggs to saw or mill a <u>mortise tenon connection.</u> You might even have to make modifications to your existing machinery.  <br><br><h2 style="color:red; font-size: 1.2em;">For this reason we cannot take responsibility that your mortise tenon solution will be safe and complies with all norms.</h2> <br>Toothmaster requires other components to create safe mortise tenon connections as is explained next.</div>', id: 1 },
     { title: 'Caution!', description: '<div class="safety-text">You will use Toothmaster to create precise movements in order to enable an operator to make a precision cut. There is a chance (explained below) that there will be unexpected movements while the operator makes the cut. These movements could lead to damage to persons, your workpiece or machinery. For this reason, you have to take additional safety measures</div>', id: 2 },
     { title: 'Causes of unexpected movements: ', description: '<div class="item item-text-wrap row"><div class="warning-sign col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">Android/iOS is no Opereating System for safety applications</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div> <div class="safety-text col-75">Toothmaster software is not developed to aim for a certain so-called SIL(Safety Integrity Level).</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75"> You might drop something on your phone and then Toothmaster will order the stepmotor to move.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">You or somebody else might by coincidence click on the continue button while making a precision cut.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">There might be interference from other applications with Toothmaster.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">Your phone memory might be bad. Leading to bit rot, causing inadvertant movement.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">There might be Electro Magnetic Interference in your workplace (for instance if you start a heavy motor), leading to bit rot, causing inadvertant movement.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75">Toothmaster uses the soundcard to steer the step motor. If you play a song/ an application does beep, there is inadvertant movement.</div></div><div class="item item-text-wrap row"><div class="warning-sign col-center col-20"><i class="glyphicon glyphicon-exclamation-sign"></i></div><div class="safety-text col-75"> etc.</div></div>', id: 3 },
@@ -34,7 +35,7 @@ angular.module('starter.controllers', [])
   ];
 
   $scope.swipeRightToLeft = function() {
-    if ($scope.i <6) {
+    if ($scope.i <7) {
     console.log('swiping right');
     $scope.i ++;
     }
@@ -64,17 +65,17 @@ angular.module('starter.controllers', [])
   }
 
   $scope.nextHide = function() {
-    if ($scope.i === 6 ) {return true;}
+    if ($scope.i === 7 ) {return true;}
     else {return false;}
   }
 
   $scope.safetyReadHide = function() {
-    if ($scope.i === 6 ) {return false;}
+    if ($scope.i === 7 ) {return false;}
     else {return true;}
   }
 
   $scope.showScheme = function() {
-    if ($scope.i === 5) {
+    if ($scope.i === 6) {
       return true;
     }
   }

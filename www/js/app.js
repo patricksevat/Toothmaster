@@ -25,19 +25,19 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
   //check if app.safety-slide has been completed, if not redirect to app.safety
   $rootScope.$on( "$locationChangeStart", function(event, toState, fromState) {
     console.log(event);
-    if ( window.localStorage.getItem("Safety") !== "Completed") {
+    if ( (window.localStorage.getItem("Safety") !== "Completed") ) {
       console.log("safety not completed");
 
       // no safety slides checked, redirect to Safety
-      if (toState.name == "app.safety") {
+      if (toState.name === "app.safety") {
         console.log("no redirect needed");
         // already going to safety.html, no redirect needed
-
+        return;
       }
       else {
         // not going to safety.html, we should redirect now
         console.log("redirecting to safety");
-        $state.go("app.safety");
+        $state.go("app.safety-slide");
 
       }
     }
@@ -55,6 +55,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
   })
 
   .state('app.settings', {
+    name: 'settings',
     url: '/settings',
     views: {
       'menuContent': {
@@ -85,6 +86,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
 
     .state('app.safety-slide', {
       url: '/safety-slide',
+      name: 'app.safety-slide',
       views: {
         'menuContent': {
           templateUrl: 'templates/safety-slide.html',
@@ -123,6 +125,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
     }
   });
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/home');
+  $urlRouterProvider.otherwise('/app/safety-slide');
 });
 
