@@ -1,35 +1,75 @@
 <ion-view view-title="Program">
   <ion-content>
 
-    <div class="list">
+    <div class="list" ng-controller="ProgramController">
       <label class="item item-input item-stacked-label" on-tap="focus()">
         <span class="input-label">Saw width (mm)</span>
-        <input type="number" placeholder="Example: 5">
+        <input type="number" placeholder="Example: 5" ng-model="sawWidth">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Cut width (mm)</span>
-        <input type="number" placeholder="Example: 20">
+        <input type="number" placeholder="Example: 20" ng-model="cutWidth">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Pin width (mm)</span>
-        <input type="number" placeholder="Example: 20">
+        <input type="number" placeholder="Example: 20" ng-model="pinWidth">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Number of cuts</span>
-        <input type="number" placeholder="Example: 4">
+        <input type="number" placeholder="Example: 4" ng-model="numberOfCuts">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Start position (mm)</span>
-        <input type="number" placeholder="Example: 50">
+        <input type="number" placeholder="Example: 50" ng-model="startPosition">
       </label>
     </div>
     <div class="padding" id="program-buttons-div">
       <button class="button button-balanced"> Run program</button>
-      <button class="button button-calm">Save  <i class="glyphicon glyphicon-floppy-save"></i> </button>
-      <button class="button button-calm">Load  <i class="glyphicon glyphicon-floppy-open"></i> </button>
+      <button class="button button-calm" on-tap="openModal(2)">Save  <i class="glyphicon glyphicon-floppy-save"></i> </button>
+      <button class="button button-calm" on-tap="openModal(1)">Load  <i class="glyphicon glyphicon-floppy-open"></i> </button>
     </div>
     <div id="graphic-outer" class="padding">
       <img class="img-responsive" src="img/graphic.png">
     </div>
   </ion-content>
 </ion-view>
+
+<script id="load-modal.html" type="text/ng-template">
+  <ion-modal-view>
+    <ion-header-bar>
+      <h1 class="title">Load program <i class="glyphicon glyphicon-remove-sign padding" on-tap="closeModal(1)"></i></h1>
+    </ion-header-bar>
+    <ion-content class="padding">
+      <div class="list">
+
+        <div class="item item-divider">
+          Presets
+        </div>
+        <ion-item ng-repeat="preset in presets">
+          {{preset.title}}
+        </ion-item>
+
+        <div class="item item-divider">
+          Your programs
+        </div>
+      </div>
+    </ion-content>
+  </ion-modal-view>
+</script>
+
+<script id="save-modal.html" type="text/ng-template">
+  <ion-modal-view>
+    <ion-header-bar>
+      <h1 class="title">Save program<i class="glyphicon glyphicon-remove-sign padding" on-tap="closeModal(2)"></i></h1>
+    </ion-header-bar>
+    <ion-content class="padding">
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Program name</span>
+        <input type="text" placeholder="Example: My first program" ng-model="title">
+      </label>
+      <button class="button button-balanced" on-tap="saveProgram()">Save program</button>
+    </ion-content>
+  </ion-modal-view>
+</script>
+
+

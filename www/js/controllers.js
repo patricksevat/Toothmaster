@@ -107,7 +107,78 @@ angular.module('starter.controllers', [])
   }
 })
 
-.controller('ProgramController', function($scope) {
+.controller('ProgramController', function($scope, $ionicModal, $ionicPopup) {
+
+
+  $scope.presets = [
+    { title: '5mm everything', sawWidth: 5, cutWidth: 5, pinWidth: 5, numberOfCuts: 5, startPosition: 5  },
+    { title: '15mm everything', sawWidth: 15, cutWidth: 15, pinWidth: 15, numberOfCuts: 15, startPosition: 15  }
+  ];
+
+  $scope.userPrograms = [];
+
+  $scope.title;
+  $scope.sawWidth;
+  $scope.cutWidth;
+  $scope.pinWidth;
+  $scope.numberOfCuts;
+  $scope.startPosition;
+
+  $scope.saveProgram = function() {
+    if ($scope.title === undefined ) {
+      $scope.showAlert();
+    }
+  };
+
+  $scope.showAlert = function(){
+    var alertPopup = $ionicPopup.alert(
+      {
+        title: 'Not all fields are filled in',
+        template: 'Title is not filled in'
+      }
+    )
+  }
+
+    $ionicModal.fromTemplateUrl('load-modal.html', {
+      id: 1,
+      scope: $scope,
+      animation: 'slide-in-up'
+    }).then(function(modal) {
+      $scope.modal1 = modal;
+    });
+
+
+    $ionicModal.fromTemplateUrl('save-modal.html', {
+      id: 2,
+      scope: $scope,
+      animation: 'slide-in-up'
+    }).then(function(modal) {
+      $scope.modal2 = modal;
+    });
+
+  $scope.openModal = function(index) {
+    if (index === 1) {
+      $scope.modal1.show();
+    }
+    else {
+      $scope.modal2.show();
+    }
+    };
+
+    $scope.closeModal = function(index) {
+      if (index === 1) {
+        $scope.modal1.hide();
+      }
+      else {
+        $scope.modal2.hide();
+      }
+
+    };
+    //Cleanup the modal when we're done with it!
+    $scope.$on('$destroy', function() {
+      $scope.modal1.remove();
+      $scope.modal2.remove();
+    });
 
 }
 )
