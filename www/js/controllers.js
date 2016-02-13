@@ -106,3 +106,8 @@ angular.module('starter.controllers', [])
     window.localStorage.setItem("Safety", "Completed");
   }
 })
+
+.controller('ProgramController', function($scope) {
+
+}
+)

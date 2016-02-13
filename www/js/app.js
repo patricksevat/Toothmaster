@@ -99,7 +99,8 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
       url: '/program',
       views: {
         'menuContent': {
-          templateUrl: 'templates/program.html'
+          templateUrl: 'templates/program.html',
+          controller: 'ProgramController'
         }
       }
     })

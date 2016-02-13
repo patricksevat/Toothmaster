@@ -1,5 +1,35 @@
 <ion-view view-title="Program">
   <ion-content>
-    <h1>Program</h1>
+
+    <div class="list">
+      <label class="item item-input item-stacked-label" on-tap="focus()">
+        <span class="input-label">Saw width (mm)</span>
+        <input type="number" placeholder="Example: 5">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Cut width (mm)</span>
+        <input type="number" placeholder="Example: 20">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Pin width (mm)</span>
+        <input type="number" placeholder="Example: 20">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Number of cuts</span>
+        <input type="number" placeholder="Example: 4">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Start position (mm)</span>
+        <input type="number" placeholder="Example: 50">
+      </label>
+    </div>
+    <div class="padding" id="program-buttons-div">
+      <button class="button button-balanced"> Run program</button>
+      <button class="button button-calm">Save  <i class="glyphicon glyphicon-floppy-save"></i> </button>
+      <button class="button button-calm">Load  <i class="glyphicon glyphicon-floppy-open"></i> </button>
+    </div>
+    <div id="graphic-outer" class="padding">
+      <img class="img-responsive" src="img/graphic.png">
+    </div>
   </ion-content>
 </ion-view>

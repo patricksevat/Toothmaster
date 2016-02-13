@@ -4,6 +4,8 @@ ion-content {
   text-align: center;
 }
 
+/*Safety.html*/
+
 .card {
   min-height: 200px;
 }
@@ -49,3 +51,11 @@ ion-content {
 .remove-button {
   float: right;
 }
+
+/*home.html*/
+
+label {
+  text-align: left;
+}
+
+
