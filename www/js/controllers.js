@@ -291,12 +291,61 @@ angular.module('starter.controllers', [])
     });
 
   $scope.deleteUserProgram = function($index) {
-    console.log('delete userprogram at index: '+$index);
-    $scope.userPrograms.splice($index, 1);
-    var userProgNum = $index+1;
-    console.log(userProgNum);
-    window.localStorage.removeItem('userProgram'+userProgNum);
+    console.log('delete userProgram clicked at index: '+$index);
+    $scope.showDeleteAlert($index);
   };
 
+    $scope.showDeleteAlert = function($index) {
+      var index = $index;
+      $ionicPopup.show(
+        {
+          title: 'Areyou sure you want to delete this program?',
+          scope: $scope,
+
+          buttons: [
+            {
+              //button clears program fields and title
+              text: 'Yes',
+              type: 'button-assertive',
+              onTap: function sureDelete() {
+
+                console.log('index ='+index);
+                //remove the userProgram visually
+                $scope.userPrograms.splice(index, 1);
+
+                // remove the userProgram from localstorage. Step 1: get the key under which the userProgram is saved
+                // $index+2 is because the first item is 'Safety' and second item is numUserProgs
+                var userProgName = window.localStorage.key( index+2 );
+
+                //check if the userProgramName has 1 or 2 ID-numbers
+                //set userProgNum to the ID-number(s) and remove from localStorage
+                if (userProgName.length === 11) {
+                  var userProgNum = userProgName.charAt(11);
+                  window.localStorage.removeItem('userProgram'+userProgNum);
+                }
+                else if (userProgName.length === 12) {
+                  var userProgNum = userProgName.charAt(11)+userProgName.charAt(12);
+                  window.localStorage.removeItem('userProgram'+userProgNum);
+                }
+
+              }
+            },
+            {
+              text: 'No',
+              type: 'button-balanced',
+            }
+          ]
+        }
+      );
+
+    }
 }
 )
+.controller('SettingsCtrl', function($scope, $ionicPopup){
+  $scope.onLeave = function() {
+    console.log('left input field');
+    if ($scope.minFreq < 50) {
+
+    }
+  }
+})

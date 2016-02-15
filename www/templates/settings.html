@@ -1,5 +1,30 @@
 <ion-view view-title="Settings" name="settings" cache-view="false">
   <ion-content>
-    <h1>Settings</h1>
+    <div class="list">
+      <label class="item item-input item-stacked-label" on-tap="focus()">
+        <span class="input-label">Minimum frequency (steps/sec)</span>
+        <input type="number" placeholder="Minimum value: 50" ng-model="settings.minFreq" ng-class="{redText: settings.minFreq < 50}">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Maximum frequency (steps/sec)</span>
+        <input type="number" placeholder="Maximum value 1000" ng-model="settings.maxFreq" ng-class="{redText: settings.maxFreq > 1000}">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Step motor driver dipswitch setting (steps/revolution)</span>
+        <input type="number" placeholder="Determines how many pulses are needed per revolution" ng-model="settings.dipswitch">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Spindle advancement (mm/revolution)</span>
+        <input type="number" placeholder="Example: 5" ng-model="settings.spindleAdvancement">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Time to reach maximum frequency (seconds)</span>
+        <input type="number" placeholder="Example: 0.5" ng-model="settings.time">
+      </label>
+    </div>
+    <div class="settings-buttons">
+      <button class="button button-calm" on-tap="">Create test sample</button> <!-- TODO open popup with further explanation and confirm -->
+      <button class="button button-balanced" on-tap="">Save settings</button>
+    </div>
   </ion-content>
 </ion-view>
