@@ -45,15 +45,15 @@
         <div class="item item-divider">
           Presets
         </div>
-        <ion-item ng-repeat="preset in presets track by $index" on-tap="loadPreset($index)">
-          {{preset.title}}
+        <ion-item ng-repeat="preset in presets track by $index" on-tap="loadPreset($index)" class="loadItems">
+          {{preset.titlePreset}}
         </ion-item>
 
         <div class="item item-divider">
           Your programs
         </div>
-        <ion-item ng-repeat="userProgram in userPrograms track by $index" on-tap="loadUserProgram($index)">
-          {{userProgram.title}}
+        <ion-item ng-repeat="userProgram in userPrograms track by $index"  class="loadItems">
+          <div class="userProgramName" on-tap="loadUserProgram($index)">{{userProgram.title}}</div> <div class="delete-userProgram" on-tap="deleteUserProgram($index)"><i class="glyphicon glyphicon-remove"></i> </div>
         </ion-item>
         <ion-item ng-show="!userPrograms.length">
           No programs have been saved yet

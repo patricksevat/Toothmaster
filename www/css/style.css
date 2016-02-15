@@ -58,4 +58,18 @@ label {
   text-align: left;
 }
 
+/*program.html*/
+
+.loadItems {
+  text-align: left;
+}
+
+.userProgramName {
+  float: left;
+}
+
+.delete-userProgram {
+  float:right;
+  text-align: right;
+}
 

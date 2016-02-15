@@ -116,8 +116,8 @@ angular.module('starter.controllers', [])
 
 
   $scope.presets = [
-    { title: '5mm everything', sawWidth: 5, cutWidth: 5, pinWidth: 5, numberOfCuts: 5, startPosition: 5  },
-    { title: '15mm everything', sawWidth: 15, cutWidth: 15, pinWidth: 15, numberOfCuts: 15, startPosition: 15  }
+    { titlePreset: '5mm everything', sawWidth: 5, cutWidth: 5, pinWidth: 5, numberOfCuts: 5, startPosition: 5  },
+    { titlePreset: '15mm everything', sawWidth: 15, cutWidth: 15, pinWidth: 15, numberOfCuts: 15, startPosition: 15  }
   ];
 
   $scope.userPrograms = [];
@@ -138,11 +138,12 @@ angular.module('starter.controllers', [])
     //push the parsed userPrograms to $scope.userPrograms array
     else {
       for (a=1; a<window.localStorage.length-1; a++) {
-        var temp = window.localStorage['userProgram'+a];
-        var temp = JSON.parse(temp);
-        $scope.userPrograms.push(temp);
-        console.log('window.localStorage[userProgram'+a+'] pushed to userPrograms');
-
+        if (window.localStorage['userProgram'+a] !== undefined) {
+          var temp = window.localStorage['userProgram'+a];
+          var temp = JSON.parse(temp);
+          $scope.userPrograms.push(temp);
+          console.log('window.localStorage[userProgram'+a+'] pushed to userPrograms');
+        }
       }
     }
   }
@@ -205,9 +206,12 @@ angular.module('starter.controllers', [])
         scope: $scope,
         buttons: [
           {
-            //button holds current program
+            //button holds current program & closes modal
             text: 'Use current program',
-            type: 'button-balanced'
+            type: 'button-balanced',
+            onTap: function() {
+              $scope.closeModal(2);
+            }
           },
           {
             //button clears program fields and title
@@ -285,6 +289,14 @@ angular.module('starter.controllers', [])
       $scope.modal1.remove();
       $scope.modal2.remove();
     });
+
+  $scope.deleteUserProgram = function($index) {
+    console.log('delete userprogram at index: '+$index);
+    $scope.userPrograms.splice($index, 1);
+    var userProgNum = $index+1;
+    console.log(userProgNum);
+    window.localStorage.removeItem('userProgram'+userProgNum);
+  };
 
 }
 )
