@@ -7,22 +7,10 @@ angular.module('starter.controllers', [])
   }
 
   $scope.setLocalSafety = function () {
-    window.localStorage.setItem('Safety', 'Completed');
+    window.localStorage['Safety'] = 'Completed';
     console.log('Safety completed');
   }
 })
-
-.controller('PlaylistsCtrl', function($scope) {
-  $scope.playlists = [
-    { title: 'Reggae', id: 1 },
-    { title: 'Chill', id: 2 },
-    { title: 'Dubstep', id: 3 },
-    { title: 'Indie', id: 4 },
-    { title: 'Rap', id: 5 },
-    { title: 'Cowbell', id: 6 }
-  ];
-})
-
 
 .controller('SafetySlides', function($scope, $sce, $ionicModal) {
   $scope.i = 0;
@@ -125,13 +113,9 @@ angular.module('starter.controllers', [])
   $scope.currentProgram = {};
 
   $scope.loadUserPrograms = function() {
-    //set numUserProgs in localstorage, used for naming the userPrograms
-    if (window.localStorage['numUserProgs'] === undefined) {
-      window.localStorage['numUserProgs'] = 0;
-    }
 
-    if (window.localStorage.length === 2) {
-      console.log('only safety & numUserProgs found in localstorage');
+    if (window.localStorage.length === 3) {
+      console.log('only safety, settings & numUserProgs found in localstorage');
     }
     //load the userPrograms stored in localStorage. objects are named userProgram1 - userProgramN.
     //parse the userPrograms in localStorage so that they are converted to objects
@@ -314,8 +298,8 @@ angular.module('starter.controllers', [])
                 $scope.userPrograms.splice(index, 1);
 
                 // remove the userProgram from localstorage. Step 1: get the key under which the userProgram is saved
-                // $index+2 is because the first item is 'Safety' and second item is numUserProgs
-                var userProgName = window.localStorage.key( index+2 );
+                // $index+3 is because the first item is 'Safety' and second item is numUserProgs, third is settings
+                var userProgName = window.localStorage.key( index+3 );
 
                 //check if the userProgramName has 1 or 2 ID-numbers
                 //set userProgNum to the ID-number(s) and remove from localStorage
@@ -342,10 +326,48 @@ angular.module('starter.controllers', [])
 }
 )
 .controller('SettingsCtrl', function($scope, $ionicPopup){
-  $scope.onLeave = function() {
-    console.log('left input field');
-    if ($scope.minFreq < 50) {
+  $scope.settings = {};
 
+  $scope.saveSettings = function() {
+    if($scope.settings.minFreq < 50){
+      $scope.showAlertMinFreq();
     }
+    else if ($scope.settings.maxFreq > 1000) {
+      $scope.showAlertMaxFreq();
+    }
+    else {
+      var settingsJSON = JSON.stringify($scope.settings);
+      console.log(settingsJSON);
+      window.localStorage['settings'] = settingsJSON;
+    }
+
+  }
+
+  $scope.loadSettings = function() {
+    console.log(window.localStorage['settings']);
+    if (window.localStorage['settings'] !== '') {
+      $scope.settings = JSON.parse(window.localStorage['settings']);
+    }
+
+  }
+
+  $scope.loadSettings();
+
+  $scope.showAlertMinFreq = function(){
+    $ionicPopup.alert(
+      {
+        title: 'Minimum frequency invalid',
+        template: 'Please make sure that minimum frequency is set to 50 or higher'
+      }
+    )
+  }
+
+  $scope.showAlertMaxFreq = function(){
+    $ionicPopup.alert(
+      {
+        title: 'Maximum frequency invalid',
+        template: 'Please make sure that maximum frequency is set to 1000 or lower'
+      }
+    )
   }
 })

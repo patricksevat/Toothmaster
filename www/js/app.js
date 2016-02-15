@@ -23,10 +23,21 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
     }
 
   });
+  if (window.localStorage['Safety'] === undefined) {
+    window.localStorage.setItem('Safety', '');
+  }
+  if (window.localStorage['numUserProgs'] === undefined) {
+    window.localStorage['numUserProgs'] = 0;
+  }
+  if (window.localStorage['settings'] === undefined) {
+    window.localStorage['settings'] = '';
+  }
+
+  console.log('localstorage.length ='+window.localStorage.length);
 
   //check if app.safety-slide has been completed, if not redirect to app.safety
   $rootScope.$on( "$locationChangeStart", function(event, toState, fromState) {
-    if ( (window.localStorage.getItem("Safety") !== "Completed") ) {
+    if ( (window.localStorage["Safety"] !== "Completed") ) {
       console.log("safety not completed");
 
       // no safety slides checked, redirect to Safety
@@ -43,7 +54,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
       }
     }
   });
-
 
 })
 
@@ -107,28 +117,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
           controller: 'ProgramController'
         }
       }
-    })
-
-
-    .state('app.playlists', {
-      url: '/playlists',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/playlists.html',
-          controller: 'PlaylistsCtrl'
-        }
-      }
-    })
-
-  .state('app.single', {
-    url: '/playlists/:playlistId',
-    views: {
-      'menuContent': {
-        templateUrl: 'templates/playlist.html',
-        controller: 'PlaylistCtrl'
-      }
-    }
-  });
+    });
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/safety-slide');
 });
