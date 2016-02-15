@@ -26,7 +26,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
 
   //check if app.safety-slide has been completed, if not redirect to app.safety
   $rootScope.$on( "$locationChangeStart", function(event, toState, fromState) {
-    console.log(event);
     if ( (window.localStorage.getItem("Safety") !== "Completed") ) {
       console.log("safety not completed");
 

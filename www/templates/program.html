@@ -3,7 +3,7 @@
 
     <div class="list">
       <label class="item item-input item-stacked-label" on-tap="focus()">
-        <span class="input-label">Saw width (mm)</span>
+        <span class="input-label">Saw width (mm)</span> <!-- TODO add info icon that toggles graphic-->
         <input type="number" placeholder="Example: 5" ng-model="currentProgram.sawWidth">
       </label>
       <label class="item item-input item-stacked-label">
@@ -45,15 +45,18 @@
         <div class="item item-divider">
           Presets
         </div>
-        <ion-item ng-repeat="preset in presets">
+        <ion-item ng-repeat="preset in presets track by $index" on-tap="loadPreset($index)">
           {{preset.title}}
         </ion-item>
 
         <div class="item item-divider">
           Your programs
         </div>
-        <ion-item ng-repeat="userProgram in userPrograms">
+        <ion-item ng-repeat="userProgram in userPrograms track by $index" on-tap="loadUserProgram($index)">
           {{userProgram.title}}
+        </ion-item>
+        <ion-item ng-show="!userPrograms.length">
+          No programs have been saved yet
         </ion-item>
       </div>
     </ion-content>

@@ -6,6 +6,10 @@ angular.module('starter.controllers', [])
     console.log('local storage cleared');
   }
 
+  $scope.setLocalSafety = function () {
+    window.localStorage.setItem('Safety', 'Completed');
+    console.log('Safety completed');
+  }
 })
 
 .controller('PlaylistsCtrl', function($scope) {
@@ -116,58 +120,79 @@ angular.module('starter.controllers', [])
     { title: '15mm everything', sawWidth: 15, cutWidth: 15, pinWidth: 15, numberOfCuts: 15, startPosition: 15  }
   ];
 
-  $scope.userPrograms = [
-  ];
+  $scope.userPrograms = [];
 
-  $scope.currentProgram = {
-  };
+  $scope.currentProgram = {};
 
   $scope.loadUserPrograms = function() {
-    console.log('userProgram pushed to localstorage, local storage is now this long: '+window.localStorage.length);
-    if (window.localStorage.length === 1) {
-      console.log('only safety found in localstorage');
+    //set numUserProgs in localstorage, used for naming the userPrograms
+    if (window.localStorage['numUserProgs'] === undefined) {
+      window.localStorage['numUserProgs'] = 0;
     }
+
+    if (window.localStorage.length === 2) {
+      console.log('only safety & numUserProgs found in localstorage');
+    }
+    //load the userPrograms stored in localStorage. objects are named userProgram1 - userProgramN.
+    //parse the userPrograms in localStorage so that they are converted to objects
+    //push the parsed userPrograms to $scope.userPrograms array
     else {
-      for (a=1; a<window.localStorage.length; a++) {
+      for (a=1; a<window.localStorage.length-1; a++) {
         var temp = window.localStorage['userProgram'+a];
         var temp = JSON.parse(temp);
-        console.log('temp =');
-        console.log(temp);
         $scope.userPrograms.push(temp);
-        console.log('window.localstorage[userProgram'+a+'] pushed to userPrograms');
-        console.log('window.localstorage[a] =');
-        console.log(window.localStorage['userProgram'+a]);
+        console.log('window.localStorage[userProgram'+a+'] pushed to userPrograms');
+
       }
-      console.log('userPrograms =');
-      console.log($scope.userPrograms);
     }
   }
 
   $scope.loadUserPrograms();
 
+  $scope.loadUserProgram = function($index) {
+    //load userProgram & close load modal
+    console.log('userProgram clicked');
+    $scope.currentProgram = $scope.userPrograms[$index];
+    $scope.closeModal(1);
+  }
+
+  $scope.loadPreset = function($index) {
+    //load preset & close load modal
+    console.log('loadPreset clicked');
+    $scope.currentProgram = $scope.presets[$index];
+    $scope.closeModal(1);
+  }
 
   $scope.saveProgram = function() {
-    console.log($scope.currentProgram);
+    //show alert if title is not filled in
     if ($scope.currentProgram.title === undefined ) {
       $scope.showAlertTitle();
     }
+    //show alert if not all program fields are filled in
     else if ($scope.currentProgram.sawWidth === undefined || $scope.currentProgram.cutWidth === undefined
       || $scope.currentProgram.pinWidth === undefined    || $scope.currentProgram.numberOfCuts === undefined
       || $scope.currentProgram.startPosition === undefined) {
       $scope.showAlertVars();
     }
     else {
-      var userProgramNumber = "userProgram";
-      userProgramNumber += 1;
+      //add 1 to window.localStorage['numUserProgs']
+      var tempNumUserProgs = window.localStorage['numUserProgs'];
+      tempNumUserProgs = Number(tempNumUserProgs);
+      tempNumUserProgs += 1;
+      window.localStorage.setItem('numUserProgs',tempNumUserProgs);
+      console.log('numUserProg for this save is = '+window.localStorage['numUserProgs']);
 
-      window.localStorage[userProgramNumber] = JSON.stringify($scope.currentProgram);
-      console.log('userProgram pushed to localstorage, local storage is now this long: '+window.localStorage.length);
-      console.log('window.localStorage[userProgramNumber] parsed=');
-      console.log(JSON.parse(window.localStorage[userProgramNumber]));
+      //create variables for naming the new userProgram
+      var numUserProgs = window.localStorage['numUserProgs'];
+      var userProgramID = "userProgram";
+      userProgramID += numUserProgs;
+
+      //store the new userProgram in localStorage
+      window.localStorage[userProgramID] = JSON.stringify($scope.currentProgram);
       $scope.userPrograms.push($scope.currentProgram);
-      console.log('userProgram pushed to userPrograms');
-      console.log('userPrograms = ');
-      console.log($scope.userPrograms);
+      console.log('userProgram pushed to userPrograms & localStorage');
+
+      //call the succesful save popup
       $scope.showAlertSaveSucces();
 
     }
@@ -180,13 +205,22 @@ angular.module('starter.controllers', [])
         scope: $scope,
         buttons: [
           {
+            //button holds current program
             text: 'Use current program',
             type: 'button-balanced'
           },
           {
+            //button clears program fields and title
             text: 'Create new program',
             type: 'button-calm',
-            /*TODO make create new program button clear out current program*/
+            onTap: function () {
+              $scope.currentProgram.title = undefined;
+                $scope.currentProgram.sawWidth = undefined;
+                $scope.currentProgram.cutWidth = undefined;
+                $scope.currentProgram.pinWidth = undefined;
+                $scope.currentProgram.numberOfCuts = undefined;
+                $scope.currentProgram.startPosition = undefined;
+            }
           }
         ]
         }
