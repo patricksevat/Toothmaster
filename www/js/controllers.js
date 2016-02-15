@@ -2,7 +2,8 @@ angular.module('starter.controllers', [])
 
 .controller('AppCtrl', function($scope) {
   $scope.ClearLocalStor = function() {
-    localStorage.removeItem('Safety');
+    localStorage.clear();
+    console.log('local storage cleared');
   }
 
 })
@@ -115,22 +116,93 @@ angular.module('starter.controllers', [])
     { title: '15mm everything', sawWidth: 15, cutWidth: 15, pinWidth: 15, numberOfCuts: 15, startPosition: 15  }
   ];
 
-  $scope.userPrograms = [];
+  $scope.userPrograms = [
+  ];
 
-  $scope.title;
-  $scope.sawWidth;
-  $scope.cutWidth;
-  $scope.pinWidth;
-  $scope.numberOfCuts;
-  $scope.startPosition;
+  $scope.currentProgram = {
+  };
+
+  $scope.loadUserPrograms = function() {
+    console.log('userProgram pushed to localstorage, local storage is now this long: '+window.localStorage.length);
+    if (window.localStorage.length === 1) {
+      console.log('only safety found in localstorage');
+    }
+    else {
+      for (a=1; a<window.localStorage.length; a++) {
+        var temp = window.localStorage['userProgram'+a];
+        var temp = JSON.parse(temp);
+        console.log('temp =');
+        console.log(temp);
+        $scope.userPrograms.push(temp);
+        console.log('window.localstorage[userProgram'+a+'] pushed to userPrograms');
+        console.log('window.localstorage[a] =');
+        console.log(window.localStorage['userProgram'+a]);
+      }
+      console.log('userPrograms =');
+      console.log($scope.userPrograms);
+    }
+  }
+
+  $scope.loadUserPrograms();
+
 
   $scope.saveProgram = function() {
-    if ($scope.title === undefined ) {
-      $scope.showAlert();
+    console.log($scope.currentProgram);
+    if ($scope.currentProgram.title === undefined ) {
+      $scope.showAlertTitle();
+    }
+    else if ($scope.currentProgram.sawWidth === undefined || $scope.currentProgram.cutWidth === undefined
+      || $scope.currentProgram.pinWidth === undefined    || $scope.currentProgram.numberOfCuts === undefined
+      || $scope.currentProgram.startPosition === undefined) {
+      $scope.showAlertVars();
+    }
+    else {
+      var userProgramNumber = "userProgram";
+      userProgramNumber += 1;
+
+      window.localStorage[userProgramNumber] = JSON.stringify($scope.currentProgram);
+      console.log('userProgram pushed to localstorage, local storage is now this long: '+window.localStorage.length);
+      console.log('window.localStorage[userProgramNumber] parsed=');
+      console.log(JSON.parse(window.localStorage[userProgramNumber]));
+      $scope.userPrograms.push($scope.currentProgram);
+      console.log('userProgram pushed to userPrograms');
+      console.log('userPrograms = ');
+      console.log($scope.userPrograms);
+      $scope.showAlertSaveSucces();
+
     }
   };
 
-  $scope.showAlert = function(){
+    $scope.showAlertSaveSucces = function() {
+      var alertPopup3 = $ionicPopup.show(
+        {
+        title: 'Program saved!',
+        scope: $scope,
+        buttons: [
+          {
+            text: 'Use current program',
+            type: 'button-balanced'
+          },
+          {
+            text: 'Create new program',
+            type: 'button-calm',
+            /*TODO make create new program button clear out current program*/
+          }
+        ]
+        }
+      )
+    }
+
+    $scope.showAlertVars = function(){
+      var alertPopup2 = $ionicPopup.alert(
+        {
+          title: 'Not all fields are filled in',
+          template: 'Please fill in all Program fields before saving the program'
+        }
+      )
+    }
+
+  $scope.showAlertTitle = function(){
     var alertPopup = $ionicPopup.alert(
       {
         title: 'Not all fields are filled in',

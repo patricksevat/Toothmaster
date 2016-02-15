@@ -1,26 +1,26 @@
 <ion-view view-title="Program">
   <ion-content>
 
-    <div class="list" ng-controller="ProgramController">
+    <div class="list">
       <label class="item item-input item-stacked-label" on-tap="focus()">
         <span class="input-label">Saw width (mm)</span>
-        <input type="number" placeholder="Example: 5" ng-model="sawWidth">
+        <input type="number" placeholder="Example: 5" ng-model="currentProgram.sawWidth">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Cut width (mm)</span>
-        <input type="number" placeholder="Example: 20" ng-model="cutWidth">
+        <input type="number" placeholder="Example: 20" ng-model="currentProgram.cutWidth">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Pin width (mm)</span>
-        <input type="number" placeholder="Example: 20" ng-model="pinWidth">
+        <input type="number" placeholder="Example: 20" ng-model="currentProgram.pinWidth">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Number of cuts</span>
-        <input type="number" placeholder="Example: 4" ng-model="numberOfCuts">
+        <input type="number" placeholder="Example: 4" ng-model="currentProgram.numberOfCuts">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Start position (mm)</span>
-        <input type="number" placeholder="Example: 50" ng-model="startPosition">
+        <input type="number" placeholder="Example: 50" ng-model="currentProgram.startPosition">
       </label>
     </div>
     <div class="padding" id="program-buttons-div">
@@ -52,6 +52,9 @@
         <div class="item item-divider">
           Your programs
         </div>
+        <ion-item ng-repeat="userProgram in userPrograms">
+          {{userProgram.title}}
+        </ion-item>
       </div>
     </ion-content>
   </ion-modal-view>
@@ -65,7 +68,7 @@
     <ion-content class="padding">
       <label class="item item-input item-stacked-label">
         <span class="input-label">Program name</span>
-        <input type="text" placeholder="Example: My first program" ng-model="title">
+        <input type="text" placeholder="Example: My first program" ng-model="currentProgram.title" >
       </label>
       <button class="button button-balanced" on-tap="saveProgram()">Save program</button>
     </ion-content>
