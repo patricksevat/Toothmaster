@@ -89,15 +89,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
       }
   })
 
-  .state('app.safety', {
-      url: '/safety',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/safety.html'
-        }
-      }
-    })
-
     .state('app.safety-slide', {
       url: '/safety-slide',
       name: 'app.safety-slide',

@@ -22,13 +22,22 @@ ion-content {
 
 
 }
+
+.item-text-wrap {
+  margin-bottom: 15px;
+}
+
 .item {
   overflow: hidden;
 
 }
 
+.text-slide-4{
+  margin-bottom: 15px;
+}
+
 .glyphicon-exclamation-sign {
-  padding-top:5px;
+
   color: #ffbb59;
 }
 

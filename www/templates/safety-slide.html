@@ -1,13 +1,76 @@
-<ion-view view-title="Safety instructions" name="app.safety-slide" cache-view="false">
+<ion-view view-title="Safety instructions" name="app.safety-slide" >
   <ion-content>
     <div class="card"  id="safety-slide-card" on-swipe-left="swipeRightToLeft()" >
       <div class="item item-divider">
-          {{slides[i].title}}
+          {{slides[i]}}
 
       </div>
-      <div class="item item-text-wrap text-justify" ng-bind-html="trustAsHtml(slides[i].description)">
-
-
+      <div class="item item-text-wrap text-justify">
+        <div ng-show="i === 0">
+          <div class="safety-text">
+            <p>Dear customer, before you start using the program in your application, please read this note on safety, health and responsibilities.</p>
+          </div>
+        </div>
+        <div ng-show="i===1">
+          <div class="safety-text"><p>Toothmaster contains functionality that can be used in an application/ product to make a <b>mortise tenon connection.</b> You will have to add other components or jiggs to saw or mill a <b>mortise tenon connection.</b> You might even have to make modifications to your existing machinery.</p>
+            <br><p class="emphasis">For this reason we cannot take responsibility that your mortise tenon solution will be safe and complies with all norms.</p><!--TODO add emphasis class-->
+            <br><p>Toothmaster requires other components to create safe mortise tenon connections as is explained next.</p>
+          </div>
+        </div>
+        <div ng-show="i===2">
+            <div class="safety-text">
+              <p>You will use Toothmaster to create precise movements in order to enable an operator to make a precision cut. There is a chance (explained below) that there will be unexpected movements while the operator makes the cut. These movements could lead to damage to persons, your workpiece or machinery. For this reason, you have to take additional safety measures.</p>
+            </div>
+        </div>
+          <div ng-show="i===3">
+            <div class="item item-text-wrap row" ng-repeat="slide in slide3">
+              <div class="warning-sign col-20 col-center">
+                <i class="glyphicon glyphicon-exclamation-sign"></i>
+              </div>
+              <div class="safety-text col-75" >
+                <p>{{slide}}</p>
+              </div>
+            </div>
+          </div>
+        <div ng-show="i===4">
+          <div class="safety-text text-slide-4">
+            To stress once more, the Toothmaster program and OS environment might generate unexpected movements.
+            <br><br>Thus you might need extra safety precautions. Do NEVER trust the Toothmaster and OS environment alone!
+            <br><br>Please take the following failure modes into account (even though the chances will be small that this will happen in reality):
+          </div>
+          <div class="item item-text-wrap row" ng-repeat="slide in slide4">
+            <div class="warning-sign col-center col-20">
+              <i class="glyphicon glyphicon-exclamation-sign red-warning"></i>
+            </div>
+            <div class="safety-text col-75">
+              <p>{{slide}}</p>
+            </div>
+          </div>
+        </div>
+        <div ng-show="i===5">
+          <div class="item item-text-wrap row" ng-repeat="slide in slide5">
+            <div class="warning-sign col-center col-20">
+              <i class="glyphicon glyphicon-ok-sign"></i>
+            </div>
+            <div class="safety-text col-75">
+              <p>{{slide.main}}</p>
+              <div class="safety-recommendation">
+                <p class="safety-recommendation-text"> {{slide.sub}} </p>
+                <p class="safety-recommendation-text"> {{slide.sub2}} </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div ng-show="i===6">
+          <div class="safety-text">
+            <p>We strongly advice you to at least introduce a safety switch (can also be ordered at goodlife.nu) to switch of power to the step motor when you are making a precision cut (Click scheme button on this page and watch movies/ tutorials on www.Goodlife.nu).  Please note that taking sufficient safety measures is your choice. For example you could also decide to use a momentary switch from a refrigerator door if you think this is sufficient safe and reliable for your application. If you do not use a safety switch, clamp your workpiece so that inadvertent movement is impossible. Or do both, clamping and safety switch.</p>
+          </div>
+        </div>
+        <div ng-show="i===7">
+          <div class="safety-text">
+            <p>There is always the question when is safe sufficiently safe. This depends on the region in the world. In the Eu there are many norms that guarantee health and safety. You could consider complying with the machines directive, the EMC directive and the ATEX directive. Complying with these standards is costly.<br><br>Be aware that we cannot take responsibility for complying with all these norms because we only deliver components and no complete solution. YOU have to think carefully if what you want to do is safe and in agreement with norms/ directives. You can find some examples on www.goodlife.nu of how you can make relatively safe mortise tenon connections. This might not be sufficient to comply with all norms in your situation/ country.<br><br>Now that you know your responsibilities and Tootmaster limitations, cllick the button below and enjoy !</p>
+          </div>
+        </div>
       </div>
     </div>
     <div id="safety-slide-buttons-div">
