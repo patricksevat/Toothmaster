@@ -48,15 +48,15 @@
           </div>
         </div>
         <div ng-show="i===5">
-          <div class="item item-text-wrap row" ng-repeat="slide in slide5">
+          <div class="item item-text-wrap row slide5" ng-repeat="slide in slide5">
             <div class="warning-sign col-center col-20">
               <i class="glyphicon glyphicon-ok-sign"></i>
             </div>
-            <div class="safety-text col-75">
+            <div class="safety-text col-75 main">
               <p>{{slide.main}}</p>
               <div class="safety-recommendation">
-                <p class="safety-recommendation-text"> {{slide.sub}} </p>
-                <p class="safety-recommendation-text"> {{slide.sub2}} </p>
+                <p class="safety-recommendation-text sub"> {{slide.sub}} </p>
+                <p class="safety-recommendation-text sub"> {{slide.sub2}} </p>
               </div>
             </div>
           </div>
@@ -73,11 +73,13 @@
         </div>
       </div>
     </div>
+
     <div id="safety-slide-buttons-div">
         <button ng-hide="prevHide()" class="button button-calm" id="prev-safety-slide" on-tap="prev()"><i class="glyphicon glyphicon-chevron-left"></i>Prev</button>
         <button ng-hide="nextHide()" class="button button-calm" id="next-safety-slide" on-tap="next()">Next<i class="glyphicon glyphicon-chevron-right"></i></button>
         <button ng-hide="safetyReadHide()" class="button button-balanced" id="safety-read-button" on-tap="setLocalStorageSafety()" ui-sref="app.home">I have read the safety instructions<i class="glyphicon glyphicon-ok"></i></button>
     </div>
+
     <div id="scheme-div" class="padding"><button ng-show="showScheme()" class="button button-balanced" id="show-scheme-button" on-tap="openModal()">Show Mortise tenon scheme</button></div>
   </ion-content>
 </ion-view>

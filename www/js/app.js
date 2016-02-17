@@ -1,12 +1,18 @@
-// Ionic Starter App
-
-
-
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
-// 'starter.controllers' is found in controllers.js
 angular.module('Toothmaster', ['ionic', 'starter.controllers'])
+
+  .service('shareSettings', function() {
+    var shareSettings = this;
+    shareSettings.obj = {};
+    shareSettings.obj.settings = JSON.parse(window.localStorage['settings']);
+
+      shareSettings.getObj = function() {
+        return shareSettings.obj.settings;
+      }
+      shareSettings.setObj = function(value) {
+        shareSettings.obj.settings = value;
+      }
+    }
+  )
 
 .run(function($ionicPlatform, $rootScope, $state) {
   $ionicPlatform.ready(function() {
@@ -32,6 +38,11 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
   if (window.localStorage['settings'] === undefined) {
     window.localStorage['settings'] = '';
   }
+  if (window.localStorage['registered'] === undefined) {
+    window.localStorage['registered'] = false;
+  }
+
+
 
   console.log('localstorage.length ='+window.localStorage.length);
 
@@ -76,8 +87,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
         controller: 'SettingsCtrl'
       }
     }
-
-
   })
 
   .state('app.home', {
@@ -108,9 +117,46 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
           controller: 'ProgramController'
         }
       }
-    });
+    })
+
+    .state('app.register', {
+      url: '/register',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/register.html',
+          controller: 'RegisterCtrl'
+        }
+      }
+    })
+
+    .state('app.runAudio', {
+      url: '/runAudio',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/runAudio.html',
+          controller: 'runAudioCtrl'
+        }
+      }
+    })
+
+    .state('app.runBluetooth', {
+      url: '/runBluetooth',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/runBluetooth.html',
+          controller: 'runBluetoothCtrl'
+        }
+      }
+    })
+  ;
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/safety-slide');
+  if (window.localStorage['Safety'] === "Completed") {
+    $urlRouterProvider.otherwise('/app/program');
+  }
+  else {
+    $urlRouterProvider.otherwise('/app/safety-slide');
+  }
+
 });
 
 

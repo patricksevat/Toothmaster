@@ -3,7 +3,7 @@
     <div class="list">
       <label class="item item-input item-stacked-label" on-tap="focus()">
         <span class="input-label">Minimum frequency (steps/sec)</span>
-        <input type="number" placeholder="Minimum value: 50" ng-model="settings.minFreq" ng-class="{redText: settings.minFreq < 50}">
+        <input type="number" placeholder="Minimum value: 50" ng-model="settings.minFreq" ng-class="{redText: settings.minFreq < 50 && settings.minFreq !== ''}">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Maximum frequency (steps/sec)</span>

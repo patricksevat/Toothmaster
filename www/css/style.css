@@ -19,8 +19,6 @@ ion-content {
   float:left;
   font-size: 2em;
   margin-right: 15px;
-
-
 }
 
 .item-text-wrap {
@@ -29,7 +27,6 @@ ion-content {
 
 .item {
   overflow: hidden;
-
 }
 
 .text-slide-4{
@@ -61,6 +58,15 @@ ion-content {
   float: right;
 }
 
+.sub{
+  font-size: 0.8em !important;
+  margin-top: 15px;
+  width: 90%;
+  float: right;
+}
+
+
+
 /*home.html*/
 
 label {
@@ -86,4 +92,12 @@ label {
 .redText {
   color: white !important;
   background-color: rgba(255,0,0,0.7) !important;
+}
+
+.output-button{
+  float: left;
+}
+
+button, .icon {
+  vertical-align: middle !important;
 }

@@ -1,9 +1,9 @@
-<ion-view view-title="Program">
+<ion-view view-title="Program {{ currentProgram.title}}">
   <ion-content>
 
     <div class="list">
       <label class="item item-input item-stacked-label" on-tap="focus()">
-        <span class="input-label">Saw width (mm)</span> <!-- TODO add info icon that toggles graphic-->
+        <span class="input-label">Saw width (mm)</span>
         <input type="number" placeholder="Example: 5" ng-model="currentProgram.sawWidth">
       </label>
       <label class="item item-input item-stacked-label">
@@ -16,7 +16,7 @@
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Number of cuts</span>
-        <input type="number" placeholder="Example: 4" ng-model="currentProgram.numberOfCuts">
+        <input type="number" placeholder="Limited to 2 in unregistered version" ng-model="currentProgram.numberOfCuts" ng-class="{redText: currentProgram.numberOfCuts > 2 }"  >
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Start position (mm)</span>
@@ -24,7 +24,7 @@
       </label>
     </div>
     <div class="padding" id="program-buttons-div">
-      <button class="button button-balanced"> Run program</button>
+      <button class="button button-balanced" on-tap="confirmVars()"> Run program</button>
       <button class="button button-calm" on-tap="openModal(2)">Save  <i class="glyphicon glyphicon-floppy-save"></i> </button>
       <button class="button button-calm" on-tap="openModal(1)">Load  <i class="glyphicon glyphicon-floppy-open"></i> </button>
     </div>
