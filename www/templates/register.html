@@ -1,5 +1,60 @@
-<ion-view>
+<ion-view title="Register">
   <ion-content>
-    Register
+    <div class="card">
+      <div class="item item-divider" ng-hide="slide2">
+        Register your Toothmaster
+      </div>
+      <div class="item item-divider" ng-show="slide2">
+        Activation instructions
+      </div>
+      <div class="padding item-text-wrap text-justify" ng-hide="slide2">
+        <p class="safety-text">Dear customer,
+          <br><br>
+          This is a non-licensed version. The allowable number of cuts will be limited to two.
+          All other functionality is working as in the licensed version.
+          <br><br>
+          The licensed version can be bought at www.goodlife.nu.
+          <br><br>
+          The license code is present on the invoice that is sent after payment.
+          <br><br>
+          You need a computer specific activation code to buy the licensed version.
+          The license code is calculated from this activation code.
+          <br><br>
+          Run Toothmaster on the computer that has to be licensed and press the "REGISTER" button
+          below to get the activation code.</p>
+      </div>
+      <div class="padding item-text-wrap text-justify" ng-show="slide2">
+        <p>Please note, you can only use the licensed Toothmaster on one smartphone</p>
+        <ion-list>
+          <ion-item><p>Run the Toothmaster unlicensed version on the smartphone you want to use</p></ion-item>
+          <ion-item><p>Press the copy button below to copy the activation code to the clipboard.</p></ion-item>
+          <ion-item><p>Go to <a ng-controller="browserCtrl" on-tap="openBrowser()">www.Goodlife.nu</a> to order your licensed version.</p></ion-item>
+          <ion-item><p>Copy the activation code into the field named "activation code" when ordering</p></ion-item>
+          <ion-item><p>You receive an email and invoice after payment containing the license code.</p></ion-item>
+          <ion-item><p>Copy the license code into the license field below and press activate</p></ion-item>
+        </ion-list>
+      </div>
+    </div>
+    <button class="button button-balanced" ng-hide="slide2"  on-tap="register()">Register</button>
+    <div class="list" ng-show="slide2">
+      <div class="item item-input-inset">
+        <label class="item-input-wrapper" >
+          <input type="text" ng-model="activationCode" class="codeInput">
+        </label>
+        <button class="button button-small button-calm" on-tap="buyPopup()">
+          Copy
+        </button>
+      </div>
+      <div class="item item-input-inset">
+        <label class="item-input-wrapper">
+          <input type="text" ng-model="licenseCode" class="codeInput">
+        </label>
+        <button class="button button-small button-balanced" on-tap="checkLicense()">
+          Submit
+        </button>
+      </div>
+
+    </div>
+
   </ion-content>
 </ion-view>

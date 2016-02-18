@@ -121,22 +121,10 @@ angular.module('starter.controllers', [])
 
   };
 
-  /*If localstorage[registered] == false restrict number of cuts to 2
-  $scope.numberOfCutsRestriction = function() {
-    if (window.localStorage['registered'] === true) {
-      console.log('number cuts not restricted');
-      return 999999999;
-    }
-    else {
-      console.log('number of cuts restricted');
-      return 2;
-    }
-  }*/
-
   $scope.loadUserPrograms = function() {
 
-    if (window.localStorage.length === 4) {
-      console.log('only safety, settings, registered & numUserProgs found in localstorage');
+    if (window.localStorage.length === 5) {
+      console.log('only safety, settings, registered, activationcode & numUserProgs found in localstorage');
     }
     //load the userPrograms stored in localStorage. objects are named userProgram1 - userProgramN.
     //parse the userPrograms in localStorage so that they are converted to objects
@@ -231,7 +219,7 @@ angular.module('starter.controllers', [])
       $scope.userPrograms.push($scope.currentProgram);
       console.log('userProgram pushed to userPrograms & localStorage');
 
-      //call the succesful save popup
+      //call the successful save popup
       $scope.showAlertSaveSucces();
     }
     else {
@@ -353,8 +341,8 @@ angular.module('starter.controllers', [])
                 $scope.userPrograms.splice(index, 1);
 
                 // remove the userProgram from localstorage. Step 1: get the key under which the userProgram is saved
-                // $index+4 is because the first item is 'Safety', second item is numUserProgs, third is settings and fourth is registered
-                var userProgName = window.localStorage.key( index+4 );
+                // $index+5 is because the first item is 'Safety', second item is numUserProgs, third is settings, fourth is registered & fifth is activationcode
+                var userProgName = window.localStorage.key( index+5 );
 
                 //check if the userProgramName has 1 or 2 ID-numbers
                 //set userProgNum to the ID-number(s) and remove from localStorage
@@ -544,6 +532,86 @@ angular.module('starter.controllers', [])
 
 })
 
-  .controller('registerCtrl', function($scope) {
+  .controller('registerCtrl', function($scope, $ionicPopup, $cordovaClipboard, $cordovaInAppBrowser, $state) {
+    $scope.slide2 = false;
+
+    $scope.register = function() {
+      $scope.slide2 = true;
+      $scope.generateActivationCode();
+    }
+
+    $scope.generateActivationCode = function(){
+      if (window.localStorage['activationCode'] === '') {
+      $scope.activationCode = '';
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      for (j=1; j<41; j++) {
+        $scope.activationCode += possible.charAt(Math.floor(Math.random()* possible.length));
+        }
+      window.localStorage['activationCode'] = $scope.activationCode;
+      console.log('Localstorage activation code = '+window.localStorage['activationCode']);
+      }
+      else {
+        $scope.activationCode = window.localStorage['activationCode'];
+      }
+    }
+
+    $scope.copyText = function() {
+        $cordovaClipboard.copy($scope.activationCode);
+    }
+
+    $scope.buyPopup = function() {
+      $ionicPopup.alert({
+        title: 'Activation code copied to clipboard',
+        template: 'Go to the website to order your license',
+        buttons: [
+          {
+           text: 'Cancel',
+          },
+          {
+          text: 'Buy<br>Toothmaster',
+          type: 'button-balanced',
+          onTap: function () {
+            $cordovaInAppBrowser.open('http://goodlife.nu', '_self');
+          }
+        }]
+      })
+    }
+
+
+
+    $scope.checkLicense = function () {
+      if ($scope.codeInput === null) {
+        $ionicPopup.alert({
+          title: 'Please enter your license code',
+          template: 'Go to the website to order your license',
+          buttons: [
+            {
+              text: 'Cancel',
+            },
+            {
+              text: 'Buy<br>Toothmaster',
+              type: 'button-balanced',
+              onTap: function () {
+                $cordovaInAppBrowser.open('http://goodlife.nu', '_self');
+              }
+            }]
+        })
+      }
+      else {
+        window.localStorage['registered'] = true;
+        $ionicPopup.alert({
+          title: 'Toothmaster succesfully registered',
+          template: 'Number of cuts is no longer restricted',
+          onTap: $state.go('app.program')
+        })
+
+      }
+    }
 
   })
+
+.controller('browserCtrl', function($scope, $cordovaInAppBrowser) {
+  $scope.openBrowser = function() {
+    $cordovaInAppBrowser.open('http://goodlife.nu', '_self');
+  }
+})

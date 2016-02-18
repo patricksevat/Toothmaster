@@ -1,5 +1,5 @@
-angular.module('Toothmaster', ['ionic', 'starter.controllers'])
-
+angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
+//TODO implement ngCordova plugins
   .service('shareSettings', function() {
     var shareSettings = this;
     shareSettings.obj = {};
@@ -16,6 +16,8 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
 
 .run(function($ionicPlatform, $rootScope, $state) {
   $ionicPlatform.ready(function() {
+
+
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
     if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -41,11 +43,13 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
   if (window.localStorage['registered'] === undefined) {
     window.localStorage['registered'] = false;
   }
-
+  if (window.localStorage['activationCode'] === undefined) {
+    window.localStorage['activationCode'] = '';
+  }
 
 
   console.log('localstorage.length ='+window.localStorage.length);
-
+  //TODO fix the redirector
   //check if app.safety-slide has been completed, if not redirect to app.safety
   $rootScope.$on( "$locationChangeStart", function(event, toState, fromState) {
     if ( (window.localStorage["Safety"] !== "Completed") ) {
@@ -124,7 +128,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers'])
       views: {
         'menuContent': {
           templateUrl: 'templates/register.html',
-          controller: 'RegisterCtrl'
+          controller: 'registerCtrl'
         }
       }
     })

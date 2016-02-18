@@ -27,7 +27,26 @@
         },
         "cordova-plugin-screen-orientation": {
             "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
+        },
+        "com.verso.cordova.clipboard": {
+            "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
+        },
+        "cordova-plugin-media": {
+            "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
+        },
+        "cordova-plugin-bluetooth-serial": {
+            "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
+        },
+        "cordova-plugin-inappbrowser": {
+            "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
+        },
+        "cordova-plugin-nativeaudio": {
+            "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
         }
     },
-    "dependent_plugins": {}
+    "dependent_plugins": {
+        "cordova-plugin-file": {
+            "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
+        }
+    }
 }

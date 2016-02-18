@@ -1,10 +1,10 @@
 <ion-view view-title="Safety instructions" name="app.safety-slide" >
   <ion-content>
-    <div class="card"  id="safety-slide-card" on-swipe-left="swipeRightToLeft()" >
+    <div class="card"  id="safety-slide-card" ng-swipe-left="swipeRightToLeft()" >
       <div class="item item-divider">
           {{slides[i]}}
-
       </div>
+
       <div class="item item-text-wrap text-justify">
         <div ng-show="i === 0">
           <div class="safety-text">
@@ -34,9 +34,9 @@
           </div>
         <div ng-show="i===4">
           <div class="safety-text text-slide-4">
-            To stress once more, the Toothmaster program and OS environment might generate unexpected movements.
+            <p>To stress once more, the Toothmaster program and OS environment might generate unexpected movements.
             <br><br>Thus you might need extra safety precautions. Do NEVER trust the Toothmaster and OS environment alone!
-            <br><br>Please take the following failure modes into account (even though the chances will be small that this will happen in reality):
+            <br><br>Please take the following failure modes into account (even though the chances will be small that this will happen in reality):</p>
           </div>
           <div class="item item-text-wrap row" ng-repeat="slide in slide4">
             <div class="warning-sign col-center col-20">
