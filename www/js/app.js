@@ -3,11 +3,14 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   .service('shareSettings', function() {
     var shareSettings = this;
     shareSettings.obj = {};
-    shareSettings.obj.settings = JSON.parse(window.localStorage['settings']);
+    if (window.localStorage['settings'] !== '') {
+      shareSettings.obj.settings = JSON.parse(window.localStorage['settings']);
+    }
+
 
       shareSettings.getObj = function() {
         return shareSettings.obj.settings;
-      }
+      };
       shareSettings.setObj = function(value) {
         shareSettings.obj.settings = value;
       }
@@ -34,48 +37,48 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   if (window.localStorage['Safety'] === undefined) {
     window.localStorage.setItem('Safety', '');
   }
-  if (window.localStorage['numUserProgs'] === undefined) {
-    window.localStorage['numUserProgs'] = 0;
-  }
   if (window.localStorage['settings'] === undefined) {
     window.localStorage['settings'] = '';
   }
   if (window.localStorage['registered'] === undefined) {
-    window.localStorage['registered'] = false;
+    window.localStorage['registered'] = 'false';
   }
   if (window.localStorage['activationCode'] === undefined) {
     window.localStorage['activationCode'] = '';
   }
-
+  console.log(window.localStorage);
 
   console.log('localstorage.length ='+window.localStorage.length);
+
   //TODO fix the redirector
   //check if app.safety-slide has been completed, if not redirect to app.safety
-  $rootScope.$on( "$locationChangeStart", function(event, toState, fromState) {
+  /*$rootScope.$on( "$stateChangeStart", function(event, toState, fromState) {
     if ( (window.localStorage["Safety"] !== "Completed") ) {
       console.log("safety not completed");
 
       // no safety slides checked, redirect to Safety
-      if (toState.name === "app.safety") {
+      if (toState.name = "safety-slide") {
         console.log("no redirect needed");
-        // already going to safety.html, no redirect needed
-        return;
+        // already going to safety, no redirect needed
+
       }
       else {
-        // not going to safety.html, we should redirect now
+        // not going to safety, we should redirect now
+
         console.log("redirecting to safety");
         $state.go("app.safety-slide");
 
       }
     }
   });
-
+  */
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
 
     .state('app', {
+      name: 'app',
     url: '/app',
     abstract: true,
     templateUrl: 'templates/menu.html',
@@ -94,6 +97,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   })
 
   .state('app.home', {
+      name: 'home',
       url: '/home',
       views: {
         'menuContent': {
@@ -104,7 +108,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
     .state('app.safety-slide', {
       url: '/safety-slide',
-      name: 'app.safety-slide',
+      name: 'safety-slide',
       views: {
         'menuContent': {
           templateUrl: 'templates/safety-slide.html',
@@ -114,6 +118,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     })
 
     .state('app.program', {
+      name: 'program',
       url: '/program',
       views: {
         'menuContent': {
@@ -124,6 +129,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     })
 
     .state('app.register', {
+      name: 'register',
       url: '/register',
       views: {
         'menuContent': {
@@ -134,6 +140,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     })
 
     .state('app.runAudio', {
+      name: 'runAudio',
       url: '/runAudio',
       views: {
         'menuContent': {
@@ -144,6 +151,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     })
 
     .state('app.runBluetooth', {
+      name: 'runBluetooth',
       url: '/runBluetooth',
       views: {
         'menuContent': {

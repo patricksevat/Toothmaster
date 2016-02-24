@@ -14,11 +14,16 @@ angular.module('starter.controllers', [])
   $scope.setLocalSafety = function () {
     window.localStorage['Safety'] = 'Completed';
     console.log('Safety completed');
-  }
+  };
 
   $scope.setRegister = function (){
-    window.localStorage['registered'] = true;
+    window.localStorage['registered'] = 'true';
     console.log('registered = true');
+  };
+
+  $scope.setDeregister = function (){
+    window.localStorage['registered'] = 'false';
+    console.log('registered = false');
   }
 })
 
@@ -123,20 +128,26 @@ angular.module('starter.controllers', [])
 
   $scope.loadUserPrograms = function() {
 
-    if (window.localStorage.length === 5) {
-      console.log('only safety, settings, registered, activationcode & numUserProgs found in localstorage');
+    if (window.localStorage.length === 4) {
+      console.log('only safety, settings, registered, activationcode found in localstorage');
     }
-    //load the userPrograms stored in localStorage. objects are named userProgram1 - userProgramN.
+    //load the userPrograms stored in localStorage. objects are named 1 - n.
     //parse the userPrograms in localStorage so that they are converted to objects
     //push the parsed userPrograms to $scope.userPrograms array
     else {
-      for (a=1; a<window.localStorage.length-1; a++) {
-        if (window.localStorage['userProgram'+a] !== undefined) {
-          var temp = window.localStorage['userProgram'+a];
+      console.log(window.localStorage);
+      for (a=0; a<window.localStorage.length; a++) {
+        if (window.localStorage.key(a) == 'Safety' || window.localStorage.key(a) == 'settings' || window.localStorage.key(a) == 'registered' || window.localStorage.key(a) == 'activationCode') {
+
+        }
+        else{
+          var tempName = window.localStorage.key(a);
+          var temp = window.localStorage[tempName];
           temp = JSON.parse(temp);
           $scope.userPrograms.push(temp);
-          console.log('window.localStorage[userProgram'+a+'] pushed to userPrograms');
+          console.log(tempName+' pushed to userPrograms');
         }
+
       }
     }
   };
@@ -146,6 +157,7 @@ angular.module('starter.controllers', [])
   $scope.loadUserProgram = function($index) {
     //load userProgram & close load modal
     console.log('userProgram clicked');
+
     $scope.currentProgram = $scope.userPrograms[$index];
     $scope.closeModal(1);
   };
@@ -158,12 +170,17 @@ angular.module('starter.controllers', [])
   };
 
   $scope.checkCurrentProgram = function(){
+    console.log('num cuts= '+$scope.currentProgram.numberOfCuts);
+    console.log('registered = '+ window.localStorage['registered']);
+    console.log('condition ='+ (window.localStorage['registered'] = 'false'));
     if ($scope.currentProgram.title == null ) {
       $scope.showAlertTitle();
+      return false;
     }
-    else if ($scope.currentProgram.numberOfCuts > 2 && !window.localStorage['registered']) {
+    else if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] == 'false') {
       console.log('cannot save, number of cuts too high for restriction');
       $scope.showAlertNumberOfCuts();
+      return false;
     }
 
     //show alert if not all program fields are filled in
@@ -171,6 +188,7 @@ angular.module('starter.controllers', [])
       || $scope.currentProgram.pinWidth == null    || $scope.currentProgram.numberOfCuts == null
       || $scope.currentProgram.startPosition == null) {
       $scope.showAlertVars();
+      return false;
     }
     else {
       return true;
@@ -201,24 +219,11 @@ angular.module('starter.controllers', [])
 
   $scope.saveProgram = function() {
     //show alert if title is not filled in
-    if ($scope.checkCurrentProgram()) {
-      //add 1 to window.localStorage['numUserProgs']
-      var tempNumUserProgs = window.localStorage['numUserProgs'];
-      tempNumUserProgs = Number(tempNumUserProgs);
-      tempNumUserProgs += 1;
-      window.localStorage.setItem('numUserProgs',tempNumUserProgs);
-      console.log('numUserProg for this save is = '+window.localStorage['numUserProgs']);
-
-      //create variables for naming the new userProgram
-      var numUserProgs = window.localStorage['numUserProgs'];
-      var userProgramID = "userProgram";
-      userProgramID += numUserProgs;
-
-      //store the new userProgram in localStorage
-      window.localStorage[userProgramID] = JSON.stringify($scope.currentProgram);
+    if ($scope.checkCurrentProgram() === true) {
+      window.localStorage[$scope.currentProgram.title] = JSON.stringify($scope.currentProgram);
       $scope.userPrograms.push($scope.currentProgram);
       console.log('userProgram pushed to userPrograms & localStorage');
-
+      console.log($scope.userPrograms);
       //call the successful save popup
       $scope.showAlertSaveSucces();
     }
@@ -319,6 +324,7 @@ angular.module('starter.controllers', [])
 
   $scope.deleteUserProgram = function($index) {
     console.log('delete userProgram clicked at index: '+$index);
+    console.log($scope.userPrograms);
     $scope.showDeleteAlert($index);
   };
 
@@ -335,26 +341,16 @@ angular.module('starter.controllers', [])
               text: 'Yes',
               type: 'button-assertive',
               onTap: function sureDelete() {
-
+                console.log(window.localStorage);
                 console.log('index ='+index);
+                // remove the userProgram from localstorage. Step 1: get the key under which the userProgram is saved
+                var userProg = $scope.userPrograms[index];
+                console.log(userProg);
+                var userProgName = userProg.title;
+                console.log(userProgName);
+                window.localStorage.removeItem(userProgName);
                 //remove the userProgram visually
                 $scope.userPrograms.splice(index, 1);
-
-                // remove the userProgram from localstorage. Step 1: get the key under which the userProgram is saved
-                // $index+5 is because the first item is 'Safety', second item is numUserProgs, third is settings, fourth is registered & fifth is activationcode
-                var userProgName = window.localStorage.key( index+5 );
-
-                //check if the userProgramName has 1 or 2 ID-numbers
-                //set userProgNum to the ID-number(s) and remove from localStorage
-                if (userProgName.length === 11) {
-                  var userProgNum = userProgName.charAt(11);
-                  window.localStorage.removeItem('userProgram'+userProgNum);
-                }
-                else if (userProgName.length === 12) {
-                  var userProgNum = userProgName.charAt(11)+userProgName.charAt(12);
-                  window.localStorage.removeItem('userProgram'+userProgNum);
-                }
-
               }
             },
             {
@@ -373,8 +369,7 @@ angular.module('starter.controllers', [])
         console.log('all fields filled in');
         $scope.confirmProgram();
       }
-      else if (!$scope.checkSettings) {
-        }
+
     };
 
     $scope.confirmProgram = function(){
@@ -423,16 +418,14 @@ angular.module('starter.controllers', [])
   $scope.settings = shareSettings.getObj();
 
   $scope.checkSettings = function() {
+    $scope.settings = shareSettings.getObj();
     console.log($scope.settings);
-    if ($scope.settings.maxFreq !== null && $scope.settings.minFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null) {
-      return true;
-    }
-    else {
+    if ($scope.settings === undefined){
       console.log('settings are not filled in correctly');
       $ionicPopup.alert(
         {
           title: 'Please make sure your settings are filled in correctly',
-          template: '<p>Minimum frequency: '+$scope.settings.minFreq+'</p>'+'<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+'<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+'<p>Time to maximum frequency: '+$scope.settings.time+'</p>',
+          template: 'Use the buttons to go to settings',
           buttons: [{
             text: 'Edit settings',
             type: 'button-calm',
@@ -443,7 +436,29 @@ angular.module('starter.controllers', [])
         });
       return false;
     }
-  }
+
+    else if ($scope.settings.maxFreq !== null && $scope.settings.minFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null) {
+      return true;
+    }
+    else {
+
+        console.log('settings are not filled in correctly');
+        $ionicPopup.alert(
+          {
+            title: 'Please make sure your settings are filled in correctly',
+            template: '<p>Minimum frequency: '+$scope.settings.minFreq+'</p>'+'<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+'<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+'<p>Time to maximum frequency: '+$scope.settings.time+'</p>',
+            buttons: [{
+              text: 'Edit settings',
+              type: 'button-calm',
+              onTap: function() {
+                $state.go('app.settings');
+              }
+            }]
+          });
+        return false;
+      }
+    }
+
 
   $scope.chooseOutput = function() {
     $ionicPopup.alert(
@@ -461,16 +476,23 @@ angular.module('starter.controllers', [])
             text: '<span class="vertical-align">Bluetooth  </span><i class="icon ion-bluetooth"></i>',
             type: 'button-calm',
             onTap: function() {
-              $state.go('app.runAudio');
+              $state.go('app.runBluetooth');
             }
         }]
       });
+  }
+
+  $scope.redText = function () {
+    if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] === 'false') {
+      return true;
+    }
   }
 
 })
 
 .controller('SettingsCtrl', function($scope, $ionicPopup, shareSettings){
 
+  $scope.settings = {};
 
   $scope.saveSettings = function() {
     if($scope.settings.minFreq < 50){
@@ -494,11 +516,13 @@ angular.module('starter.controllers', [])
   };
 
   $scope.loadSettings = function() {
-    console.log(window.localStorage['settings']);
-    if (window.localStorage['settings'] !== '') {
+    console.log('settings: '+window.localStorage['settings']);
+    if (window.localStorage['settings'] === '') {
+
+    }
+    else {
       $scope.settings = JSON.parse(window.localStorage['settings']);
     }
-
   };
 
   $scope.loadSettings();
@@ -530,6 +554,7 @@ angular.module('starter.controllers', [])
     )
   }
 
+  //TODO Add settings saved popup
 })
 
   .controller('registerCtrl', function($scope, $ionicPopup, $cordovaClipboard, $cordovaInAppBrowser, $state) {
@@ -598,7 +623,7 @@ angular.module('starter.controllers', [])
         })
       }
       else {
-        window.localStorage['registered'] = true;
+        window.localStorage['registered'] = 'true';
         $ionicPopup.alert({
           title: 'Toothmaster succesfully registered',
           template: 'Number of cuts is no longer restricted',
@@ -610,8 +635,35 @@ angular.module('starter.controllers', [])
 
   })
 
-.controller('browserCtrl', function($scope, $cordovaInAppBrowser) {
+  .controller('browserCtrl', function($scope, $cordovaInAppBrowser) {
   $scope.openBrowser = function() {
     $cordovaInAppBrowser.open('http://goodlife.nu', '_self');
   }
+
 })
+  .controller('runAudioCtrl', function($scope){
+
+  })
+
+  .controller('runBluetoothCtrl', function($scope, $cordovaBluetoothSerial, $ionicPopup, $state){
+    $scope.bluetoothEnabled = function() {
+      $cordovaBluetoothSerial.isEnabled(function(){
+        return true;
+      },function(){
+        return false
+      });
+    }
+
+    //TODO add iOS instructions
+    $scope.bluetoothOn = function () {
+      $cordovaBluetoothSerial.enable(function () {
+        $state.go($state.current, {}, {reload: true});
+      }, function (){
+        $cordovaBluetoothSerial.showBluetoothSettings();
+        $ionicPopup.alert({
+          title: 'Please open bluetooth settings manually',
+          template: 'Automatic enable not possible'
+        });
+      })
+    }
+  })

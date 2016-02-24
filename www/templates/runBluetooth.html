@@ -1,6 +1,20 @@
-<ion-view>
+<ion-view view-title="Run Bluetooth">
   <ion-content>
-    Run Bluetooth
+    <div class="row bluetooth-row">
+      <div class="card col col-center" ng-hide="bluetoothEnabled()">
+        <div class="item item-text-wrap">
+          <div class="bluetooth-icon ">
+            <i class="ion ion-bluetooth"></i>
+          </div>
+          <div class="bluetooth-text ">
+            <p class="bluetooth-text">Click button to enable Bluetooth</p>
+          </div>
+        </div>
+
+        <button class="button button-calm" ng-hide="bluetoothEnabled()" on-tap="bluetoothOn()">Turn on Bluetooth</button>
+      </div>
+    </div>
+
   </ion-content>
 </ion-view>
 

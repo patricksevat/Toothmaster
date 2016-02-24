@@ -120,5 +120,13 @@ button, .icon {
 }
 
 
-/* .html */
+/* runBluetooth.html */
+.bluetooth-icon {
+  float: left;
+
+}
+
+.bluetooth-row {
+  margin: 0px !important;
+}
 
