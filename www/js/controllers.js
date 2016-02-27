@@ -25,6 +25,15 @@ angular.module('starter.controllers', [])
     window.localStorage['registered'] = 'false';
     console.log('registered = false');
   }
+
+  $scope.setSettings = function () {
+    window.localStorage['settings'] = '{"minFreq":55,"maxFreq":555,"dipswitch":55,"spindleAdvancement":5,"time":5}';
+  }
+
+  $scope.setProgram= function () {
+    var testProg = {title: 'testprog', sawWidth: 5, cutWidth: 5, pinWidth: 5, numberOfCuts: 2, startPosition: 5  };
+    window.localStorage['testProg'] = JSON.stringify(testProg);
+  }
 })
 
 .controller('SafetySlides', function($scope, $sce, $ionicModal) {
@@ -166,6 +175,7 @@ angular.module('starter.controllers', [])
     //load preset & close load modal
     console.log('loadPreset clicked');
     $scope.currentProgram = $scope.presets[$index];
+    $scope.currentProgram.title = $scope.presets[$index].titlePreset;
     $scope.closeModal(1);
   };
 
@@ -364,12 +374,17 @@ angular.module('starter.controllers', [])
     };
 
   //On run program button, make sure that program and settings are filled in correctly
-    $scope.confirmVars = function() {
-      if ($scope.checkCurrentProgram() && $scope.checkSettings()) {
+    $scope.runProgram = function() {
+      if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] === 'false') {
+        console.log('cannot save, number of cuts too high for restriction');
+        $scope.showAlertNumberOfCuts();
+      }
+      else if ($scope.currentProgram.sawWidth !== null && $scope.currentProgram.cutWidth !== null
+        && $scope.currentProgram.pinWidth !== null && $scope.currentProgram.numberOfCuts !== null
+        && $scope.currentProgram.startPosition !== null && $scope.checkSettings()) {
         console.log('all fields filled in');
         $scope.confirmProgram();
       }
-
     };
 
     $scope.confirmProgram = function(){
@@ -487,7 +502,6 @@ angular.module('starter.controllers', [])
       return true;
     }
   }
-
 })
 
 .controller('SettingsCtrl', function($scope, $ionicPopup, shareSettings){
@@ -511,6 +525,7 @@ angular.module('starter.controllers', [])
       window.localStorage['settings'] = settingsJSON;
       //call shareSettings service so that settings can be used in programCtrl
       shareSettings.setObj($scope.settings);
+      $scope.showAlertSaved();
     }
 
   };
@@ -554,10 +569,17 @@ angular.module('starter.controllers', [])
     )
   }
 
-  //TODO Add settings saved popup
+  $scope.showAlertSaved = function(){
+    $ionicPopup.alert(
+      {
+        title: 'Settings saved',
+      }
+    )
+  }
 })
 
   .controller('registerCtrl', function($scope, $ionicPopup, $cordovaClipboard, $cordovaInAppBrowser, $state) {
+    //TODO register not working in program after registering
     $scope.slide2 = false;
 
     $scope.register = function() {
@@ -580,11 +602,8 @@ angular.module('starter.controllers', [])
       }
     }
 
-    $scope.copyText = function() {
-        $cordovaClipboard.copy($scope.activationCode);
-    }
-
     $scope.buyPopup = function() {
+      $cordovaClipboard.copy($scope.activationCode);
       $ionicPopup.alert({
         title: 'Activation code copied to clipboard',
         template: 'Go to the website to order your license',
@@ -645,25 +664,167 @@ angular.module('starter.controllers', [])
 
   })
 
-  .controller('runBluetoothCtrl', function($scope, $cordovaBluetoothSerial, $ionicPopup, $state){
-    $scope.bluetoothEnabled = function() {
-      $cordovaBluetoothSerial.isEnabled(function(){
-        return true;
-      },function(){
-        return false
-      });
-    }
+  .controller('runBluetoothCtrl', function($scope, $cordovaBluetoothSerial, $ionicPopup, $state, $ionicPlatform, $window){
+    $scope.availableDevices = [];
+    $scope.pairedDevices = [];
+    $scope.bluetoothLog = [];
+    $scope.bluetoothEnabled =false;
+    $scope.isConnected = false;
+    $scope.platform = ionic.Platform.platform();
+    //TODO seperate OS instructions
 
-    //TODO add iOS instructions
+    $scope.checkBluetoothEnabled = function() {
+      $ionicPlatform.ready(function() {
+      $cordovaBluetoothSerial.isEnabled().then(function(){
+        $scope.bluetoothLog.unshift('Bluetooth is turned on');
+        $scope.bluetoothEnabled = true;
+        $scope.getAvailableDevices();
+      },function(){
+        $scope.bluetoothLog.unshift('Bluetooth is turned off');
+        $scope.bluetoothEnabled = false;
+      });
+    })
+    };
+
+    $scope.checkBluetoothEnabled();
+
+
     $scope.bluetoothOn = function () {
-      $cordovaBluetoothSerial.enable(function () {
-        $state.go($state.current, {}, {reload: true});
+      $ionicPlatform.ready(function() {
+      $scope.bluetoothLog.unshift('Calling bluetoothOn');
+      if (ionic.Platform.isIOS()) {
+        $ionicPopup.alert({
+          title: 'Please open Bluetooth settings manually',
+          template: 'Automatic enable not possible on iOS'
+        });
+        $scope.bluetoothLog.unshift('Bluetooth should be turned on manually');
+      }
+      else {
+      $cordovaBluetoothSerial.enable().then(function () {
+        $scope.bluetoothLog.unshift('Bluetooth has been turned on by Toothmaster app');
+        $scope.checkBluetoothEnabled();
+        $scope.bluetoothConnected();
       }, function (){
         $cordovaBluetoothSerial.showBluetoothSettings();
-        $ionicPopup.alert({
-          title: 'Please open bluetooth settings manually',
-          template: 'Automatic enable not possible'
+        $scope.bluetoothLog.unshift('Bluetooth should be turned on manually, redirected to Bluetooth settings');
+      })
+      }
+      })
+      };
+
+    $scope.getAvailableDevices = function () {
+      $ionicPlatform.ready(function() {
+      $scope.bluetoothLog.unshift('Calling get available devices');
+      if (ionic.Platform.isAndroid) {
+        //discover unpaired
+        $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
+          $scope.bluetoothLog.unshift('Searching for unpaired Bluetooth devices');
+          devices.forEach(function (device) {
+            $scope.availableDevices.push(device);
+              $scope.bluetoothLog.unshift('Unpaired Bluetooth device found');
+          }
+          )}, function () {
+          $scope.bluetoothLog.unshift('Cannot find unpaired Bluetooth devices');
         });
+        //discover paired
+        $cordovaBluetoothSerial.list().then(function (devices) {
+          $scope.bluetoothLog.unshift('Searching for paired Bluetooth devices');
+          devices.forEach(function (device) {
+            $scope.pairedDevices.push(device);
+            $scope.bluetoothLog.unshift('Paired Bluetooth device found');
+          }),function () {
+            $scope.bluetoothLog.unshift('Cannot find paired Bluetooth devices');
+          }
+        })
+      }
+      else if (ionic.Platform.isIOS) {
+        $cordovaBluetoothSerial.list().then(function (devices) {
+          $scope.bluetoothLog.unshift('Searching for Bluetooth devices');
+          devices.forEach(function (device) {
+            $scope.bluetoothLog.unshift('Bluetooth device found');
+            $scope.availableDevices.push(device);
+          })
+        }, function () {
+          $scope.bluetoothLog.unshift('No devices found');
+        })
+      }
+      })
+    };
+
+    $scope.bluetoothConnected = function () {
+      $ionicPlatform.ready(function() {
+      $cordovaBluetoothSerial.isConnected().then(function () {
+        $scope.bluetoothLog.unshift('Your smartphone is connected with a Bluetooth device');
+        $scope.isConnected = true;
+      }, function () {
+        $scope.bluetoothLog.unshift('Your smartphone is not connected with a Bluetooth device');
+        $scope.isConnected = false;
+      })
+      })
+    };
+
+    $scope.connectToUnpairedDevice = function ($index) {
+      $ionicPlatform.ready(function() {
+      $scope.bluetoothLog.unshift('Trying to connect');
+      $scope.bluetoothLog.unshift('Index = '+$index);
+      $cordovaBluetoothSerial.connect($scope.availableDevices[$index].id).then(function () {
+         $scope.bluetoothLog.unshift('Your smartphone has succesfully connected with the selected Bluetooth device');
+         $scope.bluetoothConnected();
+        }, function (error) {
+          //failure callback
+         $scope.bluetoothLog.unshift('Your smartphone has not been able to connect with the selected Bluetooth device');
+         $scope.bluetoothLog.unshift('error: '+error);
+        $scope.bluetoothConnected();
+        })
+      })
+      };
+
+    $scope.readyForData = false;
+
+    $scope.connectToPairedDevice = function ($index) {
+      $ionicPlatform.ready(function() {
+        $scope.bluetoothLog.unshift('Trying to connect');
+        $scope.bluetoothLog.unshift('Index = '+$index);
+        $scope.bluetoothLog.unshift('Id = '+$scope.pairedDevices[$index].id);
+        $cordovaBluetoothSerial.connect($scope.pairedDevices[$index].id).then(function () {
+        $scope.bluetoothLog.unshift('Your smartphone has succesfully connected with the selected Bluetooth device');
+        $scope.bluetoothConnected();
+          $scope.readyForData = true;
+      }, function (error) {
+        $scope.bluetoothLog.unshift('Your smartphone has not been able to connect with the selected Bluetooth device');
+          $scope.bluetoothLog.unshift('error: '+error);
+      })
       })
     }
-  })
+
+    $scope.messageInABottle = "Hello World!";
+
+   $scope.sendData = function () {
+     $scope.bluetoothLog.unshift('Awaiting data transmission confirmation');
+     $scope.bluetoothLog.unshift('Sending data');
+     $cordovaBluetoothSerial.write($scope.messageInABottle).then(function () {
+       $scope.bluetoothLog.unshift('Data sent');
+     }, function () {
+       $scope.bluetoothLog.unshift('Data could not be sent');
+     })
+   }
+
+    $scope.start = function () {
+      $ionicPopup.alert({
+        title: 'Make sure your workpiece is tightly secured!',
+        template: 'Program is about to start!',
+        buttons: [
+          {
+            text: 'Cancel'
+          },
+          {
+            text: Start,
+            type: 'button-balanced',
+            onTap: function () {
+
+            }
+          }]
+      })
+    }
+
+  }) //end of controller runBluetoothCtrl

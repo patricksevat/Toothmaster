@@ -1,20 +1,67 @@
 <ion-view view-title="Run Bluetooth">
   <ion-content>
     <div class="row bluetooth-row">
-      <div class="card col col-center" ng-hide="bluetoothEnabled()">
-        <div class="item item-text-wrap">
-          <div class="bluetooth-icon ">
-            <i class="ion ion-bluetooth"></i>
+      <div class="card col col-center" >
+
+        <div class="item item-divider">
+          <p class="">Connection status</p>
+        </div>
+
+        <div class="item item-text-wrap row">
+          <div class="bluetooth-icon col-25 col-center">
+            <i class="ion ion-bluetooth" ng-class="{'bg-green': bluetoothEnabled}"></i>
+            <i class="ion ion-alert-circled" ng-hide="isConnected"></i>
+            <i class="ion ion-checkmark" ng-show="isConnected"></i>
           </div>
-          <div class="bluetooth-text ">
-            <p class="bluetooth-text">Click button to enable Bluetooth</p>
+          <div class="bluetooth-text col-75">
+            <p class="bluetooth-text" ng-hide="bluetoothEnabled">Bluetooth turned off</p>
+            <p class="bluetooth-text" ng-show="bluetoothEnabled">Bluetooth turned on</p>
+            <p class="bluetooth-text" ng-show="isConnected">Bluetooth connected with device</p>
+            <p class="bluetooth-text" ng-hide="isConnected">Bluetooth not connected </p>
           </div>
         </div>
 
-        <button class="button button-calm" ng-hide="bluetoothEnabled()" on-tap="bluetoothOn()">Turn on Bluetooth</button>
+        <div class="item item-divider">
+          <p class="bluetooth-text">Available devices</p>
+        </div>
+
+        <!-- TODO explainer for Windows Phone that unpaired devices must be connected manually-->
+        <div id="bluetooth-available-devices-div" ng-model="availableDevices">
+          <ion-item ng-repeat="device in availableDevices track by $index" on-tap="connectToUnpairedDevice($index)">
+            <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
+          </ion-item>
+          <ion-item ng-show="!availableDevices.length">
+            <p class="bluetooth-text">No unpaired Bluetooth devices are available</p>
+          </ion-item>
+        </div>
+
+        <div class="item item-divider">
+          <p class="bluetooth-text">Paired devices</p>
+        </div>
+
+        <div id="bluetooth-paired-devices-div" ng-model="pairedDevices">
+          <ion-item ng-repeat="device in pairedDevices track by $index"  on-tap="connectToPairedDevice($index)">
+            <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
+          </ion-item>
+          <ion-item ng-show="!pairedDevices.length">
+            <p class="bluetooth-text">No paired Bluetooth devices are availabe</p>
+          </ion-item>
+        </div>
+
+        <div class="item item-divider">
+          <p class="bluetooth-text">Activity log</p>
+        </div>
+
+        <div class="item item-text-wrap">
+          <p class="bluetooth-text" ng-repeat="message in bluetoothLog track by $index">
+            {{message}}
+          </p>
+        </div>
+
       </div>
     </div>
-
+    <button class="button button-calm" ng-hide="bluetoothEnabled" on-tap="bluetoothOn()">Turn on Bluetooth</button>
+    <button class="button button-calm" ng-show="readyForData" on-tap="sendData()">Send data</button>
   </ion-content>
 </ion-view>
 

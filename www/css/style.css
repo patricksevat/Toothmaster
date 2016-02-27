@@ -18,6 +18,7 @@ ion-content {
 
 .card {
   min-height: 200px;
+  padding: 0px !important;
 }
 
 #warning {
@@ -32,7 +33,7 @@ ion-content {
 }
 
 .item-text-wrap {
-  margin-bottom: 15px;
+  margin-bottom: 0px;
 }
 
 .item {
@@ -123,10 +124,24 @@ button, .icon {
 /* runBluetooth.html */
 .bluetooth-icon {
   float: left;
+  height: 100%;
+  color: red;
+  font-size: 2em;
+}
 
+.bg-green {
+  color: green !important;
 }
 
 .bluetooth-row {
   margin: 0px !important;
+}
+
+.ion-alert-circled {
+  color: red;
+}
+
+.ion-checkmark {
+  color: green;
 }
 
