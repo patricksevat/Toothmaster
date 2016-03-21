@@ -139,17 +139,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       }
     })
 
-    .state('app.runAudio', {
-      name: 'runAudio',
-      url: '/runAudio',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/runAudio.html',
-          controller: 'runAudioCtrl'
-        }
-      }
-    })
-
     .state('app.runBluetooth', {
       name: 'runBluetooth',
       url: '/runBluetooth',

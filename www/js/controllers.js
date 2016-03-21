@@ -45,15 +45,15 @@ angular.module('starter.controllers', [])
   ];
 
   $scope.slide3 = [
-    'Android/iOS is no Operating System for safety applications','Toothmaster software is not developed to aim for a certain so-called SIL(Safety Integrity Level).','You might drop something on your phone and then Toothmaster will order the stepmotor to move.','You or somebody else might by coincidence click on the continue button while making a precision cut.','There might be interference from other applications with Toothmaster.','Your phone memory might be bad. Leading to bit rot, causing inadvertant movement.','There might be Electro Magnetic Interference in your workplace (for instance if you start a heavy motor), leading to bit rot, causing inadvertant movement.','Toothmaster uses the soundcard to steer the step motor. If you play a song/ an application does beep, there is inadvertant movement.','etc.'
+    'Android/iOS is no Operating System for safety applications','Toothmaster software is not developed to aim for a certain so-called SIL(Safety Integrity Level).','You might drop something on your phone and then Toothmaster will order the stepmotor to move.','You or somebody else might by coincidence click on the continue button while making a precision cut.','There might be interference from other applications with Toothmaster.','Your phone memory might be bad. Leading to bit rot, causing inadvertant movement.','There might be Electro Magnetic Interference in your workplace (for instance if you start a heavy motor), leading to bit rot, causing inadvertant movement.','Step motor driver (step motor driver is explained here (TBD)) generates inadvertent movement etc.'
   ];
 
   $scope.slide4 = [
-    'Toothmaster/ OS/ smartphone generates movement when not expected.','Toothmaster/ OS/ smartphone keeps moving/ moves too far. (could also be cause by wrong user input/ installation errors)'
+    'Toothmaster/ OS/ smartphone generates movement when not expected.','Toothmaster/ OS/ driver keeps moving or moves too far. (could also be cause by wrong user input/ installation errors)'
   ];
 
   $scope.slide5 = [
-    {main: 'A) Clamping your workpiece before making a cut.', sub: 'Clamping is very simple and very safe. The time to make the mortise tenon connection will be longer because the milling machine has to be stopped, clamp has to be removed and installed for every cut.'},
+    {main: 'A) Clamping your workpiece before making a cut.', sub: 'Clamping is very simple and very safe. Of course safety has a negative effect on availability. The time to make the wood joint will be longer because the milling machine might have to be stopped, clamp has to be removed and installed for every cut.'},
     {main: 'B) Safety Switch', sub: 'Operator operates the safety switch. Not recommended because operator could make mistakes/ shorts the safety switch on purpose.', sub2: 'Safety switch is operated by the shifting part of your machinery when the workpiece is in a safe position to move.'},
     {main: 'C) Combination A&B', sub: 'Especially when working on expensive and big workpieces, you might consider A + B2 and even stop your machine before shifting the workpiece.'}
   ];
@@ -422,7 +422,7 @@ angular.module('starter.controllers', [])
           text: 'Confirm settings',
           type: 'button-balanced',
           onTap: function () {
-            $scope.chooseOutput();
+            $state.go('app.runBluetooth');
           }
 
         }]
@@ -474,29 +474,6 @@ angular.module('starter.controllers', [])
       }
     }
 
-
-  $scope.chooseOutput = function() {
-    $ionicPopup.alert(
-      {
-        title: 'Please choose your output mode',
-        template: 'You can choose between audio output or bluetooth connection',
-        buttons: [{
-          text: 'Audio  <i class="icon ion-volume-medium"></i>',
-          type: 'button-calm',
-          onTap: function() {
-            $state.go('app.runAudio');
-          }
-        },
-          {
-            text: '<span class="vertical-align">Bluetooth  </span><i class="icon ion-bluetooth"></i>',
-            type: 'button-calm',
-            onTap: function() {
-              $state.go('app.runBluetooth');
-            }
-        }]
-      });
-  }
-
   $scope.redText = function () {
     if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] === 'false') {
       return true;
@@ -512,7 +489,7 @@ angular.module('starter.controllers', [])
     if($scope.settings.minFreq < 50){
       $scope.showAlertMinFreq();
     }
-    else if ($scope.settings.maxFreq > 1000) {
+    else if ($scope.settings.maxFreq > 80000) {
       $scope.showAlertMaxFreq();
     }
 
@@ -660,9 +637,7 @@ angular.module('starter.controllers', [])
   }
 
 })
-  .controller('runAudioCtrl', function($scope){
 
-  })
 
   .controller('runBluetoothCtrl', function($scope, $cordovaBluetoothSerial, $ionicPopup, $state, $ionicPlatform, $window){
     $scope.availableDevices = [];
@@ -797,17 +772,105 @@ angular.module('starter.controllers', [])
       })
     }
 
-    $scope.messageInABottle = "Hello World!";
+    //TODO onthoud ontvangende kant ook programUID?
+    //TODO  <c>? --> 'stepper' alleen nodig voor homing
+    //TODO check of f0 ergens nog gestuurd moet worden
+    $scope.bluetoothStr = "";
 
-   $scope.sendData = function () {
-     $scope.bluetoothLog.unshift('Awaiting data transmission confirmation');
-     $scope.bluetoothLog.unshift('Sending data');
-     $cordovaBluetoothSerial.write($scope.messageInABottle).then(function () {
-       $scope.bluetoothLog.unshift('Data sent');
-     }, function () {
-       $scope.bluetoothLog.unshift('Data could not be sent');
+    var emergency = false;
+    $scope.showEmergency = false;
+    $scope.showMovingButton = false;
+    var update = false;
+
+    $scope.emergencyOn = function () {
+      $scope.bluetoothLog.unshift('Stop button pressed');
+      emergency = emergency ? false : true;
+      $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>', function () {
+        $scope.bluetoothLog.unshift('Emergency reset sent');
+      }, function () {
+        $scope.bluetoothLog.unshift('Emergency command could not be set. ');
+      });
+    };
+
+    var programUID = '';
+    var stepMotorNum = '1';
+    var direction = '0';
+    var totalSteps = '100'; //test
+    var maxFreq = '3000'; //test
+    var time = '1'; //test
+    var clear = false;
+
+    var command = 0;
+    var updateSteps = '0';
+
+    $scope.receivedBuffer = [];
+    var lastCommandTime;
+    var lastReceivedTime;
+    $scope.movements = [0,1,2,3];
+    $scope.movementsNum = 0;
+    var commands = ['<<y8:y'+stepMotorNum+'>', '<v'+direction+stepMotorNum+'>', '<s'+totalSteps+stepMotorNum+'>', '<r'+maxFreq+stepMotorNum+'>',
+      '<f1'+stepMotorNum+'>', '<o'+time+stepMotorNum+'>', '<kFAULT'+stepMotorNum+'>'];
+
+    $scope.sendSettingsData = function () {
+      $scope.showEmergency = true;
+      $scope.subscribe();
+      $scope.bluetoothLog.unshift('Starting to send settings data');
+      $scope.bluetoothLog.unshift('sending new program setting '+command+commands.length);
+      if (command < commands.length-1 && !emergency) {
+        write(commands[command]);
+        command +=1;
+      }
+      else if (command === commands.length-1 && !emergency) {
+        write(commands[command]);
+        command = 0;
+        $scope.showMovingButton = true;
+      }
+      else {
+
+      }
+     };
+
+    function write(str){
+      lastCommandTime = Date.now();
+      $cordovaBluetoothSerial.write(str, function() {
+        $scope.bluetoothLog.unshift('Data sent '+str);
+        //check if answer is on time
+        if ($scope.receivedBuffer[0] !== undefined && lastReceivedTime - lastCommandTime < 1000) {
+          $scope.bluetoothLog.unshift('In time, response time = '+(lastReceivedTime - lastCommandTime)+' ms');
+          $scope.bluetoothLog.unshift('Response = '+$scope.receivedBuffer[0]);
+        }
+        else {
+          $scope.bluetoothLog.unshift('Not responded in time, trying again');
+        }
+      }, function () {
+        $scope.bluetoothLog.unshift('Could not send data');
+      });
+    }
+
+    $scope.startMoving = function () {
+      $scope.movementsNum +=1;
+
+    };
+
+
+
+    $scope.clearBuffer = function () {
+     $cordovaBluetoothSerial.clear(function success(){
+       $scope.bluetoothLog.unshift('Received buffer cleared');
+     }, function err() {
+       $scope.bluetoothLog.unshift('Error: Could not clear receive buffer');
      })
-   }
+    };
+
+    $scope.subscribe = function () {
+      $cordovaBluetoothSerial.subscribe('\n', function success(data) {
+        $scope.bluetoothLog.unshift('Opening receive buffer');
+        $scope.receivedBuffer.unshift(data);
+        lastReceivedTime = Date.now();
+      }, function failure() {
+        $scope.bluetoothLog.unshift('Error: could not subscribe to receive buffer');
+      })
+    };
 
     $scope.start = function () {
       $ionicPopup.alert({
@@ -818,7 +881,7 @@ angular.module('starter.controllers', [])
             text: 'Cancel'
           },
           {
-            text: Start,
+            text: 'Start',
             type: 'button-balanced',
             onTap: function () {
 
@@ -827,4 +890,5 @@ angular.module('starter.controllers', [])
       })
     }
 
-  }) //end of controller runBluetoothCtrl
+  });
+//end of controller runBluetoothCtrl

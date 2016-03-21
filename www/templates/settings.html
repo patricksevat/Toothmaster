@@ -7,10 +7,10 @@
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Maximum frequency (steps/sec)</span>
-        <input type="number" placeholder="Maximum value 1000" ng-model="settings.maxFreq" ng-class="{redText: settings.maxFreq > 1000}">
+        <input type="number" placeholder="Maximum value 80 000" ng-model="settings.maxFreq" ng-class="{redText: settings.maxFreq > 80000}">
       </label>
       <label class="item item-input item-stacked-label">
-        <span class="input-label">Step motor driver dipswitch setting (steps/revolution)</span>
+        <span class="input-label">Step motor driver dipswitch setting (steps/revolution)</span> <!--TODO make labels wrap text-->
         <input type="number" placeholder="Determines how many pulses are needed per revolution" ng-model="settings.dipswitch">
       </label>
       <label class="item item-input item-stacked-label">

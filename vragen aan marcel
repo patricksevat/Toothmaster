@@ -1,0 +1,57 @@
+RPM = max freq \ dipswitch *60?
+omega_max := 2*Pi*rpm/60;
+omega_acc :=  omega_max/onspeed; --> onspeed settings.time
+
+homing = de return op typemachine, terug naar huis, op de stapmotor. Alleen commando H
+
+toevoegen homing functionaliteit
+
+   alpha := 2 * Pi/steps_per_rpm;
+
+
+Hoe is de ramp-up goed te programmeren?
+
+
+width_counter := (width_of_cut  - width_of_saw) /width_of_saw; --> hoeveel gaat de stappenmotor opzij
+
+aantal stappen per omwenteling is het enige wat uitgerekend moet worden per cut
+
+prescaler wordt gebruikt in stappenmotor controller om stappen
+
+1. uitrekenen hoeveel stappen genomen moeten worden middels variabelen cut width, saw width, revolutions
+    cut width = 10mm,
+    saw width = 2mm,
+    revolutions = cut width \ saw width = 5??
+    steps = dipswitch(55) * revolutions = 275?
+    WAAR KOMT SPINDLE ADVANCEMENT VOOR IN DIT STUK??
+2. dat converteren naar serieel commando
+    WAT ZIJN ALLE COMMANDO'S?
+      <p1001> Dit is 100 stappen per omwenteling voor stap motor 1. Zijn er meerdere stappen motors mogelijk???
+      Settings sturen = ?
+      <y> = reset program
+      <c> = stepper???????
+      <v> = total steps
+      <s> = total steps2
+      <p> = steps per rpm
+      <l> = prescaler
+      etc.
+      Of<h11>   om stappenmotor 1 te homen op rechter stopswitch
+      Of <h21> om stappenmotor 1 te homen op linker stopswitch
+3. serieel commando over bluetooth
+    VOORKEUR VOOR
+4. response afwachten vanuit bluetooth over serieel
+5. Killswitch \
+
+program:
+  Saw width
+  Cut width
+  Pin width
+  Number of Cuts
+  Start position
+
+Settings:
+  Min Freq
+  Max Freq
+  Dipswitch (step \ rev]
+  Spindle advancement (in mm \ rev]
+  Time to reach max freq

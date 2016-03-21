@@ -1,0 +1,91 @@
+$cordovaBluetoothSerial.write($scope.bluetoothStr)
+$scope.bluetootStr($scope.commando, $scope.clearStr, $scope.emergency)
+
+
+scope.clearstr = legen van ontvangen str vanuit seriele poort, KIES GOED MOMENT OM TE LEGEN!
+scope.emergency = if true --> kill all
+
+NA VERSTUREN VAN Bluetooth write WACHTEN OP RESPONS VOOR HET VERSTUREN VAN ANDERE COMMANDO'S! --> scope.waitResponse
+Tijdens wachten user interface vrijgeven zodat wel $scope.emergency gedrukt kan worden
+Timeout voor response = 1s
+
+
+Nieuw progamma:
+
+  Start prog commando: <<y{{programma variabele}}:y{{step-motor nummer}}> = Nieuwe settings // ook sluiten met >>?
+    LET OP DUBBEL '<<' !!!
+    Programma variabele = UID programma, mag constante zijn, of anders session storage //onthoud de bluetooth receive kant ook vorige programma's?
+    step-motor-nummber = constant op 1.
+
+//moet de nieuwprog+settings commando in één keer worden verstuurd?
+  Settings:
+
+<v> is richting
+<v+{{direction}}+{{step-motor-number}}>
+                                                    direction wordt checkbox
+<s+{{ tot aant stappen}}+{{step-motor-number}}> totaal aantal stappen: mm verplaatsing \ trapezium verplaatsing = omwentelingen \ omwentelingen\stap === totaal aantal stappen
+<p+{{stap per rpm}}+{{step-motor-number}}> = stappen per omwentelingen === dipswitch setting
+
+OPTIONEEEEEEEEEEEL OF OVERBODIG <a+{{aantal stappen voor afremming\descreleration}}+{{step-motor-number}}>
+
+<r+{{max freq}}+{{step-motor-number}}> == max freq
+
+<f1+{{step-motor-number}}> == aanzetten stapmotor controller //moet dit commando als eerste worden gestauurd? Nog voor <<y>>?
+<f0+{{step-motor-number}}> == uitzetten stapmotor controller
+
+<o+{{time to max freq}}+{{step motor num}}> --> time
+
+<k+'FAULT'+{{step motor num}}> === start commando, als response === 'rdy' dan kunnen we starten //starten met wat? updaten?
+
+NA HET STARTEN PINGEN EN STUREN WE PERIODIEK (100ms) EEN COMMANDO 'w'
+<w+{{step-motor-number}}> alle args === false
+response kan zijn: 'w''of 'wydone'
+
+Als er een stopswitch geraakt wordt dan is dat geencodeerd in de 'wydone' response
+'done:0' --> geen stopswitch geraakt
+'done:1' -> stepper1: right geraakt
+
+update <q+{{aantal stappen}}+{{step motor number}}>
+rdy commando sturen en timer aanzetten
+
+    $scope.writeData = function (str) {
+      //check if emergency is pressed
+      if (!emergency) {
+        lastCommandTime = Date.now();
+        $cordovaBluetoothSerial.write(str, function() {
+          $scope.bluetoothLog.unshift('Data sent '+str);
+          //check if answer is on time
+          if ($scope.receivedBuffer[0] !== undefined && lastReceivedTime - lastCommandTime < 1000) {
+            $scope.bluetoothLog.unshift('In time, response time = '+(lastReceivedTime - lastCommandTime)+' ms');
+            command += 1;
+            $scope.sendSettingsData();
+          }
+          else {
+            $scope.bluetoothLog.unshift('Not responded in time, trying again');
+            $scope.sendSettingsData();
+          }
+        }, function () {
+          $scope.bluetoothLog.unshift('Could not send data');
+          });
+      }
+      else {
+          $scope.bluetoothLog.unshift('Error: Data could not be sent, emergency button pressed');
+        }
+      };
+
+
+       $scope.sendSettingsData = function () {
+         if (command < commands.length-1) {
+           $scope.showEmergency = true;
+           $scope.bluetoothLog.unshift('Starting to send settings data');
+           $scope.bluetoothLog.unshift('sending new program setting '+command+commands.length);
+           lastCommandTime = Date.now();
+           $scope.writeData(commands[command]);
+         }
+         else if (command === commands.length-1) {
+           $scope.bluetoothLog.unshift('sending new program setting '+command+commands.length);
+           lastCommandTime = Date.now();
+           $scope.writeData(commands[command]);
+         }
+
+         };
