@@ -9,7 +9,7 @@ angular.module('starter.controllers', [])
   $scope.removeLocalSafety = function() {
     window.localStorage['Safety'] = '';
     console.log('Safety reset to ""');
-  }
+  };
 
   $scope.setLocalSafety = function () {
     window.localStorage['Safety'] = 'Completed';
@@ -24,11 +24,11 @@ angular.module('starter.controllers', [])
   $scope.setDeregister = function (){
     window.localStorage['registered'] = 'false';
     console.log('registered = false');
-  }
+  };
 
   $scope.setSettings = function () {
     window.localStorage['settings'] = '{"minFreq":55,"maxFreq":555,"dipswitch":55,"spindleAdvancement":5,"time":5}';
-  }
+  };
 
   $scope.setProgram= function () {
     var testProg = {title: 'testprog', sawWidth: 5, cutWidth: 5, pinWidth: 5, numberOfCuts: 2, startPosition: 5  };
@@ -145,7 +145,7 @@ angular.module('starter.controllers', [])
     //push the parsed userPrograms to $scope.userPrograms array
     else {
       console.log(window.localStorage);
-      for (a=0; a<window.localStorage.length; a++) {
+      for (var a=0; a<window.localStorage.length; a++) {
         if (window.localStorage.key(a) == 'Safety' || window.localStorage.key(a) == 'settings' || window.localStorage.key(a) == 'registered' || window.localStorage.key(a) == 'activationCode') {
 
         }
@@ -387,6 +387,7 @@ angular.module('starter.controllers', [])
       }
     };
 
+  //TODO: build check for correct program & settings, currently possible to proceed without any program variables filled in
     $scope.confirmProgram = function(){
       $ionicPopup.alert(
         {
@@ -472,7 +473,7 @@ angular.module('starter.controllers', [])
           });
         return false;
       }
-    }
+    };
 
   $scope.redText = function () {
     if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] === 'false') {
@@ -535,7 +536,7 @@ angular.module('starter.controllers', [])
         template: 'Please make sure that maximum frequency is set to 1000 or lower'
       }
     )
-  }
+  };
 
   $scope.showAlertSettings = function(){
     $ionicPopup.alert(
@@ -544,12 +545,12 @@ angular.module('starter.controllers', [])
         template: 'Please make sure that all fields are filled in correctly'
       }
     )
-  }
+  };
 
   $scope.showAlertSaved = function(){
     $ionicPopup.alert(
       {
-        title: 'Settings saved',
+        title: 'Settings saved'
       }
     )
   }
@@ -562,13 +563,13 @@ angular.module('starter.controllers', [])
     $scope.register = function() {
       $scope.slide2 = true;
       $scope.generateActivationCode();
-    }
+    };
 
     $scope.generateActivationCode = function(){
       if (window.localStorage['activationCode'] === '') {
       $scope.activationCode = '';
       var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      for (j=1; j<41; j++) {
+      for (var j=1; j<41; j++) {
         $scope.activationCode += possible.charAt(Math.floor(Math.random()* possible.length));
         }
       window.localStorage['activationCode'] = $scope.activationCode;
@@ -577,7 +578,7 @@ angular.module('starter.controllers', [])
       else {
         $scope.activationCode = window.localStorage['activationCode'];
       }
-    }
+    };
 
     $scope.buyPopup = function() {
       $cordovaClipboard.copy($scope.activationCode);
@@ -586,7 +587,7 @@ angular.module('starter.controllers', [])
         template: 'Go to the website to order your license',
         buttons: [
           {
-           text: 'Cancel',
+           text: 'Cancel'
           },
           {
           text: 'Buy<br>Toothmaster',
@@ -596,7 +597,7 @@ angular.module('starter.controllers', [])
           }
         }]
       })
-    }
+    };
 
 
 
@@ -607,7 +608,7 @@ angular.module('starter.controllers', [])
           template: 'Go to the website to order your license',
           buttons: [
             {
-              text: 'Cancel',
+              text: 'Cancel'
             },
             {
               text: 'Buy<br>Toothmaster',
@@ -639,7 +640,8 @@ angular.module('starter.controllers', [])
 })
 
 
-  .controller('runBluetoothCtrl', function($scope, $cordovaBluetoothSerial, $ionicPopup, $state, $ionicPlatform, $window, $interval){
+  .controller('runBluetoothCtrl', function($scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup,
+                                           $state, $ionicPlatform, $window, $interval, $timeout, shareSettings){
     $scope.availableDevices = [];
     $scope.pairedDevices = [];
     $scope.bluetoothLog = [];
@@ -741,7 +743,7 @@ angular.module('starter.controllers', [])
     $scope.connectToUnpairedDevice = function ($index) {
       $ionicPlatform.ready(function() {
       $scope.bluetoothLog.unshift('Trying to connect');
-      $scope.bluetoothLog.unshift('Index = '+$index);
+      $scope.bluetoothLog.unshift('Id = '+$scope.availableDevices[$index].id);
       $cordovaBluetoothSerial.connect($scope.availableDevices[$index].id).then(function () {
          $scope.bluetoothLog.unshift('Your smartphone has succesfully connected with the selected Bluetooth device');
          $scope.bluetoothConnected();
@@ -760,7 +762,6 @@ angular.module('starter.controllers', [])
     $scope.connectToPairedDevice = function ($index) {
       $ionicPlatform.ready(function() {
         $scope.bluetoothLog.unshift('Trying to connect');
-        $scope.bluetoothLog.unshift('Index = '+$index);
         $scope.bluetoothLog.unshift('Id = '+$scope.pairedDevices[$index].id);
         $cordovaBluetoothSerial.connect($scope.pairedDevices[$index].id).then(function () {
         $scope.bluetoothLog.unshift('Your smartphone has succesfully connected with the selected Bluetooth device');
@@ -771,12 +772,11 @@ angular.module('starter.controllers', [])
           $scope.bluetoothLog.unshift('error: '+error);
       })
       })
-    }
+    };
 
     //TODO onthoud ontvangende kant ook programUID?
     //TODO  <c>? --> 'stepper' alleen nodig voor homing
     //TODO check of f0 ergens nog gestuurd moet worden
-    $scope.bluetoothStr = "";
 
     var emergency = false;
     $scope.showEmergency = false;
@@ -784,6 +784,7 @@ angular.module('starter.controllers', [])
     $scope.moving = false;
 
     $scope.emergencyOn = function () {
+      //TODO add emergency off option
       $scope.bluetoothLog.unshift('Stop button pressed');
       emergency = true;
       //Send reset command
@@ -794,6 +795,7 @@ angular.module('starter.controllers', [])
       });
     };
 
+    $scope.settings = shareSettings.getObj();
 
     var stepMotorNum = '1';
     var stepsPerRPMDevidedByStepsPerRPMEncoder = '1'; //test value floating point, allowed positive or negative value
@@ -809,74 +811,128 @@ angular.module('starter.controllers', [])
     var stepUpdate;  //test, value is integer, positive or negative allowed
     var softwareVersionCommand = '<z'+stepMotorNum+'>';
 
-
-    var newCommand = true;
-    var dataRead = false;
-
+    var commands = ['<<8:y'+stepMotorNum+'>','<d'+stepsPerRPMDevidedByStepsPerRPMEncoder+stepMotorNum+'>', '<'+disableEncoder+stepMotorNum+'>', '<b'+maxAllowedMiss+stepMotorNum+'>', '<v'+direction+stepMotorNum+'>', '<s'+totalSteps+stepMotorNum+'>', '<p'+stepsPerRPM+stepMotorNum+'>', '<r'+maxRPM+stepMotorNum+'>', '<f'+stepMotorOnOff+stepMotorNum+'>', '<o'+time+stepMotorNum+'>', '<kFAULT'+stepMotorNum+'>'];
     var command = 0;
-    var stepsToSend = [100, 500, 50, 1000, 150];
-    var stepCommand = 0;
 
-    $scope.receivedBuffer = [];
     var lastCommandTime;
     var lastReceivedTime;
-    $scope.movements = [0,1,2,3];
-    $scope.movementsNum = 0;
-    var commands = ['<<8:y'+stepMotorNum+'>','<d'+stepsPerRPMDevidedByStepsPerRPMEncoder+stepMotorNum+'>',
-      '<'+disableEncoder+stepMotorNum+'>', '<b'+maxAllowedMiss+stepMotorNum+'>', '<v'+direction+stepMotorNum+'>',
-      '<s'+totalSteps+stepMotorNum+'>', '<p'+stepsPerRPM+stepMotorNum+'>', '<r'+maxRPM+stepMotorNum+'>',
-      '<f'+stepMotorOnOff+stepMotorNum+'>', '<o'+time+stepMotorNum+'>', '<kFAULT'+stepMotorNum+'>', '<q0'+stepMotorNum+'>'];
+
+    $scope.receivedBuffer = [];
+    var response='';
+
+    function subscribe(){
+      $window.bluetoothSerial.subscribeRawData(function (data) {
+        //update view as message comes in, response converted from ArrayBuffer to String
+        $scope.$apply(function () {
+          response += String.fromCharCode.apply(null, new Uint8Array(data));
+          lastReceivedTime = Date.now();
+          //$scope.bluetoothLog.unshift('Last received time: '+lastReceivedTime);
+        });
+      });
+    }
 
     //user clicks button front end, sendSettingsData() called
     $scope.sendSettingsData = function () {
       $scope.showEmergency = true;
-        $window.bluetoothSerial.subscribeRawData(function (data) {
-          $scope.$apply(function () {
-            $scope.bluetoothLog.unshift('Response: '+String.fromCharCode.apply(null, new Uint8Array(data)));
-            $scope.receivedBuffer.unshift(String.fromCharCode.apply(null, new Uint8Array(data)));
-            lastReceivedTime = Date.now();
-            $scope.bluetoothLog.unshift('Last received time: '+lastReceivedTime);
-        });
-      });
+      //subscribe to Bluetooth incoming messages
+      subscribe();
+      //send first command
       send(commands[command], commandPlus);
 
+      //command closure callback
       function commandPlus() {
         if (command < commands.length-1) {
           command += 1;
           send(commands[command], commandPlus);
         }
-        if (command === commands.length-1 /*&& $scope.receivedBuffer[0].search('rdy')> -1*/) {
-          $scope.receivedBuffer.unshift('last command');
-          //$scope.bluetoothLog.unshift('receivedBuffer = '+$scope.receivedBuffer);
-          $scope.bluetoothLog.unshift('All settings send, ready for movement');
-          $scope.clearBuffer();
+        //on last command check if 'rdy' has been sent
+        else if (command === commands.length-1 && $scope.receivedBuffer[0].search('rdy')> -1) {
+          $scope.bluetoothLog.unshift('Ready for movement');
           $scope.showMovingButton = true;
-
+          $scope.readyForData = false;
+        }
+        else if (command === commands.length-1 && $scope.receivedBuffer[0].search('rdy') === -1){
+          $scope.bluetoothLog.unshift('Settings have not been sent correctly');
         }
       }
-
     };
 
+    $scope.movements = [1000, 50000, 1500, 10000, 1500];
+    $scope.movementsNum = 0;
+    var done = true;
+
+    $scope.startMoving = function () {
+      //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
+      subscribe();
+      if (done) {
+
+        done = false;
+        send('<q'+$scope.movements[$scope.movementsNum]+stepMotorNum+'>', checkDone);
+        $scope.movementsNum += 1;
+        if ($scope.movementsNum === $scope.movements.length -1) {
+          $scope.showRestartModal();
+        }
+      }
+      else {
+        $scope.bluetoothLog.unshift('Please wait untill this step is finished');
+      }
+
+      function checkDone() {
+        if ($scope.receivedBuffer[0].search('done:') !== -1) {
+          $scope.bluetoothLog.unshift('Starting <w> pings');
+          $scope.bluetoothLog.unshift('Movement done, ready for next movement');
+          done = true;
+
+        }
+        else {
+          var pingInterval = $interval(function () {
+            if (!emergency) {
+              send('<w'+stepMotorNum+'>');
+              if ($scope.receivedBuffer[0].search('done:') !== -1){
+                $scope.bluetoothLog.unshift('Movement done, ready for next movement');
+                done = true;
+                $interval.cancel(pingInterval);
+              }
+            }
+            else if (emergency){
+              $scope.bluetoothLog.unshift('Emergency pressed, will not send ping updates');
+              $interval.cancel(pingInterval);
+            }
+          },200);
+        }
+
+      }
+    };
+
+
+
     function send(str, callback){
+      //Check for emergency
       if(!emergency) {
+        //write to bluetooth receiver
         $cordovaBluetoothSerial.write(str).then(function () {
           lastCommandTime = Date.now();
           $scope.bluetoothLog.unshift('Command: '+str);
           $scope.receivedBuffer.unshift('Command: '+str);
-          $scope.bluetoothLog.unshift('Last command time: '+lastCommandTime);
+          //$scope.bluetoothLog.unshift('Last command time: '+lastCommandTime);
+
+          //check periodically if response has been sent
           var interval = $interval(function () {
             var now = Date.now();
+            //parse response && reset response
+            $scope.bluetoothLog.unshift('Response: '+response);
+            $scope.receivedBuffer.unshift('Response: '+response);
+            response = '';
             if(lastReceivedTime - lastCommandTime <1000 && lastReceivedTime - lastCommandTime >0) {
               $scope.bluetoothLog.unshift('Responded in time = '+(lastReceivedTime-lastCommandTime)+' ms');
               $interval.cancel(interval);
               if(callback) callback();
             }
-            else if (now - lastCommandTime > 3000) {
+            else if (now - lastCommandTime>3000){
               $scope.bluetoothLog.unshift('Not responded on time, now = '+now);
               $interval.cancel(interval);
             }
-          },50);
-
+          },100);
         }), function () {
           $scope.bluetoothLog.unshift('Could not send command');
         };
@@ -884,8 +940,6 @@ angular.module('starter.controllers', [])
       else {
         $scope.bluetoothLog.unshift('Emergency button pressed');
       }
-
-
     }
 
     $scope.clearBuffer = function () {
@@ -923,7 +977,7 @@ angular.module('starter.controllers', [])
             }
           }]
       })
-    }
+    };
 
 
     $scope.start = function () {
@@ -942,7 +996,57 @@ angular.module('starter.controllers', [])
             }
           }]
       })
-    }
+    };
+/*
+    $scope.openBluetoothLog = function () {
+      var html ='';
+      $scope.bluetoothLog.forEach(function (item) {
+        item.replace('<','&lt;');
+        item.replace('>','&gt;');
+        html += '<pre><p>'+item+'</p></pre>';
+      });
+      $ionicPopup.alert({
+        title: 'Bluetooth log',
+        template: $scope.bluetoothLog,
+        buttons: [
+          {
+            text: 'Close'
+          },
+          {
+            text: 'Copy',
+            type: 'button-balanced',
+            onTap: function () {
+              $cordovaClipboard.copy($scope.bluetoothLog.join(' , '));
+            }
+          }]
+      })
+    };
 
+    $scope.openReceivedBuffer= function () {
+      var html = '';
+      for (var i =0; i<5; i++){
+        var str = '';
+        str += $scope.receivedBuffer[0];
+        str.replace('&lt;','open');
+        str.replace('>','close');
+        html+='<p>'+str+'</p>';
+      }
+      $ionicPopup.alert({
+        title: 'Command log',
+        template: html,
+        buttons: [
+          {
+            text: 'Close'
+          },
+          {
+            text: 'Copy',
+            type: 'button-balanced',
+            onTap: function () {
+              $cordovaClipboard.copy($scope.receivedBuffer.join(' , '));
+            }
+          }]
+      })
+    };
+*/
   });
 //end of controller runBluetoothCtrl

@@ -1,6 +1,6 @@
 <ion-view view-title="Run Bluetooth">
   <ion-content>
-    <div class="row bluetooth-row"><!--TODO add killswitch-->
+    <div class="row bluetooth-row">
       <div class="card col col-center" >
 
         <div class="item item-divider">
@@ -55,16 +55,16 @@
         <button class="button button-calm" ng-show="readyForData" on-tap="sendSettingsData()">Send data</button>
         <button class="button button-calm" ng-show="readyForData" on-tap="clearBuffer()">Clear buffer</button>
         <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop program</button>
-        <button class="button button-calm" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum}}/{{movements.length}}</button>
-        <div class="item item-text-wrap">
+        <button class="button button-calm" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum+1}}/{{movements.length}}</button>
+        <div class="item item-text-wrap log" on-tap="openBluetoothLog()">
           <p class="bluetooth-text" ng-repeat="message in bluetoothLog track by $index">
             {{message}}
           </p>
         </div>
 
-        <div class="item item-text-wrap">
+        <div class="item item-text-wrap log" on-tap="openReceivedBuffer()">
           <p class="bluetooth-text" ng-repeat="message in receivedBuffer track by $index">
-            {{message}} index = {{$index}}
+            {{message}}
           </p>
         </div>
 
