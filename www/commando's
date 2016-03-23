@@ -89,3 +89,128 @@ rdy commando sturen en timer aanzetten
          }
 
          };
+
+$scope.sendSettingsData = function (str, callback) {
+  write(str, read());
+}
+
+write = funct (str, callback) {
+  bluetooth.write(str)
+
+}
+
+check emergency, write string, read buffer, check on time, allow next
+
+
+
+
+
+    $scope.sendSettingsData = function () {
+      //hides send Data button
+      $scope.readyForData = false;
+      //shows emergency button
+      $scope.showEmergency = true;
+      //starts receiving messages from bluetooth
+      $scope.subscribe();
+      $scope.bluetoothLog.unshift('Starting to send settings data');
+      $scope.bluetoothLog.unshift('sending new program setting '+(command+1)+'/'+commands.length);
+      //send settings from commands array, call sendSettings recursively
+      if (command < commands.length-1 && !emergency && newCommand) {
+        newCommand = false;
+        write(commands[command]);
+        command +=1;
+
+        $scope.sendSettingsData();
+      }
+      //last command in array
+      else if (command === commands.length-1 && !emergency && newCommand) {
+        write(commands[command]);
+        command = 0;
+        //check for rdy response, clear buffer, show Make movement button
+        if ($scope.receivedBuffer[0] === 'rdy') {
+          $scope.bluetoothLog.unshift('Received "rdy" & clearing buffer');
+          $scope.clearBuffer();
+          $scope.showMovingButton = true;
+        }
+      }
+      else {
+        $scope.bluetoothLog.unshift('Error, cannot send settings, emergency is pressed');
+      }
+     };
+
+    function write(str){
+      lastCommandTime = Date.now();
+      //send data, then(success, err)
+      $cordovaBluetoothSerial.write(str).then(function() {
+        $scope.bluetoothLog.unshift('Data sent '+str);
+        $scope.read();
+        //check if answer is on time
+        if (dataRead && $scope.receivedBuffer[0] !== undefined && lastReceivedTime - lastCommandTime < 1000) {
+          $scope.bluetoothLog.unshift('In time, response time = '+(lastReceivedTime - lastCommandTime)+' ms');
+          $scope.bluetoothLog.unshift('Response = '+$scope.receivedBuffer[0]);
+          newCommand = true;
+        }
+        else {
+          $scope.bluetoothLog.unshift('Not responded in time, trying again');
+        }
+      }, function (err) {
+        $scope.bluetoothLog.unshift('Error: Could not send data '+err);
+      });
+    }
+
+    //user clicks Make movement button
+    $scope.startMoving = function () {
+      //check if already executing and no emergency
+      if (!$scope.moving && !emergency) {
+        //set to true so cannot be called until finished
+        $scope.moving = true;
+        $scope.bluetoothLog.unshift('Starting movement');
+        //send item in stepsToSend array
+        if (stepCommand <= stepsToSend.length-1) {
+          write('<q'+stepsToSend[stepCommand]+stepMotorNum+'>');
+          //ping every 100ms to check if connection is alive
+          var timer = setInterval(function () {
+            $cordovaBluetoothSerial.write('<w'+stepMotorNum+'>');
+            lastCommandTime = Date.now();
+            //check response 'w' or 'wydone'
+            if ($scope.receivedBuffer[0] === 'w' && lastReceivedTime - lastCommandTime <100) {
+              $scope.bluetoothLog.unshift('Pinged on time');
+            }
+            //if wydone --> allow for next item in stepsToSend array
+            else if ($scope.receivedBuffer[0].search('wydone') < -1 && lastReceivedTime - lastCommandTime <100) {
+              $scope.bluetoothLog.unshift('Moving done, can start next section, clearing buffer');
+              $scope.clearBuffer();
+              $scope.movementsNum +=1;
+              stepCommand += 1;
+              //last stepCommand, reset
+              if (stepCommand === stepsToSend.length) {
+                stepCommand = 0;
+                $scope.movementsNum = 0;
+                $scope.showMovingButton = false;
+                $scope.showEmergency = false;
+                $scope.showRestartModal();
+              }
+              $scope.moving = false;
+              clearInterval(timer);
+            }
+          }, 100);
+        }
+      }
+      else {
+        $scope.bluetoothLog.unshift('Already moving, please wait');
+      }
+    };
+
+CORRECT FORMAT bluetooth write + read:
+    function send(str){
+          $cordovaBluetoothSerial.write(str).then($timeout(function success() {
+            $cordovaBluetoothSerial.read().then(function (data2) {
+              $scope.bluetoothLog.unshift('reading...');
+              $scope.bluetoothLog.unshift('Received '+data2);
+              $scope.receivedBuffer.unshift('Received '+data2);
+            });
+          },1000), function failure() {
+            $scope.bluetoothLog.unshift('Str could not be sent: '+str);
+          });
+        }
+

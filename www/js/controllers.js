@@ -639,7 +639,7 @@ angular.module('starter.controllers', [])
 })
 
 
-  .controller('runBluetoothCtrl', function($scope, $cordovaBluetoothSerial, $ionicPopup, $state, $ionicPlatform, $window){
+  .controller('runBluetoothCtrl', function($scope, $cordovaBluetoothSerial, $ionicPopup, $state, $ionicPlatform, $window, $interval){
     $scope.availableDevices = [];
     $scope.pairedDevices = [];
     $scope.bluetoothLog = [];
@@ -745,6 +745,7 @@ angular.module('starter.controllers', [])
       $cordovaBluetoothSerial.connect($scope.availableDevices[$index].id).then(function () {
          $scope.bluetoothLog.unshift('Your smartphone has succesfully connected with the selected Bluetooth device');
          $scope.bluetoothConnected();
+         $scope.readyForData = true;
         }, function (error) {
           //failure callback
          $scope.bluetoothLog.unshift('Your smartphone has not been able to connect with the selected Bluetooth device');
@@ -780,97 +781,150 @@ angular.module('starter.controllers', [])
     var emergency = false;
     $scope.showEmergency = false;
     $scope.showMovingButton = false;
-    var update = false;
+    $scope.moving = false;
 
     $scope.emergencyOn = function () {
       $scope.bluetoothLog.unshift('Stop button pressed');
-      emergency = emergency ? false : true;
-      $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>', function () {
+      emergency = true;
+      //Send reset command
+      $cordovaBluetoothSerial.write('<<8:y'+stepMotorNum+'>').then(function () {
         $scope.bluetoothLog.unshift('Emergency reset sent');
-      }, function () {
-        $scope.bluetoothLog.unshift('Emergency command could not be set. ');
+      }, function (err) {
+        $scope.bluetoothLog.unshift('Error: Emergency command could not be set. '+err);
       });
     };
 
-    var programUID = '';
+
     var stepMotorNum = '1';
-    var direction = '0';
-    var totalSteps = '100'; //test
-    var maxFreq = '3000'; //test
-    var time = '1'; //test
-    var clear = false;
+    var stepsPerRPMDevidedByStepsPerRPMEncoder = '1'; //test value floating point, allowed positive or negative value
+    var disableEncoder = 'x0';
+    var maxAllowedMiss = '2'; //test, value = integer
+    var direction = '0'; //possible values: 0 or 1
+    var totalSteps = '100'; //test, value can be positive or negative
+    var stepsPerRPM = '15'; //test, value must be positive
+    var maxRPM = '3000'; //test, value is max speed in RPM, floating point, must be positive
+    var time = '1'; //test, value floating point, must be positive
+    var stepMotorOnOff = '1'; //test, value 0 or 1
+    var homingCommand = '0'; //test, value 0 (left) or 1 (right)
+    var stepUpdate;  //test, value is integer, positive or negative allowed
+    var softwareVersionCommand = '<z'+stepMotorNum+'>';
+
+
+    var newCommand = true;
+    var dataRead = false;
 
     var command = 0;
-    var updateSteps = '0';
+    var stepsToSend = [100, 500, 50, 1000, 150];
+    var stepCommand = 0;
 
     $scope.receivedBuffer = [];
     var lastCommandTime;
     var lastReceivedTime;
     $scope.movements = [0,1,2,3];
     $scope.movementsNum = 0;
-    var commands = ['<<y8:y'+stepMotorNum+'>', '<v'+direction+stepMotorNum+'>', '<s'+totalSteps+stepMotorNum+'>', '<r'+maxFreq+stepMotorNum+'>',
-      '<f1'+stepMotorNum+'>', '<o'+time+stepMotorNum+'>', '<kFAULT'+stepMotorNum+'>'];
+    var commands = ['<<8:y'+stepMotorNum+'>','<d'+stepsPerRPMDevidedByStepsPerRPMEncoder+stepMotorNum+'>',
+      '<'+disableEncoder+stepMotorNum+'>', '<b'+maxAllowedMiss+stepMotorNum+'>', '<v'+direction+stepMotorNum+'>',
+      '<s'+totalSteps+stepMotorNum+'>', '<p'+stepsPerRPM+stepMotorNum+'>', '<r'+maxRPM+stepMotorNum+'>',
+      '<f'+stepMotorOnOff+stepMotorNum+'>', '<o'+time+stepMotorNum+'>', '<kFAULT'+stepMotorNum+'>', '<q0'+stepMotorNum+'>'];
 
+    //user clicks button front end, sendSettingsData() called
     $scope.sendSettingsData = function () {
       $scope.showEmergency = true;
-      $scope.subscribe();
-      $scope.bluetoothLog.unshift('Starting to send settings data');
-      $scope.bluetoothLog.unshift('sending new program setting '+command+commands.length);
-      if (command < commands.length-1 && !emergency) {
-        write(commands[command]);
-        command +=1;
-      }
-      else if (command === commands.length-1 && !emergency) {
-        write(commands[command]);
-        command = 0;
-        $scope.showMovingButton = true;
-      }
-      else {
-
-      }
-     };
-
-    function write(str){
-      lastCommandTime = Date.now();
-      $cordovaBluetoothSerial.write(str, function() {
-        $scope.bluetoothLog.unshift('Data sent '+str);
-        //check if answer is on time
-        if ($scope.receivedBuffer[0] !== undefined && lastReceivedTime - lastCommandTime < 1000) {
-          $scope.bluetoothLog.unshift('In time, response time = '+(lastReceivedTime - lastCommandTime)+' ms');
-          $scope.bluetoothLog.unshift('Response = '+$scope.receivedBuffer[0]);
-        }
-        else {
-          $scope.bluetoothLog.unshift('Not responded in time, trying again');
-        }
-      }, function () {
-        $scope.bluetoothLog.unshift('Could not send data');
+        $window.bluetoothSerial.subscribeRawData(function (data) {
+          $scope.$apply(function () {
+            $scope.bluetoothLog.unshift('Response: '+String.fromCharCode.apply(null, new Uint8Array(data)));
+            $scope.receivedBuffer.unshift(String.fromCharCode.apply(null, new Uint8Array(data)));
+            lastReceivedTime = Date.now();
+            $scope.bluetoothLog.unshift('Last received time: '+lastReceivedTime);
+        });
       });
-    }
+      send(commands[command], commandPlus);
 
-    $scope.startMoving = function () {
-      $scope.movementsNum +=1;
+      function commandPlus() {
+        if (command < commands.length-1) {
+          command += 1;
+          send(commands[command], commandPlus);
+        }
+        if (command === commands.length-1 /*&& $scope.receivedBuffer[0].search('rdy')> -1*/) {
+          $scope.receivedBuffer.unshift('last command');
+          //$scope.bluetoothLog.unshift('receivedBuffer = '+$scope.receivedBuffer);
+          $scope.bluetoothLog.unshift('All settings send, ready for movement');
+          $scope.clearBuffer();
+          $scope.showMovingButton = true;
+
+        }
+      }
 
     };
 
+    function send(str, callback){
+      if(!emergency) {
+        $cordovaBluetoothSerial.write(str).then(function () {
+          lastCommandTime = Date.now();
+          $scope.bluetoothLog.unshift('Command: '+str);
+          $scope.receivedBuffer.unshift('Command: '+str);
+          $scope.bluetoothLog.unshift('Last command time: '+lastCommandTime);
+          var interval = $interval(function () {
+            var now = Date.now();
+            if(lastReceivedTime - lastCommandTime <1000 && lastReceivedTime - lastCommandTime >0) {
+              $scope.bluetoothLog.unshift('Responded in time = '+(lastReceivedTime-lastCommandTime)+' ms');
+              $interval.cancel(interval);
+              if(callback) callback();
+            }
+            else if (now - lastCommandTime > 3000) {
+              $scope.bluetoothLog.unshift('Not responded on time, now = '+now);
+              $interval.cancel(interval);
+            }
+          },50);
 
+        }), function () {
+          $scope.bluetoothLog.unshift('Could not send command');
+        };
+      }
+      else {
+        $scope.bluetoothLog.unshift('Emergency button pressed');
+      }
+
+
+    }
 
     $scope.clearBuffer = function () {
-     $cordovaBluetoothSerial.clear(function success(){
+     $cordovaBluetoothSerial.clear().then(function success(){
        $scope.bluetoothLog.unshift('Received buffer cleared');
      }, function err() {
        $scope.bluetoothLog.unshift('Error: Could not clear receive buffer');
      })
     };
 
-    $scope.subscribe = function () {
-      $cordovaBluetoothSerial.subscribe('\n', function success(data) {
-        $scope.bluetoothLog.unshift('Opening receive buffer');
-        $scope.receivedBuffer.unshift(data);
-        lastReceivedTime = Date.now();
-      }, function failure() {
-        $scope.bluetoothLog.unshift('Error: could not subscribe to receive buffer');
+    $scope.showRestartModal = function () {
+      $ionicPopup.alert({
+        title: 'Program finished!',
+        template: 'Would you like to restart your program?',
+        buttons: [
+          {
+            text: 'Yes',
+            type: 'button-balanced',
+            onTap: function () {
+
+            }
+          },
+          {
+            text: 'Edit program',
+            type: 'button-balanced',
+            onTap: function () {
+
+            }
+          },
+          {
+            text: 'No',
+            type: 'button-calm',
+            onTap: function () {
+
+            }
+          }]
       })
-    };
+    }
+
 
     $scope.start = function () {
       $ionicPopup.alert({

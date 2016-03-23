@@ -51,7 +51,11 @@
         <div class="item item-divider">
           <p class="bluetooth-text">Activity log</p>
         </div>
-
+        <button class="button button-calm" ng-hide="bluetoothEnabled" on-tap="bluetoothOn()">Turn on Bluetooth</button>
+        <button class="button button-calm" ng-show="readyForData" on-tap="sendSettingsData()">Send data</button>
+        <button class="button button-calm" ng-show="readyForData" on-tap="clearBuffer()">Clear buffer</button>
+        <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop program</button>
+        <button class="button button-calm" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum}}/{{movements.length}}</button>
         <div class="item item-text-wrap">
           <p class="bluetooth-text" ng-repeat="message in bluetoothLog track by $index">
             {{message}}
@@ -60,16 +64,13 @@
 
         <div class="item item-text-wrap">
           <p class="bluetooth-text" ng-repeat="message in receivedBuffer track by $index">
-            {{message}}
+            {{message}} index = {{$index}}
           </p>
         </div>
 
       </div>
     </div>
-    <button class="button button-calm" ng-hide="bluetoothEnabled" on-tap="bluetoothOn()">Turn on Bluetooth</button>
-    <button class="button button-calm" ng-show="readyForData" on-tap="sendSettingsData()">Send data</button>
-    <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop program</button>
-    <button class="button button-calm" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum}}/{{movements.length}}</button>
+
   </ion-content>
 </ion-view>
 
