@@ -1,5 +1,5 @@
 angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
-//TODO implement ngCordova plugins
+
   .service('shareSettings', function() {
     var shareSettings = this;
     shareSettings.obj = {};
@@ -13,6 +13,19 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       };
       shareSettings.setObj = function(value) {
         shareSettings.obj.settings = value;
+      }
+    }
+  )
+
+  .service('shareProgram', function() {
+      var shareProgram = this;
+      shareProgram.obj = {};
+
+      shareProgram.getObj = function() {
+        return shareProgram.obj.program;
+      };
+      shareProgram.setObj = function(value) {
+        shareProgram.obj.program = value;
       }
     }
   )

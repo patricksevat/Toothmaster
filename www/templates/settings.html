@@ -2,36 +2,47 @@
   <ion-content>
     <div class="list">
       <label class="item item-input item-stacked-label" on-tap="focus()">
+        <!--Niet gebruikt-->
         <span class="input-label">Minimum frequency (steps/sec)</span>
         <input type="number" placeholder="Minimum value: 50" ng-model="settings.minFreq" ng-class="{redText: settings.minFreq < 50 && settings.minFreq !== ''}">
       </label>
+      <!--Gebruikt-->
       <label class="item item-input item-stacked-label">
         <span class="input-label">Maximum frequency (steps/sec)</span>
         <input type="number" placeholder="Maximum value 80 000" ng-model="settings.maxFreq" ng-class="{redText: settings.maxFreq > 80000}">
       </label>
+      <!--gebruikt-->
       <label class="item item-input item-stacked-label">
-        <span class="input-label">Step motor driver dipswitch setting (steps/revolution)</span> <!--TODO make labels wrap text-->
+        <span class="input-label">Step motor dipswitch setting (steps/revolution)</span> <!--TODO make labels wrap text-->
         <input type="number" placeholder="Determines how many pulses are needed per revolution" ng-model="settings.dipswitch">
       </label>
+      <!--Gebruikt-->
       <label class="item item-input item-stacked-label">
         <span class="input-label">Spindle advancement (mm/revolution)</span>
         <input type="number" placeholder="Example: 5" ng-model="settings.spindleAdvancement">
       </label>
+      <!--Gebruikt-->
       <label class="item item-input item-stacked-label">
         <span class="input-label">Time to reach maximum frequency (seconds)</span>
         <input type="number" placeholder="Example: 0.5" ng-model="settings.time">
       </label>
-      <label class="toggle toggle-assertive ">
-        <input type="checkbox">
-        <div class="track">
-          <div class="handle">
-
-          </div>
-        </div>
+      <!--Gebruikt-->
+      <ion-toggle toggle-class="toggle-energized" ng-model="settings.direction"><span class="input-label">Reverse direction</span></ion-toggle>
+      <ion-toggle toggle-class="toggle-balanced" ng-model="settings.encoder.enable"><span class="input-label">Enable/disable step motor encoder </span></ion-toggle>
+      <label ng-show='settings.encoder.enable' class="item item-input item-stacked-label">
+        <span class="input-label">Encoder steps per RPM</span>
+        <input type="number" placeholder="Example: 50" ng-model="settings.encoder.stepsPerRPM">
       </label>
+      <label ng-show='settings.encoder.enable' class="item item-input item-stacked-label">
+        <span class="input-label">Maximum allowable steps to miss</span>
+        <input type="number" placeholder="Example: 12" ng-model="settings.encoder.stepsToMiss">
+      </label>
+      <ion-toggle ng-show="settings.encoder.enable" toggle-class="toggle-energized" ng-model="settings.encoder.direction"><span class="input-label">Change encoder direction</span></ion-toggle>
     </div>
+
+
     <div class="settings-buttons">
-      <button class="button button-calm" on-tap="">Create test sample</button> <!-- TODO open popup with further explanation and confirm -->
+
       <button class="button button-balanced" on-tap="saveSettings()">Save settings</button>
     </div>
   </ion-content>
