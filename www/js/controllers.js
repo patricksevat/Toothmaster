@@ -27,7 +27,7 @@ angular.module('starter.controllers', [])
   };
 
   $scope.setSettings = function () {
-    window.localStorage['settings'] = '{"minFreq":55,"maxFreq":555,"dipswitch":55,"spindleAdvancement":5,"time":5,"encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0}}';
+    window.localStorage['settings'] = '{"minFreq":55,"maxFreq":600,"dipswitch":60,"spindleAdvancement":5,"time":5,"encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0}}';
   };
 
   $scope.setProgram= function () {
@@ -389,14 +389,23 @@ angular.module('starter.controllers', [])
       //console.log('shared sawwidth= '+checkShared.sawWidth);
         $scope.confirmProgram();
       }
+      else {
+        $ionicPopup.alert(
+          {
+            title: 'Not all fields are filled in',
+            template: 'Please fill in all Program fields before running the program'
+          }
+        )
+      }
     };
 
-  //TODO: build check for correct program & settings, currently possible to proceed without any program variables filled in
     $scope.confirmProgram = function(){
       $ionicPopup.alert(
         {
           title: 'Please confirm your program',
-          template: '<p>Saw width: '+$scope.currentProgram.sawWidth+'</p>'+'<p>Cut width: '+$scope.currentProgram.cutWidth+'</p>'+'<p>Pin width: '+$scope.currentProgram.pinWidth+'</p>'+'<p>Number of cuts: '+$scope.currentProgram.numberOfCuts+'</p>'+'<p>Start position: '+$scope.currentProgram.startPosition+'</p>',
+          template: '<p>Saw width: '+$scope.currentProgram.sawWidth+'</p>'+'<p>Cut width: '+$scope.currentProgram.cutWidth+'</p>'+
+          '<p>Pin width: '+$scope.currentProgram.pinWidth+'</p>'+'<p>Number of cuts: '+$scope.currentProgram.numberOfCuts+'</p>'+
+          '<p>Start position: '+$scope.currentProgram.startPosition+'</p>',
           buttons: [{
            text: 'Edit program',
            type: 'button-calm'
@@ -412,10 +421,16 @@ angular.module('starter.controllers', [])
     };
 
   $scope.confirmSettings = function() {
+    var templateText = '<p>Minimum frequency: '+$scope.settings.minFreq+'</p>'+'<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+
+      '<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+
+      '<p>Time to maximum frequency: '+$scope.settings.time+'</p>'+'<p>Encoder enabled: '+$scope.settings.encoder.enable+'</p>';
+    if ($scope.settings.encoder.enable) {
+      templateText += '<p>Encoder steps per RPM: '+$scope.settings.encoder.stepsPerRPM+'</p>'+'<p>Max allowable missed steps: '+$scope.settings.encoder.stepsToMiss+'</p>';
+    }
     $ionicPopup.alert(
       {
         title: 'Please confirm your settings',
-        template: '<p>Minimum frequency: '+$scope.settings.minFreq+'</p>'+'<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+'<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+'<p>Time to maximum frequency: '+$scope.settings.time+'</p>',
+        template: templateText,
         buttons: [{
           text: 'Edit settings',
           type: 'button-calm',
@@ -457,18 +472,29 @@ angular.module('starter.controllers', [])
       return false;
     }
 
-    else if ($scope.settings.maxFreq !== null && $scope.settings.minFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null) {
+    else if ($scope.settings.maxFreq !== null && $scope.settings.minFreq !== null && $scope.settings.dipswitch !== null &&
+      $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.encoder.enable === false) {
       console.log('checkSettings passed');
       return true;
-
+    }
+    else if ($scope.settings.maxFreq !== null && $scope.settings.minFreq !== null && $scope.settings.dipswitch !== null &&
+      $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.encoder.enable === true &&
+      $scope.settings.encoder.stepsPerRPM !== 0 && $scope.settings.encoder.stepsToMiss < 0) {
+      console.log('checkSettings passed');
+      return true;
     }
     else {
-
         console.log('settings are not filled in correctly');
+      var templateText = '<p>Minimum frequency: '+$scope.settings.minFreq+'</p>'+'<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+
+        '<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+
+        '<p>Time to maximum frequency: '+$scope.settings.time+'</p>'+'<p>Encoder enabled: '+$scope.settings.encoder.enable+'</p>';
+      if ($scope.settings.encoder.enable) {
+        templateText += '<p>Encoder steps per RPM: '+$scope.settings.encoder.stepsPerRPM+'</p>'+'<p>Max allowable missed steps: '+$scope.settings.encoder.stepsToMiss+'</p>';
+      }
         $ionicPopup.alert(
           {
             title: 'Please make sure your settings are filled in correctly',
-            template: '<p>Minimum frequency: '+$scope.settings.minFreq+'</p>'+'<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+'<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+'<p>Time to maximum frequency: '+$scope.settings.time+'</p>',
+            template: templateText,
             buttons: [{
               text: 'Edit settings',
               type: 'button-calm',
@@ -684,7 +710,6 @@ angular.module('starter.controllers', [])
 
     $scope.checkBluetoothEnabled();
 
-
     $scope.bluetoothOn = function () {
       $ionicPlatform.ready(function() {
       $scope.bluetoothLog.unshift('Calling bluetoothOn');
@@ -769,7 +794,7 @@ angular.module('starter.controllers', [])
          $scope.readyForData = true;
         }, function (error) {
           //failure callback
-         $scope.bluetoothLog.unshift('Your smartphone has not been able to connect with the selected Bluetooth device');
+         $scope.bluetoothLog.unshift('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
          $scope.bluetoothLog.unshift('error: '+error);
         $scope.bluetoothConnected();
         })
@@ -785,7 +810,7 @@ angular.module('starter.controllers', [])
           $scope.bluetoothConnected();
           $scope.readyForData = true;
       }, function (error) {
-          $scope.bluetoothLog.unshift('Your smartphone has not been able to connect with the selected Bluetooth device');
+          $scope.bluetoothLog.unshift('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
           $scope.bluetoothLog.unshift('error: '+error);
       })
       })
@@ -800,18 +825,32 @@ angular.module('starter.controllers', [])
     var emergency = false;
     $scope.showEmergency = false;
     $scope.showMovingButton = false;
+    $scope.showCalcButton = false;
     $scope.moving = false;
 
     $scope.emergencyOn = function () {
-      //TODO add emergency off option
       $scope.bluetoothLog.unshift('Stop button pressed');
       emergency = true;
+      $scope.showEmergency = false;
+      $scope.showMovingButton = false;
+      $scope.showCalcButton = false;
+      $scope.showResetButton = true;
       //Send reset command
       $cordovaBluetoothSerial.write('<<8:y'+stepMotorNum+'>').then(function () {
         $scope.bluetoothLog.unshift('Emergency reset sent');
       }, function (err) {
         $scope.bluetoothLog.unshift('Error: Emergency command could not be set. '+err);
       });
+    };
+
+    $scope.emergencyOff = function () {
+      $scope.readyForData = true;
+      command = 0;
+      encoderCommand = 0;
+      response = 0;
+      $scope.movements = [];
+      $scope.movementsNum = 0;
+      done = true;
     };
 
     //get settings and program from other controllers
@@ -822,7 +861,8 @@ angular.module('starter.controllers', [])
     //setting vars
     var stepMotorNum = '1';
     var direction = ($scope.settings.direction) ? 1 : 0; //if 'change direction' is true then 1, else 0
-    var totalSteps = function () {
+    var totalSteps = calcTotalSteps();
+      function calcTotalSteps() {
       //calculate total movement in mm, calculate total RPM, calculate total steps, modify total steps to negative if necessary
       var totalMovementMM = (program.numberOfCuts*(program.cutWidth))+(program.pinWidth*(program.numberOfCuts-1))+program.startPosition;
       var totalRPM = totalMovementMM / $scope.settings.spindleAdvancement;
@@ -831,8 +871,8 @@ angular.module('starter.controllers', [])
       else return stepsTotal;
     }; // value can be positive or negative
     var stepsPerRPM = $scope.settings.dipswitch; // value must be positive
-    var maxRPM = ($scope.settings.maxFreq*60/$scope.settings.dipswitch); //MaxFreq*60/dipswitch , value is max speed in RPM, floating point, must be positive
-    var time = $scope.settings.time; //test, value floating point, must be positive
+    var maxRPM = ($scope.settings.maxFreq*60/$scope.settings.dipswitch).toFixed(3); //MaxFreq*60/dipswitch , value is max speed in RPM, floating point, must be positive
+    var time = $scope.settings.time.toFixed(3); //test, value floating point, must be positive
     var stepMotorOnOff = '1'; //test, value 0 or 1
 
     //other vars/commands
@@ -842,11 +882,11 @@ angular.module('starter.controllers', [])
 
     //decoder vars
     var disableEncoder = '<x0'+stepMotorNum+'>';
-    var stepsPerRPMDevidedByStepsPerRPMEncoder = ($scope.settings.encoder.stepsPerRPM) ? ($scope.settings.dipswitch/$scope.settings.encoder.stepsPerRPM) : '' ; //value floating point, allowed positive or negative value
+    var stepsPerRPMDevidedByStepsPerRPMEncoder = ($scope.settings.encoder.stepsPerRPM) ? ($scope.settings.dipswitch/$scope.settings.encoder.stepsPerRPM).toFixed(3) : '' ; //value floating point, allowed positive or negative value
     var maxAllowedMiss = ($scope.settings.encoder.stepsToMiss) ? $scope.settings.encoder.stepsToMiss : ''; //value = integer
 
     //settings commands
-    var commands = ['<<8:y'+stepMotorNum+'>', '<v'+direction+stepMotorNum+'>', '<s'+totalSteps+stepMotorNum+'>', '<p'+stepsPerRPM+stepMotorNum+'>',
+    var commands = ['<v'+direction+stepMotorNum+'>', '<s'+totalSteps+stepMotorNum+'>', '<p'+stepsPerRPM+stepMotorNum+'>',
       '<r'+maxRPM+stepMotorNum+'>', '<f'+stepMotorOnOff+stepMotorNum+'>', '<o'+time+stepMotorNum+'>', '<kFAULT'+stepMotorNum+'>'];
     var command = 0;
 
@@ -865,29 +905,87 @@ angular.module('starter.controllers', [])
     $scope.movementsNum = 0;
     var done = true;
 
-    function calcSteps() {
+    //function to add number of steps and description to $scope.movements
+    function addMovement(steps, descr) {
+      $scope.movements.push({
+        "steps": steps,
+        "description": descr
+      })
+    }
 
+    //calculate movement sequence
+    $scope.calcSteps = function() {
+      //add number of steps for startposition
       var startPositionSteps = program.startPosition / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
       var startPositionDescription = 'Moving into right position to make first cut';
-      $scope.movements.push({
-        "steps": startPositionSteps,
-        "description": startPositionDescription
+      addMovement(startPositionSteps, startPositionDescription);
+
+      //call function to calculate steps for cuts, subcuts and pins, log $scope.movements, callback to inform user of movements
+      cutsAndPins(function() {
+        $scope.bluetoothLog.unshift('Movements to take:');
+        var count= 1;
+        $scope.movements.forEach(function (item) {
+          $scope.bluetoothLog.unshift('Movement '+count+':'+' steps'+item.steps+', description: '+item.description);
+          count +=1;
+        })
       });
 
-      if (program.sawWidth === program.cutWidth) {
-
+      function cutsAndPins(callback) {
+        //do this for number of cuts
+        for (var i = 1; i <= program.numberOfCuts; i++) {
+          $scope.bluetoothLog.unshift('var i ='+i);
+          if (program.sawWidth === program.cutWidth) {
+            var cutSteps = 0;
+            var cutDescription = 'Make the cut 1/1';
+            addMovement(cutSteps, cutDescription);
+          }
+        //if cut width is wider than saw width, calculate subcuts (multiple subcuts needed to complete one cut)
+          else if (program.cutWidth > program.sawWidth){
+          //how many subcuts do we need for this cut to complete
+            var subCuts = program.cutWidth / program.sawWidth;
+            var cutsRoundedUp = Math.ceil(subCuts);
+          //first subcut is already in position
+            addMovement(0, 'Make subcut 1/'+cutsRoundedUp);
+            // calculate remaining subcut steps, start at 2 because first subcut is already added
+            for (var j=2; j<= cutsRoundedUp; j++){
+              $scope.bluetoothLog.unshift('Var j'+j);
+              if (j<cutsRoundedUp){
+                var stepsPerSawWidth = program.sawWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+                addMovement(stepsPerSawWidth, 'Make subcut '+j+'/'+cutsRoundedUp)
+              }
+              else if (j===cutsRoundedUp) {
+                //calculate remaining mm & steps, based on number of subcuts already taken
+                var remainingMM = program.cutWidth-((j-1)*program.sawWidth);
+                var remainingSteps = remainingMM / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+                addMovement(remainingSteps, 'Make subcut '+j+'/'+cutsRoundedUp);
+              }
+            }
+          }
+          //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
+          if (i<program.numberOfCuts) {
+            $scope.bluetoothLog.unshift('Calculating pin');
+            var pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+            var pinDescription = 'Moving to next cut';
+            addMovement(pinSteps, pinDescription);
+          }
+          if (i=== program.numberOfCuts){
+            $scope.bluetoothLog.unshift('i === numberofcuts');
+            if (callback) callback();
+            $scope.showMovingButton = true;
+            $scope.showCalcButton = false;
+          }
+        }
       }
 
     }
 
-
+    //retrieve bluetooth messages from driver
     function subscribe(){
       $window.bluetoothSerial.subscribeRawData(function (data) {
         //update view as message comes in, response converted from ArrayBuffer to String
         $scope.$apply(function () {
           response += String.fromCharCode.apply(null, new Uint8Array(data));
           lastReceivedTime = Date.now();
-          //$scope.bluetoothLog.unshift('Last received time: '+lastReceivedTime);
         });
       });
     }
@@ -897,17 +995,22 @@ angular.module('starter.controllers', [])
       $scope.showEmergency = true;
       //subscribe to Bluetooth incoming messages
       subscribe();
-      //send encoder settings or disable encode command, after that send settings commands
-      if ($scope.settings.encoder.enable) {
-        $scope.bluetoothLog.unshift('Encoder enabled');
-        send(encoderCommands[0], encoderPlus);
-      }
-      else {
-        $scope.bluetoothLog.unshift('Encoder disabled');
-        send(disableEncoder, function () {
-          send(commands[command], commandPlus);
-        })
-      }
+      //send start command
+      send('<<8:y'+stepMotorNum+'>', function () {
+        //send encoder settings or disable encode command, after that send settings commands
+        if ($scope.settings.encoder.enable) {
+          $scope.bluetoothLog.unshift('Encoder enabled');
+          send(encoderCommands[0], encoderPlus);
+        }
+        else {
+          $scope.bluetoothLog.unshift('Encoder disabled');
+          send(disableEncoder, function () {
+            send(commands[command], commandPlus);
+          })
+        }
+      });
+
+
 
       function encoderPlus(){
         if (encoderCommand < encoderCommands.length-1){
@@ -928,30 +1031,26 @@ angular.module('starter.controllers', [])
         //on last command check if 'rdy' has been sent
         else if (command === commands.length-1 && $scope.receivedBuffer[0].search('rdy')> -1) {
           $scope.bluetoothLog.unshift('Ready for movement');
-          $scope.showMovingButton = true;
+          $scope.showCalcButton = true;
           $scope.readyForData = false;
+          command = 0;
         }
         else if (command === commands.length-1 && $scope.receivedBuffer[0].search('rdy') === -1){
           $scope.bluetoothLog.unshift('Settings have not been sent correctly');
+          command = 0;
         }
       }
     };
 
     $scope.startMoving = function () {
-      calcSteps();
-
       //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
       subscribe();
       if (done) {
-
         done = false;
-        send('<q'+$scope.movements[$scope.movementsNum]+stepMotorNum+'>', checkDone);
+        send('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
+        $scope.bluetoothLog.unshift($scope.movements[$scope.movementsNum].description);
         $scope.movementsNum += 1;
-        if ($scope.movementsNum === $scope.movements.length -1) {
-          $timeout(function () {
-            $scope.showRestartModal();
-          },500)
-        }
+
       }
       else {
         $scope.bluetoothLog.unshift('Please wait untill this step is finished');
@@ -959,28 +1058,16 @@ angular.module('starter.controllers', [])
 
       function checkDone() {
         if ($scope.receivedBuffer[0].search('done:') !== -1) {
-          $scope.bluetoothLog.unshift('Starting <w> pings');
           $scope.bluetoothLog.unshift('Movement done, ready for next movement');
           done = true;
-
+          //once last movement is completed show restart program popup
+          if ($scope.movementsNum === $scope.movements.length -1) {
+            $scope.showRestartModal();
+          }
         }
         else {
-          var pingInterval = $interval(function () {
-            if (!emergency) {
-              send('<w'+stepMotorNum+'>');
-              if ($scope.receivedBuffer[0].search('done:') !== -1){
-                $scope.bluetoothLog.unshift('Movement done, ready for next movement');
-                done = true;
-                $interval.cancel(pingInterval);
-              }
-            }
-            else if (emergency){
-              $scope.bluetoothLog.unshift('Emergency pressed, will not send ping updates');
-              $interval.cancel(pingInterval);
-            }
-          },500);
+          send('<w'+stepMotorNum+'>', checkDone);
         }
-
       }
     };
 
@@ -991,28 +1078,30 @@ angular.module('starter.controllers', [])
       if(!emergency) {
           //write to bluetooth receiver
           $cordovaBluetoothSerial.write(str).then(function () {
-            lastCommandTime = Date.now();
-            $scope.bluetoothLog.unshift('Command: '+str);
-            $scope.receivedBuffer.unshift('Command: '+str);
-            //$scope.bluetoothLog.unshift('Last command time: '+lastCommandTime);
+              lastCommandTime = Date.now();
+              $scope.bluetoothLog.unshift('Command: '+str);
+              $scope.receivedBuffer.unshift('Command: '+str);
+              //$scope.bluetoothLog.unshift('Last command time: '+lastCommandTime);
 
-            //check periodically if response has been sent
-            var interval = $interval(function () {
-              var now = Date.now();
-              //parse response && reset response
-              $scope.bluetoothLog.unshift('Response: '+response);
-              $scope.receivedBuffer.unshift('Response: '+response);
-              response = '';
-              if(lastReceivedTime - lastCommandTime <1000 && lastReceivedTime - lastCommandTime >0) {
-                $scope.bluetoothLog.unshift('Responded in time = '+(lastReceivedTime-lastCommandTime)+' ms');
-                $interval.cancel(interval);
-                if(callback) callback();
-              }
-              else if (now - lastCommandTime>3000){
-                $scope.bluetoothLog.unshift('Not responded on time, now = '+now);
-                $interval.cancel(interval);
-              }
-            },100);
+              //check periodically if response has been sent
+              var interval = $interval(function () {
+                var now = Date.now();
+                //parse response && reset response
+                $scope.bluetoothLog.unshift('Response: '+response);
+                $scope.receivedBuffer.unshift('Response: '+response);
+                response = '';
+                if(lastReceivedTime - lastCommandTime <1000 && lastReceivedTime - lastCommandTime >0) {
+                  $scope.bluetoothLog.unshift('Responded in time = '+(lastReceivedTime-lastCommandTime)+' ms');
+                  $interval.cancel(interval);
+                  if(callback) callback();
+                }
+                else if (now - lastCommandTime>3000){
+                  $scope.bluetoothLog.unshift('Not responded on time, now = '+now);
+                  $scope.bluetoothLog.unshift('Sending command again');
+                  $interval.cancel(interval);
+                }
+              },100);
+
           }), function () {
             $scope.bluetoothLog.unshift('Could not send command');
           };

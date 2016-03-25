@@ -56,6 +56,8 @@
         <button class="button button-calm" ng-show="readyForData" on-tap="clearBuffer()">Clear buffer</button>
         <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop program</button>
         <button class="button button-calm" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum+1}}/{{movements.length}}</button>
+        <button class="button button-calm" ng-show="showCalcButton" on-tap="calcSteps()">Calculate movements</button>
+        <button class="button button-calm" ng-show="showResetButton" on-tap="emergencyOff()">Reset program</button>
         <div class="item item-text-wrap log" on-tap="openBluetoothLog()">
           <p class="bluetooth-text" ng-repeat="message in bluetoothLog track by $index">
             {{message}}
