@@ -26,6 +26,7 @@
         </div>
 
         <!-- TODO explainer for Windows Phone that unpaired devices must be connected manually-->
+        <!-- TODO hide available devices when connected-->
         <div id="bluetooth-available-devices-div" ng-model="availableDevices">
           <ion-item ng-repeat="device in availableDevices track by $index" on-tap="connectToUnpairedDevice($index)">
             <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
@@ -49,15 +50,29 @@
         </div>
 
         <div class="item item-divider">
-          <p class="bluetooth-text">Activity log</p>
+          <p class="bluetooth-text">Control buttons</p>
         </div>
         <button class="button button-calm" ng-hide="bluetoothEnabled" on-tap="bluetoothOn()">Turn on Bluetooth</button>
-        <button class="button button-calm" ng-show="readyForData" on-tap="sendSettingsData()">Send data</button>
+        <button class="button button-calm" ng-show="readyForData" on-tap="sendSettingsData()">Move to start position</button>
         <button class="button button-calm" ng-show="readyForData" on-tap="clearBuffer()">Clear buffer</button>
+        <button class="button button-calm" ng-show="showHoming" on-tap="homing()">Homing</button>
         <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop program</button>
         <button class="button button-calm" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum+1}}/{{movements.length}}</button>
-        <button class="button button-calm" ng-show="showCalcButton" on-tap="calcSteps()">Calculate movements</button>
+        <button class="button button-calm" ng-show="showCalcButton" on-tap="calcSteps()">Calculate cuts</button>
+        <button class="button button-energized" ng-show="showStressTest" on-tap="stressTest()">Stress test (100 000 q commands)</button>
         <button class="button button-calm" ng-show="showResetButton" on-tap="emergencyOff()">Reset program</button>
+        <label class="item item-input item-stacked-label" ng-show="showStressTest">
+          <span class="input-label">Time between test commands (ms)</span>
+          <input type="number" placeholder="Example: 500" ng-model="stressTestTime">
+        </label>
+        <label class="item item-input item-stacked-label" ng-show="showStressTest">
+          <span class="input-label">Time to wait for response (ms)</span>
+          <input type="number" placeholder="Example: 500" ng-model="waitResponse">
+        </label>
+        <ion-item ng-show="showStressTest"><p>Completed Tests: {{completedTest}}</p></ion-item>
+        <div class="item item-divider">
+          <p class="bluetooth-text">Activity log</p>
+        </div>
         <div class="item item-text-wrap log" on-tap="openBluetoothLog()">
           <p class="bluetooth-text" ng-repeat="message in bluetoothLog track by $index">
             {{message}}

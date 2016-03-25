@@ -13,7 +13,7 @@
       </label>
       <!--gebruikt-->
       <label class="item item-input item-stacked-label">
-        <span class="input-label">Step motor dipswitch setting (steps/revolution)</span> <!--TODO make labels wrap text-->
+        <span class="input-label">Step motor dipswitch setting (steps/revolution)</span>
         <input type="number" placeholder="Determines how many pulses are needed per revolution" ng-model="settings.dipswitch">
       </label>
       <!--Gebruikt-->
@@ -37,7 +37,7 @@
         <span class="input-label">Maximum allowable steps to miss</span>
         <input type="number" placeholder="Example: 12" ng-model="settings.encoder.stepsToMiss">
       </label>
-      <ion-toggle ng-show="settings.encoder.enable" toggle-class="toggle-energized" ng-model="settings.encoder.direction"><span class="input-label">Change encoder direction</span></ion-toggle>
+      <ion-toggle ng-show="settings.encoder.enable" toggle-class="toggle-energized" ng-model="settings.encoder.direction"><span class="input-label">Reverse encoder direction</span></ion-toggle>
     </div>
 
 
