@@ -9,6 +9,7 @@
 
         <div class="item item-text-wrap row">
           <div class="bluetooth-icon col-25 col-center">
+            <!-- TODO: checken waarom ionicons niet werken bij mArcel-->
             <i class="ion ion-bluetooth" ng-class="{'bg-green': bluetoothEnabled}"></i>
             <i class="ion ion-alert-circled" ng-hide="isConnected"></i>
             <i class="ion ion-checkmark" ng-show="isConnected"></i>
@@ -21,13 +22,13 @@
           </div>
         </div>
 
-        <div class="item item-divider">
+        <div class="item item-divider" ng-hide="isConnected">
           <p class="bluetooth-text">Available devices</p>
         </div>
 
         <!-- TODO explainer for Windows Phone that unpaired devices must be connected manually-->
         <!-- TODO hide available devices when connected-->
-        <div id="bluetooth-available-devices-div" ng-model="availableDevices">
+        <div id="bluetooth-available-devices-div" ng-model="availableDevices" ng-hide="isConnected">
           <ion-item ng-repeat="device in availableDevices track by $index" on-tap="connectToUnpairedDevice($index)">
             <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
           </ion-item>
@@ -36,11 +37,11 @@
           </ion-item>
         </div>
 
-        <div class="item item-divider">
+        <div class="item item-divider" ng-hide="isConnected">
           <p class="bluetooth-text">Paired devices</p>
         </div>
 
-        <div id="bluetooth-paired-devices-div" ng-model="pairedDevices">
+        <div id="bluetooth-paired-devices-div" ng-model="pairedDevices" ng-hide="isConnected">
           <ion-item ng-repeat="device in pairedDevices track by $index"  on-tap="connectToPairedDevice($index)">
             <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
           </ion-item>
@@ -56,6 +57,7 @@
         <button class="button button-calm" ng-show="readyForData" on-tap="sendSettingsData()">Move to start position</button>
         <button class="button button-calm" ng-show="readyForData" on-tap="clearBuffer()">Clear buffer</button>
         <button class="button button-calm" ng-show="showHoming" on-tap="homing()">Homing</button>
+        <ion-toggle ng-show="showHoming" toggle-class="toggle-balanced" on-tap="toggleHomingStopswitch()"><span class="input-label">Change homing stopswitch</span></ion-toggle>
         <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop program</button>
         <button class="button button-calm" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum+1}}/{{movements.length}}</button>
         <button class="button button-calm" ng-show="showCalcButton" on-tap="calcSteps()">Calculate cuts</button>
