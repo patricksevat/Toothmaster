@@ -51,13 +51,10 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     window.localStorage.setItem('Safety', '');
   }
   if (window.localStorage['settings'] === undefined) {
-    window.localStorage['settings'] = '';
+    window.localStorage['settings'] = '{"minFreq":50,"maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":.2,"encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
   }
-  if (window.localStorage['registered'] === undefined) {
-    window.localStorage['registered'] = 'false';
-  }
-  if (window.localStorage['activationCode'] === undefined) {
-    window.localStorage['activationCode'] = '';
+  if (window.localStorage['lastUsedProgram'] === undefined) {
+    window.localStorage['lastUsedProgram'] = '';
   }
   console.log(window.localStorage);
 
@@ -137,17 +134,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         'menuContent': {
           templateUrl: 'templates/program.html',
           controller: 'ProgramController'
-        }
-      }
-    })
-
-    .state('app.register', {
-      name: 'register',
-      url: '/register',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/register.html',
-          controller: 'registerCtrl'
         }
       }
     })

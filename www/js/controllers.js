@@ -15,7 +15,7 @@ angular.module('starter.controllers', [])
     window.localStorage['Safety'] = 'Completed';
     console.log('Safety completed');
   };
-
+/*
   $scope.setRegister = function (){
     window.localStorage['registered'] = 'true';
     console.log('registered = true');
@@ -25,7 +25,7 @@ angular.module('starter.controllers', [])
     window.localStorage['registered'] = 'false';
     console.log('registered = false');
   };
-
+*/
   $scope.setSettings = function () {
     window.localStorage['settings'] = '{"minFreq":50,"maxFreq":1600,"dipswitch":6400,"spindleAdvancement":5,"time":2,"encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
   };
@@ -122,7 +122,7 @@ angular.module('starter.controllers', [])
   }
 })
 
-//TODO: save program on destroy
+//TODO: save program on exiting app
 .controller('ProgramController', function($scope, $ionicModal, $ionicPopup, shareSettings, shareProgram, $state) {
 
   $scope.presets = [
@@ -136,10 +136,17 @@ angular.module('starter.controllers', [])
 
   };
 
-  $scope.loadUserPrograms = function() {
+  (function loadLastUsedProgram() {
+    if (window.localStorage['lastUsedProgram'] !== '') {
+      $scope.currentProgram = JSON.parse(window.localStorage['lastUsedProgram']);
+    }
+  })();
 
-    if (window.localStorage.length === 4) {
-      console.log('only safety, settings, registered, activationcode found in localstorage');
+  $scope.loadUserPrograms = function() {
+    $scope.userPrograms = [];
+//TODO Edited this for local storage register & activation-code removal, original value: 4
+    if (window.localStorage.length === 3) {
+      console.log('only safety, settings, and lastUsedProgram found in localstorage');
     }
     //load the userPrograms stored in localStorage. objects are named 1 - n.
     //parse the userPrograms in localStorage so that they are converted to objects
@@ -147,7 +154,8 @@ angular.module('starter.controllers', [])
     else {
       console.log(window.localStorage);
       for (var a=0; a<window.localStorage.length; a++) {
-        if (window.localStorage.key(a) == 'Safety' || window.localStorage.key(a) == 'settings' || window.localStorage.key(a) == 'registered' || window.localStorage.key(a) == 'activationCode') {
+        //TODO Removed checks for registered & activationcode
+        if (window.localStorage.key(a) == 'Safety' || window.localStorage.key(a) == 'settings' || window.localStorage.key(a) == 'lastUsedProgram') {
 
         }
         else{
@@ -182,17 +190,17 @@ angular.module('starter.controllers', [])
 
   $scope.checkCurrentProgram = function(){
     console.log('num cuts= '+$scope.currentProgram.numberOfCuts);
-    console.log('registered = '+ window.localStorage['registered']);
-    console.log('condition ='+ (window.localStorage['registered'] = 'false'));
+    /*console.log('registered = '+ window.localStorage['registered']);
+    console.log('condition ='+ (window.localStorage['registered'] = 'false'));*/
     if ($scope.currentProgram.title == null ) {
       $scope.showAlertTitle();
       return false;
     }
-    else if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] == 'false') {
+    /*else if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] == 'false') {
       console.log('cannot save, number of cuts too high for restriction');
       $scope.showAlertNumberOfCuts();
       return false;
-    }
+    }*/
 
     //show alert if not all program fields are filled in
     else if ($scope.currentProgram.sawWidth == null || $scope.currentProgram.cutWidth == null
@@ -205,7 +213,7 @@ angular.module('starter.controllers', [])
       return true;
     }
   };
-
+  /*
   $scope.showAlertNumberOfCuts= function(){
     $ionicPopup.alert(
       {
@@ -227,16 +235,21 @@ angular.module('starter.controllers', [])
       }
     )
   };
-
+*/
   $scope.saveProgram = function() {
     //show alert if title is not filled in
     if ($scope.checkCurrentProgram() === true) {
       window.localStorage[$scope.currentProgram.title] = JSON.stringify($scope.currentProgram);
       $scope.userPrograms.push($scope.currentProgram);
       console.log('userProgram pushed to userPrograms & localStorage');
+      console.log('\nuserPrgrams after pushed saved program:');
       console.log($scope.userPrograms);
+      console.log('\ncurrentProgram:');
+      console.log($scope.currentProgram);
       //call the successful save popup
       $scope.showAlertSaveSucces();
+      //update the list of userPrograms
+      $scope.loadUserPrograms();
     }
     else {
       //$scope.checkCurrentProgram();
@@ -268,6 +281,7 @@ angular.module('starter.controllers', [])
                 $scope.currentProgram.pinWidth = undefined;
                 $scope.currentProgram.numberOfCuts = undefined;
                 $scope.currentProgram.startPosition = undefined;
+              $scope.closeModal(2);
             }
           }
         ]
@@ -376,11 +390,13 @@ angular.module('starter.controllers', [])
 
   //On run program button, make sure that program and settings are filled in correctly
     $scope.runProgram = function() {
+
+      /*
       if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] === 'false') {
         console.log('cannot save, number of cuts too high for restriction');
         $scope.showAlertNumberOfCuts();
       }
-      else if ($scope.currentProgram.sawWidth > $scope.currentProgram.cutWidth){
+      else */ if ($scope.currentProgram.sawWidth > $scope.currentProgram.cutWidth){
         $ionicPopup.alert(
           {
             title: 'Saw width cannot be wider than cut width',
@@ -391,9 +407,10 @@ angular.module('starter.controllers', [])
 
       else if ($scope.currentProgram.sawWidth > 0 && $scope.currentProgram.cutWidth > 0
         && $scope.currentProgram.pinWidth > 0 && $scope.currentProgram.numberOfCuts > 0
-        && $scope.currentProgram.startPosition > 0 && $scope.checkSettings()) {
+        && $scope.currentProgram.startPosition >= 0 && $scope.checkSettings()) {
         console.log('all fields filled in');
         shareProgram.setObj($scope.currentProgram);
+        window.localStorage['lastUsedProgram'] = JSON.stringify($scope.currentProgram);
         $scope.confirmProgram();
       }
       else {
@@ -515,12 +532,12 @@ angular.module('starter.controllers', [])
         return false;
       }
     };
-
+  /*
   $scope.redText = function () {
     if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] === 'false') {
       return true;
     }
-  }
+  }*/
 })
 
 .controller('SettingsCtrl', function($scope, $ionicPopup, shareSettings){
@@ -609,7 +626,7 @@ angular.module('starter.controllers', [])
     )
   }
 })
-
+/*
   .controller('registerCtrl', function($scope, $ionicPopup, $cordovaClipboard, $cordovaInAppBrowser, $state) {
     //TODO register not working in program after registering
     $scope.slide2 = false;
@@ -684,7 +701,7 @@ angular.module('starter.controllers', [])
       }
     }
 
-  })
+  })*/
 
   .controller('browserCtrl', function($scope, $cordovaInAppBrowser) {
   $scope.openBrowser = function() {
@@ -875,7 +892,7 @@ angular.module('starter.controllers', [])
       $scope.showStressTest = false;
 
       //Send reset command
-      $cordovaBluetoothSerial.write('<<8:y'+stepMotorNum+'>').then(function () {
+      $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
         $scope.bluetoothLog.unshift('Emergency reset sent');
         checkResetResponse();
 
@@ -1066,7 +1083,7 @@ angular.module('starter.controllers', [])
           homingDone = false;
           $scope.showEmergency = true;
           //send start command
-          send('<<8:y' + stepMotorNum + '>', function () {
+          send('<<y8:y' + stepMotorNum + '>', function () {
             //send encoder settings or disable encode command, after that send settings commands
             if ($scope.settings.encoder.enable) {
               $scope.bluetoothLog.unshift('Homing with encoder enabled');
@@ -1142,7 +1159,7 @@ angular.module('starter.controllers', [])
         settingsDone = false;
         $scope.showEmergency = true;
         //send start command
-        send('<<8:y'+stepMotorNum+'>', function () {
+        send('<<y8:y'+stepMotorNum+'>', function () {
           //send encoder settings or disable encode command, after that send settings commands
           if ($scope.settings.encoder.enable) {
             $scope.bluetoothLog.unshift('Encoder enabled');
