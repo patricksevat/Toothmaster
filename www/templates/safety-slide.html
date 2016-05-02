@@ -1,6 +1,15 @@
 <ion-view view-title="Safety instructions" name="app.safety-slide" >
+  <ion-nav-title>
+    Safety instructions <img src="./img/icon.png" class="logo">
+  </ion-nav-title>
   <ion-content>
-    <div class="card"  id="safety-slide-card" ng-swipe-left="swipeRightToLeft()" >
+    <div id="safety-slide-buttons-div" class="margins">
+      <button ng-hide="prevHide()" class="button button-calm" id="prev-safety-slide" on-tap="prev()"><i class="glyphicon glyphicon-chevron-left"></i>Prev</button>
+      <button ng-hide="nextHide()" class="button button-calm" id="next-safety-slide" on-tap="next()">Next<i class="glyphicon glyphicon-chevron-right"></i></button>
+      <button ng-hide="safetyReadHide()" class="button button-balanced margins" id="safety-read-button" on-tap="setLocalStorageSafety()" ui-sref="app.program">I have read the safety instructions<i class="glyphicon glyphicon-ok"></i></button>
+      <button ng-show="showScheme()" class="button button-balanced margins" id="show-scheme-button" on-tap="openModal()">Show Mortise tenon scheme</button>
+    </div>
+    <div class="card" id="safety-slide-card" ng-swipe-left="swipeRightToLeft()" >
       <div class="item item-divider">
           {{slides[i]}}
       </div>
@@ -22,7 +31,7 @@
               <p>You will use Toothmaster to create precise movements in order to enable an operator to make a precision cut. There is a chance (explained later) that there will be unexpected movements while the operator makes the cut. These movements could lead to damage to persons, your workpiece or machinery. For this reason, you might have to take additional safety measures.</p>
             </div>
         </div>
-          <div ng-show="i===3">
+          <div class="" ng-show="i===3">
             <div class="item item-text-wrap row" ng-repeat="slide in slide3">
               <div class="warning-sign col-20 col-center">
                 <i class="glyphicon glyphicon-exclamation-sign"></i>
@@ -32,13 +41,13 @@
               </div>
             </div>
           </div>
-        <div ng-show="i===4">
+        <div class=" " ng-show="i===4">
           <div class="safety-text text-slide-4">
             <p>To stress once more, the Toothmaster program and OS environment might generate unexpected movements.
             <br><br>Thus you might need extra safety precautions. Do NEVER trust the Toothmaster and OS environment alone!
             <br><br>Please take the following failure modes into account (even though the chances will be small that this will happen in reality):</p>
           </div>
-          <div class="item item-text-wrap row" ng-repeat="slide in slide4">
+          <div class="item item-text-wrap  row" ng-repeat="slide in slide4">
             <div class="warning-sign col-center col-20">
               <i class="glyphicon glyphicon-exclamation-sign red-warning"></i>
             </div>
@@ -47,12 +56,12 @@
             </div>
           </div>
         </div>
-        <div ng-show="i===5">
-          <div class="item item-text-wrap row slide5" ng-repeat="slide in slide5">
-            <div class="warning-sign col-center col-20">
+        <div class="" ng-show="i===5">
+          <div class="item item-text-wrap  row slide5" ng-repeat="slide in slide5">
+            <div class="warning-sign col-center col-10">
               <i class="glyphicon glyphicon-ok-sign"></i>
             </div>
-            <div class="safety-text col-75 main">
+            <div class="safety-text col-85 main">
               <p>{{slide.main}}</p>
               <div class="safety-recommendation">
                 <p class="safety-recommendation-text sub"> {{slide.sub}} </p>
@@ -73,14 +82,6 @@
         </div>
       </div>
     </div>
-
-    <div id="safety-slide-buttons-div">
-        <button ng-hide="prevHide()" class="button button-calm" id="prev-safety-slide" on-tap="prev()"><i class="glyphicon glyphicon-chevron-left"></i>Prev</button>
-        <button ng-hide="nextHide()" class="button button-calm" id="next-safety-slide" on-tap="next()">Next<i class="glyphicon glyphicon-chevron-right"></i></button>
-        <button ng-hide="safetyReadHide()" class="button button-balanced" id="safety-read-button" on-tap="setLocalStorageSafety()" ui-sref="app.home">I have read the safety instructions<i class="glyphicon glyphicon-ok"></i></button>
-    </div>
-
-    <div id="scheme-div" class="padding"><button ng-show="showScheme()" class="button button-balanced" id="show-scheme-button" on-tap="openModal()">Show Mortise tenon scheme</button></div>
   </ion-content>
 </ion-view>
 

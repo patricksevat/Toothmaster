@@ -1,3 +1,4 @@
+var bugout = new debugout();
 angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
 
   .service('shareSettings', function() {
@@ -6,7 +7,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     if (window.localStorage['settings'] !== '') {
       shareSettings.obj.settings = JSON.parse(window.localStorage['settings']);
     }
-
 
       shareSettings.getObj = function() {
         return shareSettings.obj.settings;
@@ -19,9 +19,15 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
   .service('shareProgram', function() {
       var shareProgram = this;
-      shareProgram.obj = {};
+      shareProgram.obj = {
+        "program": {}
+      };
 
       shareProgram.getObj = function() {
+        if (shareProgram.obj.program.startPosition === undefined) {
+          bugout.log('shareProgram.obj.program is undefined, setting start position to nill');
+          shareProgram.obj.program.startPosition = 0;
+        }
         return shareProgram.obj.program;
       };
       shareProgram.setObj = function(value) {
@@ -29,16 +35,51 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       }
     }
   )
+  
+  .service('skipService', function () {
+    var skip = this;
+    skip.value = undefined;
+    skip.getSkip = function () {
+      return skip.value;
+    };
+    skip.setSkip = function (boolean) {
+      skip.value = boolean;
+    }
+  })
 
-.run(function($ionicPlatform, $rootScope, $state) {
+.run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService) {
+  var nextView;
+  var prevView;
+  var skip;
+  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState) {
+    nextView = toState.name;
+    prevView = fromState.name;
+    skip = ((prevView === 'app.test' || prevView === 'app.homing' || prevView === 'app.runBluetooth' ) && (nextView === 'app.test' || nextView === 'app.homing' || nextView === 'app.runBluetooth')) ? true : false;
+    skipService.setSkip(skip);
+  });
+  
+  $ionicPlatform.on('pause', function () {
+    if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
+      || $ionicHistory.currentStateName() === 'app.test') {
+      bugout.log('pause from app.js skipped');
+    }
+    else {
+      $window.bluetoothSerial.disconnect(function () {
+        bugout.log('disconnected on pause from app.js');
+
+      }, function () {
+        bugout.log('could not disconnect on pause from app.js')
+      })
+    }
+  });
+
   $ionicPlatform.ready(function() {
-
 
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-      cordova.plugins.Keyboard.disableScroll(true);
+      // cordova.plugins.Keyboard.disableScroll(true);
 
     }
     if (window.StatusBar) {
@@ -51,37 +92,17 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     window.localStorage.setItem('Safety', '');
   }
   if (window.localStorage['settings'] === undefined) {
-    window.localStorage['settings'] = '{"minFreq":50,"maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":.2,"encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
+    window.localStorage['settings'] = '{"maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": 2, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
   }
   if (window.localStorage['lastUsedProgram'] === undefined) {
     window.localStorage['lastUsedProgram'] = '';
   }
-  console.log(window.localStorage);
-
-  console.log('localstorage.length ='+window.localStorage.length);
-
-  //TODO fix the redirector
-  //check if app.safety-slide has been completed, if not redirect to app.safety
-  /*$rootScope.$on( "$stateChangeStart", function(event, toState, fromState) {
-    if ( (window.localStorage["Safety"] !== "Completed") ) {
-      console.log("safety not completed");
-
-      // no safety slides checked, redirect to Safety
-      if (toState.name = "safety-slide") {
-        console.log("no redirect needed");
-        // already going to safety, no redirect needed
-
-      }
-      else {
-        // not going to safety, we should redirect now
-
-        console.log("redirecting to safety");
-        $state.go("app.safety-slide");
-
-      }
-    }
-  });
-  */
+  if (window.localStorage['lastConnectedDevice'] === undefined) {
+    window.localStorage['lastConnectedDevice'] = '';
+  }
+  
+  bugout.log(window.localStorage);
+  bugout.log('localstorage.length ='+window.localStorage.length);
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
@@ -138,6 +159,17 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       }
     })
 
+    .state('app.homing', {
+      name: 'homing',
+      url: '/homing',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/homing.html',
+          controller: 'runBluetoothCtrl'
+        }
+      }
+    })
+
     .state('app.runBluetooth', {
       name: 'runBluetooth',
       url: '/runBluetooth',
@@ -148,14 +180,30 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         }
       }
     })
+
+    .state('app.test', {
+      name: 'test',
+      url: '/test',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/test.html',
+          controller: 'runBluetoothCtrl'
+        }
+      }
+    })
+
+    .state('app.website', {
+      name: 'website',
+      url: '/website',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/website.html'
+        }
+      }
+    })
   ;
   // if none of the above states are matched, use this as the fallback
-  if (window.localStorage['Safety'] === "Completed") {
-    $urlRouterProvider.otherwise('/app/program');
-  }
-  else {
-    $urlRouterProvider.otherwise('/app/safety-slide');
-  }
+  $urlRouterProvider.otherwise('/app/program');
 
 });
 

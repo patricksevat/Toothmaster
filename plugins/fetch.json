@@ -105,5 +105,14 @@
         },
         "is_top_level": true,
         "variables": {}
+    },
+    "cordova-plugin-email": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/hypery2k/cordova-email-plugin",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
     }
 }

@@ -9,26 +9,39 @@
         </button>
       </ion-nav-buttons>
     </ion-nav-bar>
-    <ion-nav-view name="menuContent"></ion-nav-view>
+    <ion-nav-view name="menuContent">
+      <ion-view>
+
+      </ion-view>
+    </ion-nav-view>
   </ion-side-menu-content>
 
   <ion-side-menu side="left">
     <ion-header-bar class="bar-stable">
-      <h1 class="title">Menu</h1>
+      <img src="./img/icon.png" class="logo-menu"><h1 class="title">Menu</h1>
     </ion-header-bar>
     <ion-content class="nav-align-left">
       <ion-list>
-        <ion-item menu-close href="#/app/home">
-          Debug buttons
-        </ion-item>
         <ion-item menu-close href="#/app/program">
           Program
+        </ion-item>
+        <ion-item menu-close href="#/app/runBluetooth">
+          Run Bluetooth program
+        </ion-item>
+        <ion-item menu-close href="#/app/homing">
+          Homing
+        </ion-item>
+        <ion-item menu-close href="#/app/test">
+          Test connection
         </ion-item>
         <ion-item menu-close href="#/app/settings">
           Settings
         </ion-item>
         <ion-item menu-close href="#/app/safety-slide">
           Safety
+        </ion-item>
+        <ion-item menu-close href="#/app/website">
+          Visit the website
         </ion-item>
       </ion-list>
     </ion-content>

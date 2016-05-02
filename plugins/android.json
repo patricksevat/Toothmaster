@@ -42,6 +42,9 @@
         },
         "cordova-plugin-nativeaudio": {
             "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
+        },
+        "cordova-plugin-email": {
+            "PACKAGE_NAME": "com.ionicframework.toothmaster237558"
         }
     },
     "dependent_plugins": {

@@ -1,10 +1,137 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+<ion-view cache-view="false">
+  <ion-nav-title>
+    Test connection <img src="./img/icon.png" class="logo">
+  </ion-nav-title>
+  <ion-content>
+    <div class="row bluetooth-row">
+      <div class="col col-center" >
+        <div class="item item-divider">
+          <p class="bluetooth-text log-text">Connection status</p>
+          <button class="button button-small button-calm button-log" on-tap="openModal(2)">
+            Help
+          </button>
+          <button class="button button-small button-assertive button-log" ng-show="isConnected" on-tap="userDisconnect()">
+            Disconnect
+          </button>
+        </div>
 
-</body>
-</html>
+        <div class="item item-text-wrap">
+          <div class="row">
+            <div class="bluetooth-icon col-25 col-center">
+              <i class=" ion-bluetooth" ng-class="{'bg-green': bluetoothEnabled}"></i>
+              <i class=" ion-alert-circled" ng-hide="isConnected"></i>
+              <i class=" ion-checkmark" ng-show="isConnected"></i>
+            </div>
+            <div class="bluetooth-text col-75">
+              <p class="bluetooth-text" ng-hide="bluetoothEnabled">Bluetooth turned off</p>
+              <p class="bluetooth-text" ng-show="bluetoothEnabled">Bluetooth turned on</p>
+              <p class="bluetooth-text" ng-show="isConnected">Connected with {{deviceName}}</p>
+              <p class="bluetooth-text" ng-hide="isConnected">Bluetooth not connected </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="item item-divider" ng-hide="isConnected || !bluetoothEnabled">
+          <p class="bluetooth-text">Available devices</p>
+        </div>
+
+        <div  id="bluetooth-available-devices-div" ng-model="availableDevices" ng-hide="isConnected || !bluetoothEnabled">
+          <div class="item item-text-wrap" ng-repeat="device in availableDevices track by $index" on-tap="connectToUnpairedDevice($index)">
+            <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
+          </div>
+          <div class="item item-text-wrap" ng-show="!availableDevices.length">
+            <p class="bluetooth-text">Searching for unpaired devices...</p>
+          </div>
+        </div>
+
+        <div class="item item-divider" ng-hide="isConnected || !bluetoothEnabled">
+          <p class="bluetooth-text">Paired devices</p>
+        </div>
+
+        <div  id="bluetooth-paired-devices-div" ng-model="pairedDevices" ng-hide="isConnected || !bluetoothEnabled">
+          <div class="item item-text-wrap" ng-repeat="device in pairedDevices track by $index"  on-tap="connectToPairedDevice($index)">
+            <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
+          </div>
+          <div class="item item-text-wrap" ng-show="!pairedDevices.length">
+            <p class="bluetooth-text">No paired Bluetooth devices are availabe</p>
+          </div>
+        </div>
+
+
+        <div class="item item-divider" ng-show="isConnected || !bluetoothEnabled">
+          <p class="bluetooth-text">Control buttons</p>
+        </div>
+        <div class="item item-text-wrap" ng-show="!bluetoothEnabled">
+          <button class="button button-calm" ng-hide="bluetoothEnabled" on-tap="bluetoothOn()">Turn on Bluetooth</button>
+        </div>
+      <label class="item item-input item-stacked-label" ng-show="isConnected">
+        <span class="input-label">Number of test commands</span>
+        <input type="number" ng-model="numberOfTests.tests" placeholder="Example: 100">
+      </label>
+      <ion-item ng-show="isConnected">
+        <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop test</button>
+        <button class="button button-calm" on-tap="stressTest()" ng-show="showStressTest">Run test</button>
+        <button class="button button-calm" ng-show="showResetButton" on-tap="emergencyOff()">Reset test</button>
+        <div ng-show="isConnected">
+          <p>Completed Tests: {{completedTest}}</p>
+          <p>Retries: {{retriesNeeded}}</p>
+        </div>
+      </ion-item>
+      <div class="item item-divider">
+        <p class="bluetooth-text log-text">Activity log</p>
+        <button class="button button-small button-calm button-log" on-tap="showFullLog()">Show full log</button>
+      </div>
+      <div class="item item-text-wrap">
+        <p class="bluetooth-text" ng-repeat="message in bluetoothLog | limitTo: 10 track by $index ">
+          {{message}}
+        </p>
+      </div>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>
+
+<script id="log-modal.html" type="text/ng-template">
+  <ion-modal-view>
+    <ion-header-bar>
+      <h1 class="title">
+        Full activity log
+        <i class="glyphicon glyphicon-remove-sign padding remove-button" on-tap="closeModal(1)"></i>
+      </h1>
+    </ion-header-bar>
+    <ion-content class="padding">
+      <div class="height-90">
+        <p class="bluetooth-text" ng-repeat="message in fullLog |limitTo: 10 track by $index">
+          {{message}}
+        </p>
+      </div>
+      <div class="height-10">
+        <i class="glyphicon glyphicon-chevron-left padding" on-tap="previousFullLogPage()" ng-hide="fullLogPage === 0"></i>
+        <span>Current page: {{fullLogPage+1}}</span>
+        <i class="glyphicon glyphicon-chevron-right padding" on-tap="nextFullLogPage()" ng-hide="(fullLogPage+1)*10 > bluetoothLog.length"></i>
+        <br><i class="glyphicon glyphicon-envelope padding" on-tap="emailFullLog()"></i>
+        <span on-tap="emailFullLog()">Email bug report</span>
+      </div>
+    </ion-content>
+  </ion-modal-view>
+</script>
+
+<script id="help-modal.html" type="text/ng-template">
+  <ion-modal-view>
+    <ion-header-bar>
+      <h1 class="title">Help<i class="glyphicon glyphicon-remove-sign padding" on-tap="closeModal(2)"></i></h1>
+    </ion-header-bar>
+    <ion-content class="padding">
+      <ion-list>
+        <div ng-repeat="QA in QAList">
+          <ion-item on-tap="showAnswer(QA)" class="item-divider">
+            {{QA.question}}
+          </ion-item>
+          <ion-item ng-show="show === QA" class="animate-show">
+            {{QA.answer}}
+          </ion-item>
+        </div>
+      </ion-list>
+    </ion-content>
+  </ion-modal-view>
+</script>

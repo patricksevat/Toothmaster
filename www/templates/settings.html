@@ -1,12 +1,16 @@
-<!--TODO bug in directions: als je settings vanaf de grond invoert en je raakt de reverse toggles niet aan dan kan je niet saven -->
-<ion-view view-title="Settings" name="settings" cache-view="false" hide-back-button="true">
+<ion-view name="settings" cache-view="false" hide-back-button="true">
+  <ion-nav-title>
+    Settings <img src="./img/icon.png" class="logo">
+  </ion-nav-title>
   <ion-content>
     <div class="list">
+      <!--Niet gebruikt
       <label class="item item-input item-stacked-label" on-tap="focus()">
-        <!--Niet gebruikt-->
+
         <span class="input-label">Minimum frequency (steps/sec)</span>
         <input type="number" placeholder="Minimum value: 50" ng-model="settings.minFreq" ng-class="{redText: settings.minFreq < 50 && settings.minFreq !== ''}">
       </label>
+      -->
       <!--Gebruikt-->
       <label class="item item-input item-stacked-label">
         <span class="input-label">Maximum frequency (steps/sec)</span>
@@ -28,6 +32,7 @@
         <input type="number" placeholder="Example: 0.5" ng-model="settings.time">
       </label>
       <!--Gebruikt-->
+      <ion-toggle toggle-class="toggle-balanced" on-tap="toggleHomingStopswitch()"><span class="input-label">Change homing stopswitch</span></ion-toggle>
       <ion-toggle toggle-class="toggle-energized" ng-model="settings.direction"><span class="input-label">Reverse direction</span></ion-toggle>
       <ion-toggle toggle-class="toggle-balanced" ng-model="settings.encoder.enable"><span class="input-label">Enable/disable step motor encoder </span></ion-toggle>
       <label ng-show='settings.encoder.enable' class="item item-input item-stacked-label">

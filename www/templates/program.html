@@ -1,4 +1,8 @@
-<ion-view view-title="Program {{ currentProgram.title}}">
+<!--TODO add scrollbar hide-->
+<ion-view >
+  <ion-nav-title>
+    Program {{ currentProgram.title}} <img src="./img/icon.png" class="logo">
+  </ion-nav-title>
   <ion-content>
     <div class="list">
       <label class="item item-input item-stacked-label" on-tap="focus()">
@@ -15,7 +19,7 @@
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Number of cuts</span>
-        <input type="number" placeholder="Limited to 2 in unregistered version" ng-model="currentProgram.numberOfCuts"   >
+        <input type="number" placeholder="Example: 5" ng-model="currentProgram.numberOfCuts">
       </label>
       <label class="item item-input item-stacked-label">
         <span class="input-label">Start position (mm)</span>
@@ -72,7 +76,7 @@
         <span class="input-label">Program name</span>
         <input type="text" placeholder="Example: My first program" ng-model="currentProgram.title" >
       </label>
-      <button class="button button-balanced" on-tap="saveProgram()">Save program</button>
+      <button class="button button-balanced margins" on-tap="saveProgram()">Save program</button>
     </ion-content>
   </ion-modal-view>
 </script>
