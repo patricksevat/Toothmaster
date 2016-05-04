@@ -67,8 +67,7 @@
           <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop</button>
           <button class="button button-calm" on-tap="homing()" ng-show="showHoming">Homing</button>
           <button class="button button-positive" ng-show="showResetButton" on-tap="emergencyOff()">Reset program</button>
-          <p class="margin-top">Homing stopswitch inverted: {{(settings.homingStopswitch === 2) ? false : true }}</p>
-          <button class="button button-small button-calm" ui-sref="app.settings">Invert homing stopswitch</button>
+          <br><ion-spinner ng-show="showSpinner"></ion-spinner>
         </ion-item>
         <div class="item item-divider">
           <p class="bluetooth-text log-text">Activity log</p>

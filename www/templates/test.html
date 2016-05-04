@@ -57,7 +57,8 @@
           </div>
         </div>
 
-
+<!--TODO add version get-->
+        <!--TODO add mm to move option-->
         <div class="item item-divider" ng-show="isConnected || !bluetoothEnabled">
           <p class="bluetooth-text">Control buttons</p>
         </div>
@@ -72,7 +73,8 @@
         <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop test</button>
         <button class="button button-calm" on-tap="stressTest()" ng-show="showStressTest">Run test</button>
         <button class="button button-calm" ng-show="showResetButton" on-tap="emergencyOff()">Reset test</button>
-        <div ng-show="isConnected">
+        <br><ion-spinner ng-show="showSpinner"></ion-spinner>
+        <div>
           <p>Completed Tests: {{completedTest}}</p>
           <p>Retries: {{retriesNeeded}}</p>
         </div>

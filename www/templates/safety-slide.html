@@ -3,12 +3,6 @@
     Safety instructions <img src="./img/icon.png" class="logo">
   </ion-nav-title>
   <ion-content>
-    <div id="safety-slide-buttons-div" class="margins">
-      <button ng-hide="prevHide()" class="button button-calm" id="prev-safety-slide" on-tap="prev()"><i class="glyphicon glyphicon-chevron-left"></i>Prev</button>
-      <button ng-hide="nextHide()" class="button button-calm" id="next-safety-slide" on-tap="next()">Next<i class="glyphicon glyphicon-chevron-right"></i></button>
-      <button ng-hide="safetyReadHide()" class="button button-balanced margins" id="safety-read-button" on-tap="setLocalStorageSafety()" ui-sref="app.program">I have read the safety instructions<i class="glyphicon glyphicon-ok"></i></button>
-      <button ng-show="showScheme()" class="button button-balanced margins" id="show-scheme-button" on-tap="openModal()">Show Mortise tenon scheme</button>
-    </div>
     <div class="card" id="safety-slide-card" ng-swipe-left="swipeRightToLeft()" >
       <div class="item item-divider">
           {{slides[i]}}
@@ -81,6 +75,12 @@
           </div>
         </div>
       </div>
+    </div>
+    <div id="safety-slide-buttons-div" class="margins">
+      <button ng-hide="prevHide()" class="button button-calm" id="prev-safety-slide" on-tap="prev()"><i class="glyphicon glyphicon-chevron-left"></i>Prev</button>
+      <button ng-hide="nextHide()" class="button button-calm" id="next-safety-slide" on-tap="next()">Next<i class="glyphicon glyphicon-chevron-right"></i></button>
+      <button ng-hide="safetyReadHide()" class="button button-balanced margins" id="safety-read-button" on-tap="setLocalStorageSafety()" ui-sref="app.program">I have read the safety instructions<i class="glyphicon glyphicon-ok"></i></button>
+      <button ng-show="showScheme()" class="button button-balanced margins" id="show-scheme-button" on-tap="openModal()">Show Mortise tenon scheme</button>
     </div>
   </ion-content>
 </ion-view>

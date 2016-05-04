@@ -32,7 +32,7 @@
         <input type="number" placeholder="Example: 0.5" ng-model="settings.time">
       </label>
       <!--Gebruikt-->
-      <ion-toggle toggle-class="toggle-balanced" on-tap="toggleHomingStopswitch()"><span class="input-label">Change homing stopswitch</span></ion-toggle>
+      <ion-toggle toggle-class="toggle-balanced" ng-model="settings.homingStopswitch"><span class="input-label">Change homing stopswitch</span></ion-toggle>
       <ion-toggle toggle-class="toggle-energized" ng-model="settings.direction"><span class="input-label">Reverse direction</span></ion-toggle>
       <ion-toggle toggle-class="toggle-balanced" ng-model="settings.encoder.enable"><span class="input-label">Enable/disable step motor encoder </span></ion-toggle>
       <label ng-show='settings.encoder.enable' class="item item-input item-stacked-label">

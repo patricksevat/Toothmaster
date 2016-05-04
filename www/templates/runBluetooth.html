@@ -1,5 +1,6 @@
 <ion-view cache-view="false">
   <ion-nav-title>
+    <!--TODO run Bluetooth wordt deels Bluetooth connection en deels bij program ondergebracht-->
     Run Bluetooth program <img src="./img/icon.png" class="logo">
   </ion-nav-title>
   <ion-content>
@@ -18,8 +19,6 @@
         <div class="item item-text-wrap">
           <div class="row">
             <div class="bluetooth-icon col-25 col-center">
-              <!-- TODO: Checken waarom ionicons niet werken bij mArcel-->
-              <!-- TODO: if problem persists: try fontAwesome -->
               <i class=" ion-bluetooth" ng-class="{'bg-green': bluetoothEnabled}"></i>
               <i class=" glyphicon glyphicon-exclamation-sign" ng-hide="isConnected"></i>
               <i class=" glyphicon glyphicon-ok" ng-show="isConnected"></i>
@@ -75,6 +74,7 @@
           <button class="button button-energized" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum+1}}/{{movements.length}}</button>
           <button class="button button-calm" ng-show="showCalcButton" on-tap="calcSteps()">Calculate cuts</button>
           <button class="button button-positive" ng-show="showResetButton" on-tap="emergencyOff()">Reset program</button>
+          <br><ion-spinner ng-show="showSpinner"></ion-spinner>
         </div>
         <div class="item item-divider">
           <p class="bluetooth-text log-text">Activity log</p>
@@ -89,6 +89,8 @@
     </div>
   </ion-content>
 </ion-view>
+
+
 
 <script id="log-modal.html" type="text/ng-template">
   <ion-modal-view>

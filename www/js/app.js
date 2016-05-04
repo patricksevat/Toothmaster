@@ -35,7 +35,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       }
     }
   )
-  
+
   .service('skipService', function () {
     var skip = this;
     skip.value = undefined;
@@ -57,7 +57,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     skip = ((prevView === 'app.test' || prevView === 'app.homing' || prevView === 'app.runBluetooth' ) && (nextView === 'app.test' || nextView === 'app.homing' || nextView === 'app.runBluetooth')) ? true : false;
     skipService.setSkip(skip);
   });
-  
+
   $ionicPlatform.on('pause', function () {
     if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
       || $ionicHistory.currentStateName() === 'app.test') {
@@ -92,7 +92,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     window.localStorage.setItem('Safety', '');
   }
   if (window.localStorage['settings'] === undefined) {
-    window.localStorage['settings'] = '{"maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": 2, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
+    window.localStorage['settings'] = '{"maxFreq":666,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
   }
   if (window.localStorage['lastUsedProgram'] === undefined) {
     window.localStorage['lastUsedProgram'] = '';
@@ -100,7 +100,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   if (window.localStorage['lastConnectedDevice'] === undefined) {
     window.localStorage['lastConnectedDevice'] = '';
   }
-  
+
   bugout.log(window.localStorage);
   bugout.log('localstorage.length ='+window.localStorage.length);
 })
