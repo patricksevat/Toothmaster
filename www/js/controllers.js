@@ -1,31 +1,31 @@
 angular.module('starter.controllers', [])
-
+//TODO replace console.log with bugout.log
 //controller used for debug buttons, not used anymore
 .controller('AppCtrl', function($scope) {
   /*
   $scope.ClearLocalStor = function() {
     localStorage.clear();
-    bugout.log('local storage cleared');
+    console.log('local storage cleared');
   };
 
   $scope.removeLocalSafety = function() {
     window.localStorage['Safety'] = '';
-    bugout.log('Safety reset to ""');
+    console.log('Safety reset to ""');
   };
 
   $scope.setLocalSafety = function () {
     window.localStorage['Safety'] = 'Completed';
-    bugout.log('Safety completed');
+    console.log('Safety completed');
   };
 
   $scope.setRegister = function (){
     window.localStorage['registered'] = 'true';
-    bugout.log('registered = true');
+    console.log('registered = true');
   };
 
   $scope.setDeregister = function (){
     window.localStorage['registered'] = 'false';
-    bugout.log('registered = false');
+    console.log('registered = false');
   };
 
   $scope.setSettings = function () {
@@ -62,21 +62,21 @@ angular.module('starter.controllers', [])
 
   $scope.swipeRightToLeft = function() {
     if ($scope.i <7) {
-    bugout.log('swiping right');
+    console.log('swiping right');
     $scope.i ++;
     }
   };
 
   $scope.next = function() {
     if ($scope.i < 7) {
-      bugout.log("next");
+      console.log("next");
       $scope.i ++;
     }
   };
 
   $scope.prev = function() {
     if ($scope.i >= 0) {
-      bugout.log("prev");
+      console.log("prev");
       $scope.i --;
     }
   };
@@ -117,7 +117,7 @@ angular.module('starter.controllers', [])
   //Cleanup the modal when we're done with it!
   $scope.$on('$ionicView.leave', function() {
     $scope.modal.remove();
-    bugout.log('cleaning up modal');
+    console.log('cleaning up modal');
   });*/
 
   //on slide.id = 7, add read-safety-instruction button
@@ -148,13 +148,13 @@ angular.module('starter.controllers', [])
   $scope.loadUserPrograms = function() {
     $scope.userPrograms = [];
     if (window.localStorage.length === 4) {
-      bugout.log('only safety, settings, lastConnectedDevice and lastUsedProgram found in localstorage');
+      console.log('only safety, settings, lastConnectedDevice and lastUsedProgram found in localstorage');
     }
     //load the userPrograms stored in localStorage. objects are named 1 - n.
     //parse the userPrograms in localStorage so that they are converted to objects
     //push the parsed userPrograms to $scope.userPrograms array
     else {
-      bugout.log(window.localStorage);
+      console.log(window.localStorage);
       for (var a=0; a<window.localStorage.length; a++) {
         if (window.localStorage.key(a) == 'Safety' || window.localStorage.key(a) == 'settings' || window.localStorage.key(a) == 'lastUsedProgram' || window.localStorage.key(a) == 'lastConnectedDevice') {
 
@@ -164,7 +164,7 @@ angular.module('starter.controllers', [])
           var temp = window.localStorage[tempName];
           temp = JSON.parse(temp);
           $scope.userPrograms.push(temp);
-          bugout.log(tempName+' pushed to userPrograms');
+          console.log(tempName+' pushed to userPrograms');
         }
 
       }
@@ -175,7 +175,7 @@ angular.module('starter.controllers', [])
 
   $scope.loadUserProgram = function($index) {
     //load userProgram & close load modal
-    bugout.log('userProgram clicked');
+    console.log('userProgram clicked');
     $scope.currentProgram = $scope.userPrograms[$index];
     shareProgram.setObj($scope.currentProgram);
     $scope.closeModal(1);
@@ -183,7 +183,7 @@ angular.module('starter.controllers', [])
 
   $scope.loadPreset = function($index) {
     //load preset & close load modal
-    bugout.log('loadPreset clicked');
+    console.log('loadPreset clicked');
     $scope.currentProgram = $scope.presets[$index];
     $scope.currentProgram.title = $scope.presets[$index].titlePreset;
     shareProgram.setObj($scope.currentProgram);
@@ -191,14 +191,14 @@ angular.module('starter.controllers', [])
   };
 
   $scope.checkCurrentProgram = function(){
-    /*bugout.log('registered = '+ window.localStorage['registered']);
-    bugout.log('condition ='+ (window.localStorage['registered'] = 'false'));*/
+    /*console.log('registered = '+ window.localStorage['registered']);
+    console.log('condition ='+ (window.localStorage['registered'] = 'false'));*/
     if ($scope.currentProgram.title == null ) {
       $scope.showAlertTitle();
       return false;
     }
     /*else if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] == 'false') {
-      bugout.log('cannot save, number of cuts too high for restriction');
+      console.log('cannot save, number of cuts too high for restriction');
       $scope.showAlertNumberOfCuts();
       return false;
     }*/
@@ -245,11 +245,11 @@ angular.module('starter.controllers', [])
       }
       window.localStorage[$scope.currentProgram.title] = JSON.stringify($scope.currentProgram);
       $scope.userPrograms.push($scope.currentProgram);
-      bugout.log('userProgram pushed to userPrograms & localStorage');
-      bugout.log('\nuserPrgrams after pushed saved program:');
-      bugout.log($scope.userPrograms);
-      bugout.log('\ncurrentProgram:');
-      bugout.log($scope.currentProgram);
+      console.log('userProgram pushed to userPrograms & localStorage');
+      console.log('\nuserPrgrams after pushed saved program:');
+      console.log($scope.userPrograms);
+      console.log('\ncurrentProgram:');
+      console.log($scope.currentProgram);
       //call the successful save popup
       $scope.showAlertSaveSucces();
       //update the list of userPrograms
@@ -351,12 +351,12 @@ angular.module('starter.controllers', [])
     $scope.$on('$ionicView.leave', function() {
       $scope.modal1.remove();
       $scope.modal2.remove();
-      bugout.log('modals removed')
+      console.log('modals removed')
     });*/
 
   $scope.deleteUserProgram = function($index) {
-    bugout.log('delete userProgram clicked at index: '+$index);
-    bugout.log($scope.userPrograms);
+    console.log('delete userProgram clicked at index: '+$index);
+    console.log($scope.userPrograms);
     $scope.showDeleteAlert($index);
   };
 
@@ -373,13 +373,13 @@ angular.module('starter.controllers', [])
               text: 'Yes',
               type: 'button-assertive',
               onTap: function sureDelete() {
-                bugout.log(window.localStorage);
-                bugout.log('index ='+index);
+                console.log(window.localStorage);
+                console.log('index ='+index);
                 // remove the userProgram from localstorage. Step 1: get the key under which the userProgram is saved
                 var userProg = $scope.userPrograms[index];
-                bugout.log(userProg);
+                console.log(userProg);
                 var userProgName = userProg.title;
-                bugout.log(userProgName);
+                console.log(userProgName);
                 window.localStorage.removeItem(userProgName);
                 //remove the userProgram visually
                 $scope.userPrograms.splice(index, 1);
@@ -400,7 +400,7 @@ angular.module('starter.controllers', [])
 
       /*
       if ($scope.currentProgram.numberOfCuts > 2 && window.localStorage['registered'] === 'false') {
-        bugout.log('cannot save, number of cuts too high for restriction');
+        console.log('cannot save, number of cuts too high for restriction');
         $scope.showAlertNumberOfCuts();
       }
       else */
@@ -423,7 +423,7 @@ angular.module('starter.controllers', [])
       else if ($scope.currentProgram.sawWidth > 0 && $scope.currentProgram.cutWidth > 0
         && $scope.currentProgram.pinWidth > 0 && $scope.currentProgram.numberOfCuts > 0
         && $scope.currentProgram.startPosition >= 0 && $scope.checkSettings()) {
-        bugout.log('all fields filled in');
+        console.log('all fields filled in');
         shareProgram.setObj($scope.currentProgram);
         window.localStorage['lastUsedProgram'] = JSON.stringify($scope.currentProgram);
         $scope.confirmProgram();
@@ -496,9 +496,9 @@ angular.module('starter.controllers', [])
 
   $scope.checkSettings = function() {
     $scope.settings = shareSettings.getObj();
-    bugout.log($scope.settings);
+    console.log($scope.settings);
     if ($scope.settings === undefined){
-      bugout.log('settings are not filled in correctly');
+      console.log('settings are not filled in correctly');
       $ionicPopup.alert(
         {
           title: 'Please make sure your settings are filled in correctly',
@@ -516,17 +516,17 @@ angular.module('starter.controllers', [])
 
     else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null &&
       $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === false) {
-      bugout.log('checkSettings passed');
+      console.log('checkSettings passed');
       return true;
     }
     else if ($scope.settings.maxFreq !== null  && $scope.settings.dipswitch !== null &&
       $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === true &&
       $scope.settings.encoder.stepsPerRPM !== 0 && $scope.settings.encoder.stepsToMiss > 0) {
-      bugout.log('checkSettings passed');
+      console.log('checkSettings passed');
       return true;
     }
     else {
-        bugout.log('settings are not filled in correctly');
+        console.log('settings are not filled in correctly');
       var templateText = '<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+
         '<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+
         '<p>Time to maximum frequency: '+$scope.settings.time+'</p>'+'<p>Encoder enabled: '+$scope.settings.encoder.enable+'</p>';
@@ -581,7 +581,7 @@ angular.module('starter.controllers', [])
     }
     else {
       var settingsJSON = JSON.stringify($scope.settings);
-      bugout.log(settingsJSON);
+      console.log(settingsJSON);
       window.localStorage['settings'] = settingsJSON;
       //call shareSettings service so that settings can be used in programCtrl & runBluetoothCtrl
       shareSettings.setObj($scope.settings);
@@ -591,7 +591,7 @@ angular.module('starter.controllers', [])
   };
 
   $scope.loadSettings = function() {
-    bugout.log('settings: '+window.localStorage['settings']);
+    console.log('settings: '+window.localStorage['settings']);
     if (window.localStorage['settings'] === '') {
 
     }
@@ -645,7 +645,7 @@ angular.module('starter.controllers', [])
         $scope.activationCode += possible.charAt(Math.floor(Math.random()* possible.length));
         }
       window.localStorage['activationCode'] = $scope.activationCode;
-      bugout.log('Localstorage activation code = '+window.localStorage['activationCode']);
+      console.log('Localstorage activation code = '+window.localStorage['activationCode']);
       }
       else {
         $scope.activationCode = window.localStorage['activationCode'];
@@ -722,11 +722,11 @@ angular.module('starter.controllers', [])
     $scope.platform = ionic.Platform.platform();
     var sending = false;
     var program = shareProgram.getObj();
-    bugout.log('program:');
-    bugout.log(JSON.stringify(program));
+    console.log('program:');
+    console.log(JSON.stringify(program));
     $scope.settings = shareSettings.getObj();
-    bugout.log('settings:');
-    bugout.log(JSON.stringify($scope.settings));
+    console.log('settings:');
+    console.log(JSON.stringify($scope.settings));
     $scope.showSpinner = false;
     $scope.testRunning = false;
 
@@ -740,10 +740,10 @@ angular.module('starter.controllers', [])
       //check for connection and if commands are being sent
       if ($scope.isConnected === true && !sending) {
         $window.bluetoothSerial.disconnect(function () {
-          bugout.log('disconnected on pause from bluetooth controller');
+          console.log('disconnected on pause from bluetooth controller');
           addToLog('Disconnected after pausing application');
         }, function () {
-          bugout.log('could not disconnect on pause from bluetooth controller')
+          console.log('could not disconnect on pause from bluetooth controller')
         });
         $scope.availableDevices = [];
         $scope.pairedDevices = [];
@@ -756,17 +756,16 @@ angular.module('starter.controllers', [])
     });
 
     var reconnectTry = 1;
-    //TODO retry connectToLastConnectedDevice
     $ionicPlatform.on('resume', function () {
-      bugout.log('resume called from bluetooth controller');
+      console.log('resume called from bluetooth controller');
       if (window.localStorage['lastConnectedDevice'] !== '' && !sending) {
         reconnectWithRetry();
           }
       else if (sending){
-        bugout.log('Not reconnecting, because we are sending')
+        console.log('Not reconnecting, because we are sending')
       }
       else {
-        bugout.log('no stored device to be called on resume')
+        console.log('no stored device to be called on resume')
         }
     });
 
@@ -776,13 +775,13 @@ angular.module('starter.controllers', [])
 
 
     var skip = skipService.getSkip();
-
+//TODO when opening app, you enter on program, moving to runBluetooth\Test\Homing, skip is called and thus not auto connected
     $scope.$on('$ionicView.enter',function () {
 
       skip = skipService.getSkip();
-        bugout.log('enterView fired, skip = '+skip);
+        console.log('enterView fired, skip = '+skip);
         if (skip === true) {
-          bugout.log('ionicView.enter reconnect to lastConnectedDevice because view remains under runBluetoothCtrl');
+          console.log('ionicView.enter reconnect to lastConnectedDevice because view remains under runBluetoothCtrl');
           $scope.checkBluetoothEnabled(function () {
             $scope.bluetoothConnected(function () {
               if (!$scope.isConnected) {
@@ -792,15 +791,15 @@ angular.module('starter.controllers', [])
           });
         }
         else {
-          bugout.log('reconnecting on $ionicView.enter');
+          console.log('reconnecting on $ionicView.enter');
           connectToLastConnectedDevice();
         }
         $scope.settings = shareSettings.getObj();
         program = shareProgram.getObj();
-        bugout.log('program:');
-        bugout.log(JSON.stringify(program));
-        bugout.log('settings:');
-        bugout.log(JSON.stringify($scope.settings));
+        console.log('program:');
+        console.log(JSON.stringify(program));
+        console.log('settings:');
+        console.log(JSON.stringify($scope.settings));
         calculateVars();
         if (emergency) {
           $scope.showResetButton = true;
@@ -820,7 +819,7 @@ angular.module('starter.controllers', [])
 
     $scope.$on('$ionicView.leave',function () {
       skip = skipService.getSkip();
-      bugout.log('ionicView.leave called, skip = '+skip);
+      console.log('ionicView.leave called, skip = '+skip);
       if (sending === true ) {
         addToLog('Cancelling current tasks');
         $scope.emergencyOn(function () {
@@ -828,15 +827,15 @@ angular.module('starter.controllers', [])
         })
       }
       else if (skip === true) {
-        bugout.log('ionicView.leave skipped because view remains under runBluetoothCtrl');
+        console.log('ionicView.leave skipped because view remains under runBluetoothCtrl');
       }
       else {
         $cordovaBluetoothSerial.clear();
         $window.bluetoothSerial.unsubscribeRawData();
         $window.bluetoothSerial.disconnect(function(){
-          bugout.log('successfully disconnected')
+          console.log('successfully disconnected')
         }, function () {
-          bugout.log('could not disconnect')
+          console.log('could not disconnect')
         });
       }
     });
@@ -849,14 +848,14 @@ angular.module('starter.controllers', [])
     function reconnectWithRetry() {
       connectToLastConnectedDevice(function () {
         if ($scope.isConnected === false && reconnectTry <= 5) {
-          bugout.log('Reconnecting after resume, try: '+reconnectTry);
+          console.log('Reconnecting after resume, try: '+reconnectTry);
           $timeout(function () {
             reconnectTry +=1;
             connectToLastConnectedDevice(reconnectWithRetry)
           }, 500)
         }
         else if ($scope.isConnected === true) {
-          bugout.log('reconnectWithRetry, isConnected = true');
+          console.log('reconnectWithRetry, isConnected = true');
           reconnectTry = 1;
         }
         else if (reconnectTry >= 6) {
@@ -873,14 +872,14 @@ angular.module('starter.controllers', [])
           var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
           $window.bluetoothSerial.connectInsecure(obj.id, function () {
             $scope.deviceName = obj.name;
-            bugout.log('succesfully connected to last connected device');
+            console.log('succesfully connected to last connected device');
             $scope.bluetoothConnected(function () {
               $scope.showCalcButton = true;
               if (cb) cb();
             });
 
           }, function () {
-            bugout.log('could not connect to last connected device');
+            console.log('could not connect to last connected device');
             $scope.$apply(function () {
               $scope.isConnected = false
             });
@@ -888,12 +887,12 @@ angular.module('starter.controllers', [])
           });
         }
         else if ($scope.bluetoothEnabled) {
-          bugout.log('No previously connected devices available');
+          console.log('No previously connected devices available');
           addToLog('No previously connected devices available');
           $scope.getAvailableDevices();
         }
         else {
-          bugout.log('Bluetooth not enabled in connecttolastdevice');
+          console.log('Bluetooth not enabled in connecttolastdevice');
         }
       });
     }
@@ -902,7 +901,7 @@ angular.module('starter.controllers', [])
       var obj = {'id':id,'name':name};
       $scope.deviceName = name;
       window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
-      bugout.log('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice']);
+      console.log('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice']);
       showSavedDeviceAlert();
     }
 
@@ -912,7 +911,7 @@ angular.module('starter.controllers', [])
 
 
     $scope.checkBluetoothEnabled = function(callback) {
-      bugout.log('checkBluetoothEnabled fired');
+      console.log('checkBluetoothEnabled fired');
 
       $cordovaBluetoothSerial.isEnabled().then(function(){
         addToLog('Bluetooth is turned on');
@@ -940,7 +939,7 @@ angular.module('starter.controllers', [])
         addToLog('Your smartphone is not connected with a Bluetooth device');
         $scope.isConnected = false;
       }).then(function () {
-        bugout.log('isConnected: '+$scope.isConnected);
+        console.log('isConnected: '+$scope.isConnected);
         if (callback) callback();
       })
     };
@@ -948,7 +947,7 @@ angular.module('starter.controllers', [])
 
     $scope.bluetoothOn = function () {
       $ionicPlatform.ready(function() {
-        bugout.log('Calling bluetoothOn');
+        console.log('Calling bluetoothOn');
         if (ionic.Platform.isIOS()) {
           $ionicPopup.alert({
             title: 'Please open Bluetooth settings manually',
@@ -979,7 +978,7 @@ angular.module('starter.controllers', [])
       $scope.pairedDevices = [];
       if (!$scope.isConnected) {
         $ionicPlatform.ready(function() {
-          bugout.log('Calling get available devices');
+          console.log('Calling get available devices');
           if (ionic.Platform.isAndroid) {
             //discover unpaired
             $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
@@ -1021,8 +1020,8 @@ angular.module('starter.controllers', [])
     $scope.connectToUnpairedDevice = function ($index) {
       $ionicPlatform.ready(function() {
       addToLog('Trying to connect');
-        bugout.log('Platform '+$scope.platform);
-      bugout.log('Id = '+$scope.availableDevices[$index].id);
+        console.log('Platform '+$scope.platform);
+      console.log('Id = '+$scope.availableDevices[$index].id);
         if ($scope.platform === 'android') {
           $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
             addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
@@ -1054,7 +1053,7 @@ angular.module('starter.controllers', [])
     $scope.connectToPairedDevice = function ($index) {
       $ionicPlatform.ready(function() {
         addToLog('Trying to connect');
-        bugout.log('Id = '+$scope.pairedDevices[$index].id);
+        console.log('Id = '+$scope.pairedDevices[$index].id);
         $cordovaBluetoothSerial.connect($scope.pairedDevices[$index].id).then(function () {
           addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
           $scope.bluetoothConnected();
@@ -1070,7 +1069,7 @@ angular.module('starter.controllers', [])
     $scope.userDisconnect = function () {
       $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
         $window.bluetoothSerial.disconnect(function () {
-          bugout.log('User disconnected');
+          console.log('User disconnected');
           addToLog('User disconnected');
           $scope.$apply(function () {
             $scope.isConnected = false;
@@ -1078,7 +1077,7 @@ angular.module('starter.controllers', [])
           });
           $scope.getAvailableDevices();
         }, function () {
-          bugout.log('User could not disconnected');
+          console.log('User could not disconnected');
           addToLog('Could not disconnect from device');
         })
       });
@@ -1107,7 +1106,7 @@ angular.module('starter.controllers', [])
     //
 
     function addToLog(str) {
-      bugout.log('Added to UI log: '+str);
+      console.log('Added to UI log: '+str);
       if ($scope.bluetoothLog.length > 200) {
         $scope.bluetoothLog.pop();
         $scope.bluetoothLog.unshift(str);
@@ -1186,7 +1185,7 @@ angular.module('starter.controllers', [])
     }
 
     $scope.emergencyOff = function () {
-      bugout.log('emergencyOff called');
+      console.log('emergencyOff called');
       emergency = false;
       $scope.showCalcButton = true;
       homingCommand = 0;
@@ -1258,7 +1257,7 @@ angular.module('starter.controllers', [])
     var stepMotorNum = '3';
 
     function calculateVars() {
-      bugout.log('calculated vars');
+      console.log('calculated vars');
       direction = ($scope.settings.direction) ? 1 : 0;
       homingDirection = ($scope.settings.direction) ? 0 : 1;
       homingStopswitchInt = ($scope.settings.homingStopswitch === true) ? 2 : 1;
@@ -1331,10 +1330,10 @@ angular.module('starter.controllers', [])
       }
       else {
         cutsAndPins(function() {
-          bugout.log('Movements to take:');
+          console.log('Movements to take:');
           var count= 1;
           $scope.movements.forEach(function (item) {
-            bugout.log('Movement '+count+':'+' steps'+item.steps+', description: '+item.description);
+            console.log('Movement '+count+':'+' steps'+item.steps+', description: '+item.description);
             count +=1;
           })
         });
@@ -1342,7 +1341,7 @@ angular.module('starter.controllers', [])
         function cutsAndPins(callback) {
           //do this for number of cuts
           for (var i = 1; i <= program.numberOfCuts; i++) {
-            bugout.log('var i ='+i);
+            console.log('var i ='+i);
 
             //if cut width is wider than saw width, calculate subcuts (multiple subcuts needed to complete one cut)
             if (program.cutWidth > program.sawWidth){
@@ -1353,7 +1352,7 @@ angular.module('starter.controllers', [])
 
               // calculate remaining subcut steps, start at 2 because first subcut is already added after moving to past pin
               for (var j=2; j<= cutsRoundedUp; j++){
-                bugout.log('Var j'+j);
+                console.log('Var j'+j);
                 if (j<cutsRoundedUp){
                   var stepsPerSawWidth = program.sawWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
                   addMovement(stepsPerSawWidth, 'Make subcut '+j+'/'+cutsRoundedUp)
@@ -1362,7 +1361,7 @@ angular.module('starter.controllers', [])
                 //calculate remaining mm & steps, based on number of subcuts already taken
                 else if (j===cutsRoundedUp) {
                   var remainingMM = program.cutWidth-((j-1)*program.sawWidth);
-                  bugout.log('remaining mm: '+remainingMM);
+                  console.log('remaining mm: '+remainingMM);
                   var remainingSteps = remainingMM / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
                   addMovement(remainingSteps, 'Make subcut '+j+'/'+cutsRoundedUp);
                 }
@@ -1371,7 +1370,7 @@ angular.module('starter.controllers', [])
 
             //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
             if (i<program.numberOfCuts) {
-              bugout.log('Calculating pin');
+              console.log('Calculating pin');
               var pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
               if (program.cutWidth > program.sawWidth) {
                 addMovement(pinSteps, 'Make subcut 1/'+cutsRoundedUp);
@@ -1382,7 +1381,7 @@ angular.module('starter.controllers', [])
 
             }
             if (i=== program.numberOfCuts){
-              bugout.log('i === numberofcuts');
+              console.log('i === numberofcuts');
               addToLog('Done calculating movements');
               if (callback) callback();
               $scope.showCalcButton = false;
@@ -1425,15 +1424,17 @@ angular.module('starter.controllers', [])
               }
             }
             else if (boolean === false) {
-              if (emergency) {}
-              else if (retry < 4) {
-                retry+=1;
-                bugout.log('retry number '+(retry+1)+'/3');
-                $scope.sendSettingsData();
+              if (!emergency) {
+                if (retry < 4) {
+                  retry+=1;
+                  console.log('retry number '+(retry+1)+'/3');
+                  $scope.sendSettingsData();
+                }
+                else {
+                  addToLog('Maximum number of retries reached');
+                }
               }
-              else {
-                addToLog('Maximum number of retries reached');
-              }
+
             }
           });
         }
@@ -1461,7 +1462,7 @@ angular.module('starter.controllers', [])
           else if (boolean === false) {
             if (retry < 4) {
               retry+=1;
-              bugout.log('retry number '+retry+'/3');
+              console.log('retry number '+retry+'/3');
               $scope.sendSettingsData();
             }
             else {
@@ -1477,15 +1478,7 @@ angular.module('starter.controllers', [])
       function commandPlus(boolean, responseStr) {
         if (!emergency) {
           if (boolean === true) {
-            if (commands[command].search('<q')) {
-              var percentage = responseStr.slice(responseStr.length-4);
-              bugout.log(percentage);
-              if (percentage === '100' ) {
-                command += 1;
-                send(commands[command], commandPlus);
-              }
-            }
-            else if (command < commands.length-1) {
+            if (command < commands.length-1) {
               command += 1;
               send(commands[command], commandPlus);
             }
@@ -1500,7 +1493,8 @@ angular.module('starter.controllers', [])
               command = 0;
               response = '';
               sending = false;
-              if (test === undefined) {
+              console.log('test argument in send settings: '+test);
+              if (test === false) {
                 addToLog('Moved to start position');
                 var subCuts = program.cutWidth / program.sawWidth;
                 var cutsRoundedUp = Math.ceil(subCuts);
@@ -1530,14 +1524,17 @@ angular.module('starter.controllers', [])
             }
           }
           else if (boolean === false) {
-            if (retry < 4) {
-              retry+=1;
-              bugout.log('retry number '+retry+'/3');
-              $scope.sendSettingsData();
+            if (!emergency) {
+              if (retry < 4) {
+                retry+=1;
+                console.log('retry number '+retry+'/3');
+                $scope.sendSettingsData();
+              }
+              else {
+                addToLog('Maximum number of retries reached');
+              }
             }
-            else {
-              addToLog('Maximum number of retries reached');
-            }
+
           }
         }
         else {
@@ -1554,7 +1551,7 @@ angular.module('starter.controllers', [])
       if (!emergency) {
         subscribe();
         response = '';
-        bugout.log('homingStopswitch = '+homingStopswitchInt);
+        console.log('homingStopswitch = '+homingStopswitchInt);
         if (settingsDone){
           $scope.showSpinner = true;
           sending = true;
@@ -1567,21 +1564,21 @@ angular.module('starter.controllers', [])
             if (boolean === true) {
               //send encoder settings or disable encode command, after that send settings commands
               if ($scope.settings.encoder.enable) {
-                bugout.log('Homing with encoder enabled');
+                console.log('Homing with encoder enabled');
                 send(encoderCommands[0], encoderHomingPlus);
               }
               else {
-                bugout.log('Homing with encoder disabled');
+                console.log('Homing with encoder disabled');
                 send(disableEncoder, function () {
                   send(homingCommands[homingCommand], homingCommandPlus);
                 })
               }
             }
             //false boolean means a timeout was encountered, retry
-            else if (boolean === false) {
+            else if (boolean === false && !emergency) {
               if (retry < 4) {
                 retry+=1;
-                bugout.log('retry number '+retry+'/3');
+                console.log('retry number '+retry+'/3');
                 $scope.homing();
               }
               else {
@@ -1614,10 +1611,10 @@ angular.module('starter.controllers', [])
             }
           }
         }
-        else if (boolean === false) {
+        else if (boolean === false && !emergency) {
           if (retry < 4) {
             retry+=1;
-            bugout.log('retry number '+retry+'/3');
+            console.log('retry number '+retry+'/3');
             $scope.homing();
           }
           else {
@@ -1629,18 +1626,18 @@ angular.module('starter.controllers', [])
       function homingCommandPlus(boolean, res) {
         if (boolean === true &&!homingDone) {
           if (!emergency){
-            bugout.log('homingCommandPlus called');
+            console.log('homingCommandPlus called');
             //first command is already sent in homing function
             if (homingCommand < homingCommands.length-1) {
               homingCommand += 1;
               send(homingCommands[homingCommand], homingCommandPlus);
-              bugout.log('homingCommand = '+homingCommand);
-              bugout.log('homingCommands.length = '+homingCommands.length);
+              console.log('homingCommand = '+homingCommand);
+              console.log('homingCommands.length = '+homingCommands.length);
             }
             //on last command check if 'rdy' has been sent
             else if (homingCommand === homingCommands.length -1) {
-              bugout.log('All homing commands sent');
-              bugout.log('Making homing movement');
+              console.log('All homing commands sent');
+              console.log('Making homing movement');
               if (res.search('wydone') > -1) {
                 $scope.showSpinner = false;
                 $ionicPopup.alert({
@@ -1666,10 +1663,10 @@ angular.module('starter.controllers', [])
             });
           }
         }
-        else if (boolean === false) {
+        else if (boolean === false && !emergency) {
           if (retry < 4) {
             retry+=1;
-            bugout.log('retry number '+retry+'/3');
+            console.log('retry number '+retry+'/3');
             $scope.homing();
           }
           else {
@@ -1724,18 +1721,21 @@ angular.module('starter.controllers', [])
       $scope.showVersionButton = false;
       $scope.showMoveXMm = false;
       if (emergency) {
-        addToLog('Emergency on, cancelling stresstest')
+        addToLog('Emergency on, cancelling stresstest');
         return
       }
       if (!sentSettingsForTest) {
-        bugout.log('numberOfTests:'+$scope.numberOfTests.tests);
-        addToLog('Sending settings needed for testing');
-        //make sure that on setting the settings, start position = 0mm
-        var moveXMmStepsCommand = '<s0'+stepMotorNum+'>';
-        $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
-          sentSettingsForTest = true;
-          $scope.stressTest();
-        });
+        if (!emergency) {
+          console.log('numberOfTests:'+$scope.numberOfTests.tests);
+          addToLog('Sending settings needed for testing');
+          //make sure that on setting the settings, start position = 0mm
+          var moveXMmStepsCommand = '<s0'+stepMotorNum+'>';
+          $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
+            sentSettingsForTest = true;
+            $scope.stressTest();
+          });
+        }
+
       }
       else {
         if (!emergency) {
@@ -1749,7 +1749,7 @@ angular.module('starter.controllers', [])
                 if (response.search('wydone') > -1) {
                   response = '';
                   $cordovaBluetoothSerial.clear();
-                  bugout.log('Test done, moving to next test');
+                  console.log('Test done, moving to next test');
                   $scope.completedTest +=1;
 
                   $cordovaBluetoothSerial.clear();
@@ -1782,12 +1782,15 @@ angular.module('starter.controllers', [])
                   }, 50);
                 }
               }
-              else if (boolean === false) {
+              else if (boolean === false && !emergency) {
                 if (retry <= 10) {
-                  bugout.log('retry number '+retry+'/10');
+                  console.log('retry number '+retry+'/10');
                   retry +=1;
                   $scope.retriesNeeded += 1;
-                  $scope.stressTest();
+                  $scope.stressTest(true, moveXMmStepsCommand, true, function () {
+                    sentSettingsForTest = true;
+                    $scope.stressTest();
+                  });
                 }
                 else {
                   addToLog('Maximum number of retries reached');
@@ -1862,14 +1865,14 @@ angular.module('starter.controllers', [])
             //If response is not wydone, send a <w> command to keep connection alive
             else {
               $timeout(function () {
-                bugout.log('no wydone, sending <w>');
+                console.log('no wydone, sending <w>');
                 send('<w'+stepMotorNum+'>', checkDone);
-              }, 200);
+              }, 25);
             }
           }
-          else if (boolean === false) {
+          else if (boolean === false && !emergency) {
             if (retry <= 3) {
-              bugout.log('retry number '+retry+'/3');
+              console.log('retry number '+retry+'/3');
               done = true;
               $scope.startMoving();
             }
@@ -1888,21 +1891,19 @@ angular.module('starter.controllers', [])
     //SECTION: sending commands and receiving responses logic
     //
 
-    //TODO check if subscribe + delimiter is better than subscribeRawDAta
-    //TODO new delimiter is going to be "#"
     //retrieve bluetooth messages from driver
     function subscribe(cb){
       var received = false;
       $window.bluetoothSerial.subscribe('#',function (data) {
           received = true;
           response += data;
-          bugout.log('ResponseFull = '+response);
+          console.log('ResponseFull = '+response);
           lastReceivedTime = Date.now();
           if (cb && typeof cb === 'function') {
             cb(received);
           }
       }, function () {
-        bugout.log('Error while subscribing');
+        console.log('Error while subscribing');
       });
       $timeout(function () {
         if (received === false) {
@@ -1915,7 +1916,7 @@ angular.module('starter.controllers', [])
 
     function unsubscribe() {
       $window.bluetoothSerial.unsubscribe(function () {
-        bugout.log('unsubscribed');
+        console.log('unsubscribed');
       });
     }
 
@@ -1934,7 +1935,7 @@ angular.module('starter.controllers', [])
       if(!emergency) {
           //write to bluetooth receiver
         lastCommandTime = Date.now();
-        bugout.log('Command: '+str);
+        console.log('Command: '+str);
           $cordovaBluetoothSerial.write(str).then(function () {
             var substr;
             var substr2;
@@ -1992,8 +1993,8 @@ angular.module('starter.controllers', [])
                 break;
             }
             //read the buffer, execute callback when response is available
-              subscribe(function (timeoutBoolean) {
-                bugout.log('in subscribe cb response = '+response+' substr: '+substr+' substr2: '+substr2+' timeoutBoolean'+timeoutBoolean);
+              subscribe(function (respondedInTime) {
+                console.log('in subscribe cb response = '+response+' substr: '+substr+' substr2: '+substr2+' respondedInTime'+respondedInTime);
                 var now = Date.now();
                 //check response for stopswitch that has been hit
                 if (response.search('wydone:') > -1 && response.search('wydone:0') === -1 ) {
@@ -2049,20 +2050,19 @@ angular.module('starter.controllers', [])
                   intervalCancelAndCB(true, response);
                   retry = 1;
                 }
-                //handle timeouts TODO how to do this with cb?
-                else if (timeoutBoolean === false){
+                else if (respondedInTime === false && !emergency){
                     addToLog('Not received a response on time, retrying command');
-                    bugout.log('time passed: '+(now-lastCommandTime));
-                    bugout.log('now: '+now);
-                  bugout.log('lastcommand: '+lastCommandTime);
+                    console.log('time passed: '+(now-lastCommandTime));
+                    console.log('now: '+now);
+                  console.log('lastcommand: '+lastCommandTime);
                   intervalCancelAndCB(false);
-                  bugout.log('retry = '+retry);
+                  console.log('retry = '+retry);
                 }
               });
 
             function logResponse(responseStr) {
-              bugout.log('Response = '+responseStr);
-              bugout.log('Responded in time = '+(lastReceivedTime-lastCommandTime)+' ms');
+              console.log('Response = '+responseStr);
+              console.log('Responded in time = '+(lastReceivedTime-lastCommandTime)+' ms');
             }
 
             function intervalCancelAndCB(responded, responseStr, posStopswitch) {
@@ -2086,7 +2086,7 @@ angular.module('starter.controllers', [])
       /*Not neccessary because all come back as false
       $scope.$on('$ionicView.leave', function () {
         var cancelledBoolean = $interval.cancel(interval);
-        bugout.log('cancelling interval on scope leave: '+cancelledBoolean);
+        console.log('cancelling interval on scope leave: '+cancelledBoolean);
       });*/
     }
 
@@ -2144,7 +2144,7 @@ angular.module('starter.controllers', [])
             text: 'Start',
             type: 'button-balanced',
             onTap: function () {
-              $scope.sendSettingsData()
+              $scope.sendSettingsData(false, '', false)
             }
           }]
       })
@@ -2167,7 +2167,7 @@ angular.module('starter.controllers', [])
         scope: $scope,
         animation: 'slide-in-up'
       }).then(function(modal) {
-        bugout.log('modal created');
+        console.log('modal created');
         $scope.modal2 = modal;
         if (cb) cb();
       });
@@ -2179,7 +2179,7 @@ angular.module('starter.controllers', [])
       if (index === 1) {
         if ($scope.modal1 == undefined) {
           createLogModal(function () {
-            bugout.log('showing modal');
+            console.log('showing modal');
             $scope.modal1.show();
           });
         }
@@ -2190,7 +2190,7 @@ angular.module('starter.controllers', [])
       else {
         if ($scope.modal2 == undefined) {
           createHelpModal(function () {
-            bugout.log('showing modal');
+            console.log('showing modal');
             $scope.modal2.show();
           });
         }
@@ -2209,30 +2209,30 @@ angular.module('starter.controllers', [])
     $scope.$on('$ionicView.leave', function() {
       if ($scope.modal1 !== undefined) $scope.modal1.remove();
       if ($scope.modal2 !== undefined) $scope.modal2.remove();
-      bugout.log('modals removed')
+      console.log('modals removed')
     });*/
 
     $scope.showFullLog= function () {
-      bugout.log('bluetoothLog.length'+$scope.bluetoothLog.length);
+      console.log('bluetoothLog.length'+$scope.bluetoothLog.length);
       $scope.fullLog = $scope.bluetoothLog.slice(0,19);
       $scope.openModal(1);
     };
 
     $scope.getFullLogExtract = function(start, end) {
-      bugout.log('getFullLogExtract, start: '+start+' end: '+end);
+      console.log('getFullLogExtract, start: '+start+' end: '+end);
       $scope.fullLog = $scope.bluetoothLog.slice(start, end)
     };
 
     $scope.fullLogPage = 0;
 
     $scope.previousFullLogPage = function () {
-      bugout.log('prevFullLogPage');
+      console.log('prevFullLogPage');
       $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
       $scope.fullLogPage -= 1;
     };
 
     $scope.nextFullLogPage = function () {
-      bugout.log('nextFullLogPage');
+      console.log('nextFullLogPage');
       $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
       $scope.fullLogPage += 1;
     };
@@ -2255,22 +2255,22 @@ angular.module('starter.controllers', [])
       var now = Date.now();
       cordova.plugins.email.isAvailable(
         function(isAvailable) {
-          bugout.log('email available:'+isAvailable);
+          console.log('email available:'+isAvailable);
           if (isAvailable === true) {
             var logFile = bugout.getLog();
             // save the file locally, so it can be retrieved from emailComposer
             window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function(fileSystem) {
-              bugout.log('file system open: ' + fileSystem.name);
+              console.log('file system open: ' + fileSystem.name);
               // create the file if it doesn't exist
               fileSystem.getFile('log'+now+'.txt', {create: true, exclusive: false}, function(file) {
-                bugout.log("file is file?" + file.isFile.toString());
+                console.log("file is file?" + file.isFile.toString());
                 // create writer
                 file.createWriter(function(writer) {
                   // write
                   writer.write(logFile);
                   // when done writing, call up email composer
                   writer.onwriteend = function() {
-                    bugout.log('done writing');
+                    console.log('done writing');
                     var subject = 'Toothmaster bug report';
                     var body = 'I have encountered an error. Could you please look into this problem? \nMy logfile is attached.\n\nKind regards,\nA Toothmaster user';
                     cordova.plugins.email.open({
@@ -2295,7 +2295,7 @@ angular.module('starter.controllers', [])
     };
 
     function fileSystemError(error) {
-      bugout.log('Error getting file system: '+error.code);
+      console.log('Error getting file system: '+error.code);
     }
 
     function showSavedDeviceAlert() {
@@ -2322,7 +2322,6 @@ angular.module('starter.controllers', [])
         if (responded === true && responseStr.search('8:y') > -1) {
           send(softwareVersionCommand, function (responded, responseStr) {
             if (responded === true) {
-              //TODO get correct cleanVersionStr after rebuilding subscribe(]
               var cleanVersionStr = responseStr.slice(2);
               retry = 1;
               $ionicPopup.alert({
@@ -2330,13 +2329,13 @@ angular.module('starter.controllers', [])
                 template: 'Your STM-32 version number is '+cleanVersionStr
               })
             }
-            else if (retry < 3) {
+            else if (retry < 3 &&!emergency) {
               retry += 1;
               $scope.getVersion();
             }
           })
         }
-        else if (retry < 3) {
+        else if (retry < 3 &&!emergency) {
           retry += 1;
           $scope.getVersion();
         }
