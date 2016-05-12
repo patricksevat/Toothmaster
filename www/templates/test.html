@@ -10,8 +10,11 @@
           <button class="button button-small button-calm button-log" on-tap="openModal(2)">
             Help
           </button>
-          <button class="button button-small button-assertive button-log" ng-show="isConnected" on-tap="userDisconnect()">
+          <button class="button button-small button-assertive button-log" ng-show="isConnected" on-tap="userDisconnect()" ui-sref="app.bluetoothConnection">
             Disconnect
+          </button>
+          <button class="button button-small button-calm button-log" ng-hide="isConnected" ui-sref="app.bluetoothConnection">
+            Connect to a device
           </button>
         </div>
 
@@ -31,33 +34,6 @@
           </div>
         </div>
 
-        <div class="item item-divider" ng-hide="isConnected || !bluetoothEnabled">
-          <p class="bluetooth-text">Available devices</p>
-        </div>
-
-        <div  id="bluetooth-available-devices-div" ng-model="availableDevices" ng-hide="isConnected || !bluetoothEnabled">
-          <div class="item item-text-wrap" ng-repeat="device in availableDevices track by $index" on-tap="connectToUnpairedDevice($index)">
-            <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
-          </div>
-          <div class="item item-text-wrap" ng-show="!availableDevices.length">
-            <p class="bluetooth-text">Searching for unpaired devices...</p>
-          </div>
-        </div>
-
-        <div class="item item-divider" ng-hide="isConnected || !bluetoothEnabled">
-          <p class="bluetooth-text">Paired devices</p>
-        </div>
-
-        <div  id="bluetooth-paired-devices-div" ng-model="pairedDevices" ng-hide="isConnected || !bluetoothEnabled">
-          <div class="item item-text-wrap" ng-repeat="device in pairedDevices track by $index"  on-tap="connectToPairedDevice($index)">
-            <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
-          </div>
-          <div class="item item-text-wrap" ng-show="!pairedDevices.length">
-            <p class="bluetooth-text">No paired Bluetooth devices are availabe</p>
-          </div>
-        </div>
-
-<!--TODO add version get-->
         <!--TODO add mm to move option-->
         <div class="item item-divider" ng-show="isConnected || !bluetoothEnabled">
           <p class="bluetooth-text">Control buttons</p>
@@ -65,29 +41,35 @@
         <div class="item item-text-wrap" ng-show="!bluetoothEnabled">
           <button class="button button-calm" ng-hide="bluetoothEnabled" on-tap="bluetoothOn()">Turn on Bluetooth</button>
         </div>
-      <label class="item item-input item-stacked-label" ng-show="isConnected">
-        <span class="input-label">Number of test commands</span>
-        <input type="number" ng-model="numberOfTests.tests" placeholder="Example: 100">
-      </label>
-      <ion-item ng-show="isConnected">
-        <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop test</button>
-        <button class="button button-calm" on-tap="stressTest()" ng-show="showStressTest">Run test</button>
-        <button class="button button-calm" ng-show="showResetButton" on-tap="emergencyOff()">Reset test</button>
-        <br><ion-spinner ng-show="showSpinner"></ion-spinner>
-        <div>
-          <p>Completed Tests: {{completedTest}}</p>
-          <p>Retries: {{retriesNeeded}}</p>
+        <label class="item item-input item-stacked-label" ng-show="isConnected">
+          <span class="input-label">Number of test commands</span>
+          <input type="number" ng-model="numberOfTests.tests" placeholder="Example: 100">
+        </label>
+        <label class="item item-input item-stacked-label" ng-show="isConnected">
+          <span class="input-label">Mm to move</span>
+          <input type="number" ng-model="numberOfTests.mm" placeholder="Example: 100">
+        </label>
+        <ion-item ng-show="isConnected">
+          <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop test</button>
+          <button class="button button-calm" on-tap="stressTest()" ng-show="showStressTest">Run test</button>
+          <button class="button button-calm" ng-show="showResetButton" on-tap="emergencyOff()">Reset test</button>
+          <button class="button button-calm" ng-show="showMoveXMm" on-tap="moveXMm()">Move X mm</button>
+          <br><br><button class="button button-calm" ng-show="showVersionButton" on-tap="getVersion()">Get version number</button>
+          <br><ion-spinner ng-show="showSpinner"></ion-spinner>
+          <div ng-show="testRunning">
+            <p>Completed Tests: {{completedTest}}</p>
+            <p>Retries: {{retriesNeeded}}</p>
+          </div>
+        </ion-item>
+        <div class="item item-divider">
+          <p class="bluetooth-text log-text">Activity log</p>
+          <button class="button button-small button-calm button-log" on-tap="showFullLog()">Show full log</button>
         </div>
-      </ion-item>
-      <div class="item item-divider">
-        <p class="bluetooth-text log-text">Activity log</p>
-        <button class="button button-small button-calm button-log" on-tap="showFullLog()">Show full log</button>
-      </div>
-      <div class="item item-text-wrap">
-        <p class="bluetooth-text" ng-repeat="message in bluetoothLog | limitTo: 10 track by $index ">
-          {{message}}
-        </p>
-      </div>
+        <div class="item item-text-wrap">
+          <p class="bluetooth-text" ng-repeat="message in bluetoothLog | limitTo: 10 track by $index ">
+            {{message}}
+          </p>
+        </div>
       </div>
     </div>
   </ion-content>

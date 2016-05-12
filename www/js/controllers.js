@@ -728,6 +728,7 @@ angular.module('starter.controllers', [])
     bugout.log('settings:');
     bugout.log(JSON.stringify($scope.settings));
     $scope.showSpinner = false;
+    $scope.testRunning = false;
 
     //TODO seperate OS instructions
 
@@ -754,10 +755,12 @@ angular.module('starter.controllers', [])
       }
     });
 
+    var reconnectTry = 1;
+    //TODO retry connectToLastConnectedDevice
     $ionicPlatform.on('resume', function () {
       bugout.log('resume called from bluetooth controller');
       if (window.localStorage['lastConnectedDevice'] !== '' && !sending) {
-            connectToLastConnectedDevice();
+        reconnectWithRetry();
           }
       else if (sending){
         bugout.log('Not reconnecting, because we are sending')
@@ -775,7 +778,7 @@ angular.module('starter.controllers', [])
     var skip = skipService.getSkip();
 
     $scope.$on('$ionicView.enter',function () {
-      calculateVars();
+
       skip = skipService.getSkip();
         bugout.log('enterView fired, skip = '+skip);
         if (skip === true) {
@@ -798,6 +801,7 @@ angular.module('starter.controllers', [])
         bugout.log(JSON.stringify(program));
         bugout.log('settings:');
         bugout.log(JSON.stringify($scope.settings));
+        calculateVars();
         if (emergency) {
           $scope.showResetButton = true;
         }
@@ -808,6 +812,8 @@ angular.module('starter.controllers', [])
           $scope.showMovingButton = false;
           $scope.showEmergency = false;
           $scope.readyForData = false;
+          $scope.testRunning = false;
+          $scope.showSpinner = false;
         }
     });
 
@@ -840,7 +846,27 @@ angular.module('starter.controllers', [])
     //
     $scope.deviceName= '';
 
-    function connectToLastConnectedDevice(){
+    function reconnectWithRetry() {
+      connectToLastConnectedDevice(function () {
+        if ($scope.isConnected === false && reconnectTry <= 5) {
+          bugout.log('Reconnecting after resume, try: '+reconnectTry);
+          $timeout(function () {
+            reconnectTry +=1;
+            connectToLastConnectedDevice(reconnectWithRetry)
+          }, 500)
+        }
+        else if ($scope.isConnected === true) {
+          bugout.log('reconnectWithRetry, isConnected = true');
+          reconnectTry = 1;
+        }
+        else if (reconnectTry >= 6) {
+          addToLog('Could not reconnect automatically, please connect manually');
+          $scope.getAvailableDevices()
+        }
+      })
+    }
+
+    function connectToLastConnectedDevice(cb){
       addToLog('Trying to connect with last known device');
       $scope.checkBluetoothEnabled(function () {
         if (window.localStorage['lastConnectedDevice'] !== '') {
@@ -848,14 +874,17 @@ angular.module('starter.controllers', [])
           $window.bluetoothSerial.connectInsecure(obj.id, function () {
             $scope.deviceName = obj.name;
             bugout.log('succesfully connected to last connected device');
-            $scope.bluetoothConnected();
-            $scope.showCalcButton = true;
+            $scope.bluetoothConnected(function () {
+              $scope.showCalcButton = true;
+              if (cb) cb();
+            });
+
           }, function () {
             bugout.log('could not connect to last connected device');
             $scope.$apply(function () {
               $scope.isConnected = false
             });
-            $scope.getAvailableDevices();
+            if (cb) cb();
           });
         }
         else if ($scope.bluetoothEnabled) {
@@ -873,7 +902,8 @@ angular.module('starter.controllers', [])
       var obj = {'id':id,'name':name};
       $scope.deviceName = name;
       window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
-      bugout.log('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice'])
+      bugout.log('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice']);
+      showSavedDeviceAlert();
     }
 
     //
@@ -967,9 +997,9 @@ angular.module('starter.controllers', [])
               devices.forEach(function (device) {
                 $scope.pairedDevices.push(device);
                 addToLog('Paired Bluetooth device found');
-              }),function () {
-                addToLog('Cannot find paired Bluetooth devices');
-              }
+              })
+            },function () {
+              addToLog('Cannot find paired Bluetooth devices');
             })
           }
           else if (ionic.Platform.isIOS) {
@@ -1069,6 +1099,8 @@ angular.module('starter.controllers', [])
     $scope.showResetButton = false;
     $scope.showHoming = true;
     $scope.showStressTest = true;
+    $scope.showVersionButton = true;
+    $scope.showMoveXMm = true;
 
     //
     //SECTION: UI log function
@@ -1100,15 +1132,12 @@ angular.module('starter.controllers', [])
       sentSettingsForTest = false;
       sending = false;
       $scope.showSpinner = false;
+      $scope.testRunning = false;
+      $scope.showVersionButton = false;
+      $scope.showMoveXMm = false;
+      $scope.readyForData = false;
       //Send reset command
-      $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
-        bugout.log('emergency command: <<y8:y'+stepMotorNum+'>');
-        addToLog('Emergency reset sent');
-        checkResetResponse(cb);
-
-      }, function (err) {
-        addToLog('Error: Emergency command could not be set. '+err);
-      });
+      sendResetCommand();
     };
 
     var emergencyResetCount = 0;
@@ -1121,6 +1150,7 @@ angular.module('starter.controllers', [])
         response = '';
         emergencyResetCount = 0;
         emergencySentCount = 0;
+        unsubscribe();
         if (cb) cb();
       }
       else {
@@ -1134,19 +1164,13 @@ angular.module('starter.controllers', [])
         else {
           if (emergencySentCount <3) {
             $timeout(function () {
-              $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
-                bugout.log('emergency command: <<y8:y'+stepMotorNum+'>');
-                addToLog('Emergency reset sent');
-                checkResetResponse();
-
-              }, function (err) {
-                addToLog('Error: Emergency command could not be set. '+err);
-              });
+              sendResetCommand();
             }, 250);
             emergencySentCount += 1;
           }
           else {
             addToLog('Could not receive a response from the bluetooth receiver, checking connection');
+            $scope.emergencyOff();
             $scope.bluetoothConnected(function () {
               if (!$scope.isConnected) {
                 $scope.getAvailableDevices();
@@ -1178,6 +1202,11 @@ angular.module('starter.controllers', [])
       $scope.completedTest = 0;
       $scope.showStressTest = true;
       $scope.showHoming = true;
+      $scope.showSpinner = false;
+      $scope.testRunning = false;
+      $scope.showVersionButton = true;
+      $scope.showMoveXMm = true;
+      retry = 1;
     };
 
     //
@@ -1194,7 +1223,7 @@ angular.module('starter.controllers', [])
     var stepMotorOnOff; //test, value 0 or 1
 
     //other vars/commands
-    var softwareVersionCommand = '<z'+stepMotorNum+'>';
+    var softwareVersionCommand;
 
     //decoder vars
     var disableEncoder;
@@ -1229,6 +1258,7 @@ angular.module('starter.controllers', [])
     var stepMotorNum = '3';
 
     function calculateVars() {
+      bugout.log('calculated vars');
       direction = ($scope.settings.direction) ? 1 : 0;
       homingDirection = ($scope.settings.direction) ? 0 : 1;
       homingStopswitchInt = ($scope.settings.homingStopswitch === true) ? 2 : 1;
@@ -1251,6 +1281,7 @@ angular.module('starter.controllers', [])
       homingDone = true;
       encoderCommands = ['<x1'+stepMotorNum+'>', '<d'+stepsPerRPMDevidedByStepsPerRPMEncoder+stepMotorNum+'>', '<b'+maxAllowedMiss+stepMotorNum+'>'];
       encoderCommand = 0;
+      softwareVersionCommand = '<z'+stepMotorNum+'>';
     }
 
     //retry counter
@@ -1367,123 +1398,150 @@ angular.module('starter.controllers', [])
     //
 
     //user clicks button front end, sendSettingsData() called
-    $scope.sendSettingsData = function (test, callback) {
-      if (homingDone){
-        $scope.showSpinner = true;
-        subscribe();
-        sending = true;
-        settingsDone = false;
-        $scope.showEmergency = true;
-        //send start command
-        send('<<y8:y'+stepMotorNum+'>', function (boolean) {
-          if (boolean === true) {
-            //send encoder settings or disable encode command, after that send settings commands
-            if ($scope.settings.encoder.enable) {
-              addToLog('Encoder enabled');
-              send(encoderCommands[0], encoderPlus);
+    $scope.sendSettingsData = function (moveXmmBoolean, moveXmmCommand, test, callback) {
+      if (!emergency) {
+        if (homingDone){
+          $scope.showSpinner = true;
+          subscribe();
+          sending = true;
+          settingsDone = false;
+          $scope.showEmergency = true;
+          if (moveXmmBoolean === true) {
+            commands[1] = moveXmmCommand;
+          }
+          //send start command
+          send('<<y8:y'+stepMotorNum+'>', function (boolean) {
+            if (boolean === true) {
+              //send encoder settings or disable encode command, after that send settings commands
+              if ($scope.settings.encoder.enable) {
+                addToLog('Encoder enabled');
+                send(encoderCommands[0], encoderPlus);
+              }
+              else {
+                addToLog('Encoder disabled');
+                send(disableEncoder, function () {
+                  send(commands[command], commandPlus);
+                })
+              }
             }
-            else {
-              addToLog('Encoder disabled');
-              send(disableEncoder, function () {
-                send(commands[command], commandPlus);
-              })
+            else if (boolean === false) {
+              if (emergency) {}
+              else if (retry < 4) {
+                retry+=1;
+                bugout.log('retry number '+(retry+1)+'/3');
+                $scope.sendSettingsData();
+              }
+              else {
+                addToLog('Maximum number of retries reached');
+              }
+            }
+          });
+        }
+        else {
+          $ionicPopup.alert({
+            title: 'Please wait until homing is done'
+          });
+        }
+      }
+      else {
+        addToLog('Emergency on, will not continue sending settings data');
+      }
+
+      function encoderPlus(boolean){
+        if (!emergency) {
+          if (boolean === true) {
+            if (encoderCommand < encoderCommands.length-1){
+              encoderCommand +=1;
+              send(encoderCommands[encoderCommand], encoderPlus);
+            }
+            else if (encoderCommand === encoderCommands.length-1){
+              send(commands[command], commandPlus);
             }
           }
           else if (boolean === false) {
-            if (emergency) {}
-            else if (retry < 4) {
+            if (retry < 4) {
               retry+=1;
-              addToLog('retry number '+(retry+1)+'/3');
+              bugout.log('retry number '+retry+'/3');
               $scope.sendSettingsData();
             }
             else {
               addToLog('Maximum number of retries reached');
             }
           }
-        });
-      }
-      else {
-        $ionicPopup.alert({
-          title: 'Please wait until homing is done'
-        });
-      }
-
-      function encoderPlus(boolean){
-        if (boolean === true) {
-          if (encoderCommand < encoderCommands.length-1){
-            encoderCommand +=1;
-            send(encoderCommands[encoderCommand], encoderPlus);
-          }
-          else if (encoderCommand === encoderCommands.length-1){
-            send(commands[command], commandPlus);
-          }
         }
-        else if (boolean === false) {
-          if (retry < 4) {
-            retry+=1;
-            addToLog('retry number '+retry+'/3');
-            $scope.sendSettingsData();
-          }
-          else {
-            addToLog('Maximum number of retries reached');
-          }
+        else {
+          addToLog('Emergency on, will not continue sending settings data');
         }
       }
       //command closure callback
-      function commandPlus(boolean) {
-        if (boolean === true) {
-          if (command < commands.length-1) {
-            command += 1;
-            send(commands[command], commandPlus);
-          }
-          //on last command check if 'rdy' has been sent
-          else if (command === commands.length-1 && response.search('rdy')> -1) {
+      function commandPlus(boolean, responseStr) {
+        if (!emergency) {
+          if (boolean === true) {
+            if (commands[command].search('<q')) {
+              var percentage = responseStr.slice(responseStr.length-4);
+              bugout.log(percentage);
+              if (percentage === '100' ) {
+                command += 1;
+                send(commands[command], commandPlus);
+              }
+            }
+            else if (command < commands.length-1) {
+              command += 1;
+              send(commands[command], commandPlus);
+            }
+            //on last command check if 'rdy' has been sent
+            else if (command === commands.length-1 && response.search('rdy')> -1) {
 
-            $scope.readyForData = false;
-            $scope.showMovingButton = true;
-            $scope.showCalcButton = false;
-            $scope.showHoming = false;
-            settingsDone = true;
-            command = 0;
-            response = '';
-            sending = false;
-            if (test === undefined) {
-              addToLog('Moved to start position');
-              var subCuts = program.cutWidth / program.sawWidth;
-              var cutsRoundedUp = Math.ceil(subCuts);
-              $scope.showSpinner = false;
-              if (program.cutWidth !== program.sawWidth) {
-                $ionicPopup.alert({
-                  title: 'Make the subcut 1/'+cutsRoundedUp
-                });
+              $scope.readyForData = false;
+              $scope.showMovingButton = true;
+              $scope.showCalcButton = false;
+              $scope.showHoming = false;
+              settingsDone = true;
+              command = 0;
+              response = '';
+              sending = false;
+              if (test === undefined) {
+                addToLog('Moved to start position');
+                var subCuts = program.cutWidth / program.sawWidth;
+                var cutsRoundedUp = Math.ceil(subCuts);
+                $scope.showSpinner = false;
+                if (program.cutWidth !== program.sawWidth) {
+                  $ionicPopup.alert({
+                    title: 'Make the subcut 1/'+cutsRoundedUp
+                  });
+                }
+                else {
+                  $ionicPopup.alert({
+                    title: 'Make the cut'
+                  });
+                }
               }
+              //callback used in stresstest
               else {
-                $ionicPopup.alert({
-                  title: 'Make the cut'
-                });
+                if (callback) callback();
               }
             }
-            //callback used in stresstest
-            else {
-              if (callback) callback();
+            else if (command === commands.length-1 && response.search('rdy') === -1){
+              addToLog('Settings have not been sent correctly');
+              sendResetCommand();
+              command = 0;
+              settingsDone = true;
+              response = '';
             }
           }
-          else if (command === commands.length-1 && response.search('rdy') === -1){
-            addToLog('Settings have not been sent correctly');
-            command = 0;
-            settingsDone = true;
-            response = '';
+          else if (boolean === false) {
+            if (retry < 4) {
+              retry+=1;
+              bugout.log('retry number '+retry+'/3');
+              $scope.sendSettingsData();
+            }
+            else {
+              addToLog('Maximum number of retries reached');
+            }
           }
         }
-        else if (boolean === false) {
-          if (retry < 4) {
-            retry+=1;
-            addToLog('retry number '+retry+'/3');
-            $scope.sendSettingsData();
-          }
-          else {
-            addToLog('Maximum number of retries reached');
-          }
+        else {
+          addToLog('Emergency on, will not continue sending settings data');
         }
       }
     };
@@ -1523,7 +1581,7 @@ angular.module('starter.controllers', [])
             else if (boolean === false) {
               if (retry < 4) {
                 retry+=1;
-                addToLog('retry number '+retry+'/3');
+                bugout.log('retry number '+retry+'/3');
                 $scope.homing();
               }
               else {
@@ -1559,7 +1617,7 @@ angular.module('starter.controllers', [])
         else if (boolean === false) {
           if (retry < 4) {
             retry+=1;
-            addToLog('retry number '+retry+'/3');
+            bugout.log('retry number '+retry+'/3');
             $scope.homing();
           }
           else {
@@ -1611,7 +1669,7 @@ angular.module('starter.controllers', [])
         else if (boolean === false) {
           if (retry < 4) {
             retry+=1;
-            addToLog('retry number '+retry+'/3');
+            bugout.log('retry number '+retry+'/3');
             $scope.homing();
           }
           else {
@@ -1622,7 +1680,7 @@ angular.module('starter.controllers', [])
     };
 
     //
-    //SECTION: stressTest logic
+    //SECTION: stressTest && move X mm logic
     //
 
     $scope.retriesNeeded = 0;
@@ -1630,72 +1688,119 @@ angular.module('starter.controllers', [])
     var sentSettingsForTest = false;
     $scope.numberOfTests = {};
 
+    //TODO make sure that moveXMm, stresstest and normal program still function as expected
+    $scope.moveXMm = function () {
+      if (!emergency && !sending) {
+        if ($scope.numberOfTests.mm === undefined) {
+          $ionicPopup.alert({
+            title: 'Please fill in "Move X mm"'
+          })
+        }
+        else {
+          $scope.showStressTest = false;
+          $scope.showVersionButton = false;
+          var moveXMmSteps = $scope.numberOfTests.mm / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+          var moveXMmStepsCommand = '<s'+moveXMmSteps+stepMotorNum+'>';
+          //first true is moveXMm, second true is to use callback
+          $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
+            $scope.showStressTest = true;
+            $scope.showVersionButton = true;
+            $scope.showEmergency = false;
+            $scope.showSpinner = false;
+            $ionicPopup.alert({
+              title: 'Succesfully moved '+$scope.numberOfTests.mm+' mm'
+            });
+            calculateVars();
+          })
+        }
+      }
+    };
+
     $scope.stressTest = function () {
       $scope.showEmergency = true;
       $scope.showResetButton = false;
       $scope.showStressTest = false;
+      $scope.testRunning = true;
+      $scope.showVersionButton = false;
+      $scope.showMoveXMm = false;
       if (emergency) {
+        addToLog('Emergency on, cancelling stresstest')
         return
       }
       if (!sentSettingsForTest) {
         bugout.log('numberOfTests:'+$scope.numberOfTests.tests);
         addToLog('Sending settings needed for testing');
-        $scope.sendSettingsData(true, function () {
+        //make sure that on setting the settings, start position = 0mm
+        var moveXMmStepsCommand = '<s0'+stepMotorNum+'>';
+        $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
           sentSettingsForTest = true;
           $scope.stressTest();
         });
       }
       else {
-        addToLog('Executing test '+($scope.completedTest+1)+'/'+$scope.numberOfTests.tests);
-        sending = true;
-        send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', checkTestDone);
+        if (!emergency) {
+          addToLog('Executing test '+($scope.completedTest+1)+'/'+$scope.numberOfTests.tests);
+          sending = true;
+          send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', checkTestDone);
 
-        function checkTestDone(boolean) {
-          if (boolean === true) {
-            if (response.search('wydone') > -1) {
-              response = '';
-              $cordovaBluetoothSerial.clear();
-              bugout.log('Test done, moving to next test');
-              $scope.completedTest +=1;
+          function checkTestDone(boolean) {
+            if (!emergency) {
+              if (boolean === true) {
+                if (response.search('wydone') > -1) {
+                  response = '';
+                  $cordovaBluetoothSerial.clear();
+                  bugout.log('Test done, moving to next test');
+                  $scope.completedTest +=1;
 
-              $cordovaBluetoothSerial.clear();
-              if ($scope.completedTest < $scope.numberOfTests.tests){
-                $timeout(function () {
+                  $cordovaBluetoothSerial.clear();
+                  if ($scope.completedTest < $scope.numberOfTests.tests){
+                    $timeout(function () {
+                      $scope.stressTest();
+                    }, 50)
+                  }
+                  else {
+                    $scope.showSpinner = false;
+                    $ionicPopup.alert({
+                      title: 'Test completed',
+                      template: 'You have successfully completed the tests.'
+                    });
+                    addToLog('Testing done, completed '+$scope.completedTest+' tests');
+                    $scope.showEmergency = false;
+                    $scope.completedTest = 0;
+                    $scope.showStressTest = true;
+                    $scope.showCalcButton = true;
+                    $scope.showHoming = true;
+                    sending = false;
+                    $scope.showVersionButton = true;
+                    $scope.showMoveXMm = true;
+                    calculateVars();
+                  }
+                }
+                else {
+                  $timeout(function () {
+                    send('<w'+stepMotorNum+'>', checkTestDone);
+                  }, 50);
+                }
+              }
+              else if (boolean === false) {
+                if (retry <= 10) {
+                  bugout.log('retry number '+retry+'/10');
+                  retry +=1;
+                  $scope.retriesNeeded += 1;
                   $scope.stressTest();
-                }, 50)
-              }
-              else {
-                $scope.showSpinner = false;
-                $ionicPopup.alert({
-                  title: 'Test completed',
-                  template: 'You have successfully completed the tests.'
-                });
-                addToLog('Testing done, completed '+$scope.completedTest+' tests');
-                $scope.showEmergency = false;
-                $scope.completedTest = 0;
-                $scope.showStressTest = true;
-                $scope.showCalcButton = true;
-                $scope.showHoming = true;
-                sending = false;
+                }
+                else {
+                  addToLog('Maximum number of retries reached');
+                }
               }
             }
             else {
-              $timeout(function () {
-                send('<w'+stepMotorNum+'>', checkTestDone);
-              }, 50);
+              addToLog('Emergency on, will not continue with stresstest');
             }
           }
-          else if (boolean === false) {
-            if (retry <= 10) {
-              addToLog('retry number '+retry+'/10');
-              retry +=1;
-              $scope.retriesNeeded += 1;
-              $scope.stressTest();
-            }
-            else {
-              addToLog('Maximum number of retries reached');
-            }
-          }
+        }
+        else {
+          addToLog('Emergency on, will not continue with stresstest');
         }
       }
 
@@ -1707,64 +1812,74 @@ angular.module('starter.controllers', [])
 
 
     $scope.startMoving = function () {
-      //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
-      if (done) {
-        sending = true;
-        done = false;
-        $scope.showSpinner = true;
-        send('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
+      if (!emergency) {
+        if (done) {
+          sending = true;
+          done = false;
+          $scope.showSpinner = true;
+          send('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
+        }
+        else {
+          addToLog('Please wait untill this step is finished');
+        }
       }
       else {
-        addToLog('Please wait untill this step is finished');
+        addToLog('Emergency on, will not continue with movement');
       }
 
+      //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
       function checkDone(boolean) {
-        if (boolean === true) {
-          if (response.search('wydone') > -1) {
-            response = '';
-            addToLog('Movement done');
-            addToLog($scope.movements[$scope.movementsNum].description);
-            done = true;
-            $scope.showSpinner = false;
-            if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut' && $scope.movementsNum !== $scope.movements.length -1){
-              $ionicPopup.alert({
-                title: $scope.movements[$scope.movementsNum].description
-              });
+        if (!emergency) {
+          if (boolean === true) {
+            if (response.search('wydone') > -1) {
+              response = '';
+              addToLog('Movement done');
+              addToLog($scope.movements[$scope.movementsNum].description);
+              done = true;
+              $scope.showSpinner = false;
+              if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut' && $scope.movementsNum !== $scope.movements.length -1){
+                $ionicPopup.alert({
+                  title: $scope.movements[$scope.movementsNum].description
+                });
+              }
+              //once last movement is completed show restart program popup
+              else if ($scope.movementsNum === $scope.movements.length -1) {
+                $ionicPopup.alert({
+                  title: $scope.movements[$scope.movementsNum].description,
+                  buttons: [{
+                    type: 'button-calm',
+                    text: 'OK',
+                    onTap: $scope.showRestartPopup()
+                  }]
+                });
+                $scope.showMovingButton = false;
+                $scope.showEmergency = false;
+                $scope.showResetButton = true;
+                sending = false;
+              }
+              $scope.movementsNum += 1;
             }
-            //once last movement is completed show restart program popup
-            else if ($scope.movementsNum === $scope.movements.length -1) {
-              $ionicPopup.alert({
-                title: $scope.movements[$scope.movementsNum].description,
-                buttons: [{
-                  type: 'button-calm',
-                  text: 'OK',
-                  onTap: $scope.showRestartPopup()
-                }]
-              });
-              $scope.showMovingButton = false;
-              $scope.showEmergency = false;
-              $scope.showResetButton = true;
-              sending = false;
-            }
-            $scope.movementsNum += 1;
-          }
             //If response is not wydone, send a <w> command to keep connection alive
-          else {
-            $timeout(function () {
-              bugout.log('no wydone, sending <w>');
-              send('<w'+stepMotorNum+'>', checkDone);
-            }, 200);
+            else {
+              $timeout(function () {
+                bugout.log('no wydone, sending <w>');
+                send('<w'+stepMotorNum+'>', checkDone);
+              }, 200);
+            }
+          }
+          else if (boolean === false) {
+            if (retry <= 3) {
+              bugout.log('retry number '+retry+'/3');
+              done = true;
+              $scope.startMoving();
+            }
+            else {
+              addToLog('Maximum number of retries reached');
+            }
           }
         }
-      else if (boolean === false) {
-          if (retry <= 3) {
-            addToLog('retry number '+retry+'/3');
-            done = true;
-            $scope.startMoving();
-          }
-          else {
-            addToLog('Maximum number of retries reached');
-          }
+        else {
+          addToLog('Emergency on, will not continue with movement');
         }
       }
     };
@@ -1776,21 +1891,45 @@ angular.module('starter.controllers', [])
     //TODO check if subscribe + delimiter is better than subscribeRawDAta
     //TODO new delimiter is going to be "#"
     //retrieve bluetooth messages from driver
-    function subscribe(){
-      $window.bluetoothSerial.subscribeRawData(function (data) {
-        //update view as message comes in, response converted from ArrayBuffer to String
-        //$scope.$apply(function () {
-        //Commented out scope.apply as response is now moved to bugout.log
-        response += String.fromCharCode.apply(null, new Uint8Array(data));
-        bugout.log('ResponseFull = '+response);
-        lastReceivedTime = Date.now();
-        //});
+    function subscribe(cb){
+      var received = false;
+      $window.bluetoothSerial.subscribe('#',function (data) {
+          received = true;
+          response += data;
+          bugout.log('ResponseFull = '+response);
+          lastReceivedTime = Date.now();
+          if (cb && typeof cb === 'function') {
+            cb(received);
+          }
+      }, function () {
+        bugout.log('Error while subscribing');
+      });
+      $timeout(function () {
+        if (received === false) {
+          if (cb && typeof cb === 'function') {
+            cb(received);
+          }
+        }
+      },3000)
+    }
+
+    function unsubscribe() {
+      $window.bluetoothSerial.unsubscribe(function () {
+        bugout.log('unsubscribed');
       });
     }
 
-    //TODO Bug in stm32: if settings have been sent with encoder enabled, and after new settings are sent with encoder disabled wydone keeps sending <wydone:0;0@21250;0>
+    function sendResetCommand() {
+      subscribe();
+      $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
+        addToLog('Program reset command sent');
+        checkResetResponse();
+      }, function (err) {
+        addToLog('Error: Program reset command could not be sent. '+err);
+      });
+    }
+
     function send(str, callback){
-      var interval = null;
       //Check for emergency
       if(!emergency) {
           //write to bluetooth receiver
@@ -1799,6 +1938,7 @@ angular.module('starter.controllers', [])
           $cordovaBluetoothSerial.write(str).then(function () {
             var substr;
             var substr2;
+            var substr3;
             switch (str.charAt(1)) {
               case '<':
                 substr = '8:y';
@@ -1838,6 +1978,7 @@ angular.module('starter.controllers', [])
                 $scope.showSpinner = true;
                 substr = 'rdy';
                 substr2 = 'wydone';
+                substr3 = 'q';
                 break;
               case 'h':
                 substr = '6:';
@@ -1850,40 +1991,39 @@ angular.module('starter.controllers', [])
                 substr2 = 'w'+stepMotorNum;
                 break;
             }
-            //check periodically if response has been sent
-              interval = $interval(function () {
+            //read the buffer, execute callback when response is available
+              subscribe(function (timeoutBoolean) {
+                bugout.log('in subscribe cb response = '+response+' substr: '+substr+' substr2: '+substr2+' timeoutBoolean'+timeoutBoolean);
                 var now = Date.now();
                 //check response for stopswitch that has been hit
-                //TODO Bij Homing brand er geen stopswitch
                 if (response.search('wydone:') > -1 && response.search('wydone:0') === -1 ) {
                   var posStopswitch = response.lastIndexOf('@')-3;
-                    logResponse('ERROR: Hit stopswitch number '+response.charAt(posStopswitch));
-                    addToLog('ERROR: Hit stopswitch number '+response.charAt(posStopswitch));
-                    emergency = true;
-                    $scope.showEmergency = false;
-                    $scope.showMovingButton = false;
-                    $scope.showCalcButton = false;
-                    $scope.readyForData = false;
-                    $scope.showStressTest = false;
-
-                    //Send reset command
-                    $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
-                      addToLog('Program reset command sent');
-                      checkResetResponse();
-                    }, function (err) {
-                      addToLog('Error: Program reset command could not be sent. '+err);
+                    $ionicPopup.alert({
+                      title: 'Error: hit stopswitch '+response.charAt(posStopswitch),
+                      template: 'Unexpected stopswitch has been hit. Aborting task.'
                     });
-                    var cancelledBoolean1 = $interval.cancel(interval);
-                    bugout.log('cancelled interval: '+cancelledBoolean1);
+                  logResponse('ERROR: Hit stopswitch number '+response.charAt(posStopswitch));
+                  addToLog('ERROR: Hit stopswitch number '+response.charAt(posStopswitch));
+                  emergency = true;
+                  $scope.showEmergency = false;
+                  $scope.showMovingButton = false;
+                  $scope.showCalcButton = false;
+                  $scope.readyForData = false;
+                  $scope.showStressTest = false;
+                  $scope.showSpinner = false;
+                  $scope.showVersionButton = false;
+                  $scope.showMoveXMm = false;
+                    //Send reset command
+                  sendResetCommand();
                   }
                 else if (response.search('wydone:') > -1 && response.search('@5') > -1 ) {
                   //splice result from '@' till end
-                // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
+                  // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
                   var splicedStr = response.slice(response.lastIndexOf('@'));
                   var missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
                   $ionicPopup.alert({
                     title: 'You have missed the maximum number of allowed steps',
-                    template: 'The program has been stopped.\nMaximum steps to miss: '+maxAllowedMiss+'\nNumber of steps actually missed '+missedSteps
+                    template: 'The program has been stopped.<p>Maximum steps to miss: '+maxAllowedMiss+'</p><p>Number of steps actually missed '+missedSteps+'</p>'
                   });
                   addToLog('ERROR: Number of missed steps exceeds encoder settings:');
                   addToLog('Maximum steps to miss: '+maxAllowedMiss);
@@ -1892,32 +2032,25 @@ angular.module('starter.controllers', [])
                   $scope.showEmergency = false;
                   $scope.showMovingButton = false;
                   $scope.showCalcButton = false;
+                  $scope.readyForData = false;
                   $scope.showStressTest = false;
-                  var cancelledBoolean2 = $interval.cancel(interval);
-                  bugout.log('cancelled interval: '+cancelledBoolean2);
+                  $scope.showSpinner = false;
+                  $scope.showVersionButton = false;
+                  $scope.showMoveXMm = false;
                   //Send reset command
-                  $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
-                    addToLog('Program reset command sent');
-                    checkResetResponse();
-
-                  }, function (err) {
-                    addToLog('Error: Program reset command could not be sent. '+err);
-                  });
+                  sendResetCommand();
                   response = '';
                 }
                 //check response for substring
-                else if (response.search(substr) > -1 && lastReceivedTime - lastCommandTime >0) {
-                  logResponse(substr);
-                  intervalCancelAndCB(true, substr);
-                  retry = 0;
+                else if ((response.search(substr) > -1 && lastReceivedTime - lastCommandTime >0) ||
+                  (response.search(substr2) > -1 && lastReceivedTime - lastCommandTime >0) ||
+                  (response.search(substr3) > -1 && lastReceivedTime - lastCommandTime >0) ) {
+                  logResponse(response);
+                  intervalCancelAndCB(true, response);
+                  retry = 1;
                 }
-                else if (response.search(substr2) > -1 && lastReceivedTime - lastCommandTime >0) {
-                  logResponse(substr2);
-                  intervalCancelAndCB(true, substr2);
-                  retry = 0;
-                }
-                //handle timeouts
-                else if (now - lastCommandTime>3000){
+                //handle timeouts TODO how to do this with cb?
+                else if (timeoutBoolean === false){
                     addToLog('Not received a response on time, retrying command');
                     bugout.log('time passed: '+(now-lastCommandTime));
                     bugout.log('now: '+now);
@@ -1925,7 +2058,7 @@ angular.module('starter.controllers', [])
                   intervalCancelAndCB(false);
                   bugout.log('retry = '+retry);
                 }
-              },50);
+              });
 
             function logResponse(responseStr) {
               bugout.log('Response = '+responseStr);
@@ -1933,14 +2066,7 @@ angular.module('starter.controllers', [])
             }
 
             function intervalCancelAndCB(responded, responseStr, posStopswitch) {
-
-              if (angular.isDefined(interval)) {
-                var cancelledBoolean = $interval.cancel(interval);
-                bugout.log('interval cancelled:'+cancelledBoolean)
-              }
-              else {
-                bugout.log('cannot cancel interval')
-              }
+              unsubscribe();
               if (callback && typeof callback === "function") callback(responded, responseStr, posStopswitch);
               substr = '';
               substr2 = '';
@@ -1949,6 +2075,7 @@ angular.module('starter.controllers', [])
                 response = '';
               }
             }
+
           }, function () {
             addToLog('Error sending command');
           });
@@ -2171,6 +2298,51 @@ angular.module('starter.controllers', [])
       bugout.log('Error getting file system: '+error.code);
     }
 
+    function showSavedDeviceAlert() {
+      $ionicPopup.alert({
+        title: 'Bluetooth device saved',
+        template: 'This bluetooth device is saved and will connect automatically from now on.<br \>If you need to change your device later on choose a new device via Bluetooth connection in the menu',
+        buttons: [{
+          text: 'Go to program',
+          type: 'button-calm',
+          onTap: function () {
+            $state.go('app.program')
+          }
+        },
+          {
+          text: 'Close'
+          }
+        ]
+      })
+    }
+
+    $scope.getVersion = function() {
+      subscribe();
+      send('<<y8:y'+stepMotorNum+'>', function (responded, responseStr) {
+        if (responded === true && responseStr.search('8:y') > -1) {
+          send(softwareVersionCommand, function (responded, responseStr) {
+            if (responded === true) {
+              //TODO get correct cleanVersionStr after rebuilding subscribe(]
+              var cleanVersionStr = responseStr.slice(2);
+              retry = 1;
+              $ionicPopup.alert({
+                title: 'Version number',
+                template: 'Your STM-32 version number is '+cleanVersionStr
+              })
+            }
+            else if (retry < 3) {
+              retry += 1;
+              $scope.getVersion();
+            }
+          })
+        }
+        else if (retry < 3) {
+          retry += 1;
+          $scope.getVersion();
+        }
+      })
+
+    }
 
   });
 //end of controller runBluetoothCtrl

@@ -1,4 +1,6 @@
 var bugout = new debugout();
+//TODO chekc permissions
+//Force screen on while executing program
 angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
 
   .service('shareSettings', function() {
@@ -48,14 +50,19 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   })
 
 .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService) {
+  bugout.log('version 0.8.0.13');
   var nextView;
   var prevView;
   var skip;
   $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState) {
     nextView = toState.name;
     prevView = fromState.name;
-    skip = ((prevView === 'app.test' || prevView === 'app.homing' || prevView === 'app.runBluetooth' ) && (nextView === 'app.test' || nextView === 'app.homing' || nextView === 'app.runBluetooth')) ? true : false;
+    skip = ((prevView === 'app.test' || prevView === 'app.homing' || prevView === 'app.runBluetooth' ||
+    prevView === 'app.bluetoothConnection' || prevView === 'app.program') &&
+    (nextView === 'app.bluetoothConnection' || nextView === 'app.test' || nextView === 'app.homing' ||
+    nextView === 'app.runBluetooth' || nextView === 'app.program')) ? true : false;
     skipService.setSkip(skip);
+    bugout.log('skip: '+skip+', prevView: '+prevView+', nextView'+nextView);
   });
 
   $ionicPlatform.on('pause', function () {
@@ -198,6 +205,17 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       views: {
         'menuContent': {
           templateUrl: 'templates/website.html'
+        }
+      }
+    })
+
+    .state('app.bluetoothConnection', {
+      name: 'bluetoothConnection',
+      url: '/bluetoothConnection',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/bluetoothConnection.html',
+          controller: 'runBluetoothCtrl'
         }
       }
     })
