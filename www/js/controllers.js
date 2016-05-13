@@ -736,27 +736,37 @@ angular.module('starter.controllers', [])
     //SECTION: pause & resume app
     //
 
+    var paused = false;
+
     $ionicPlatform.on('pause', function () {
+      console.log('pause called from bluetoothCtrl');
       //check for connection and if commands are being sent
-      if ($scope.isConnected === true && !sending) {
-        $window.bluetoothSerial.disconnect(function () {
-          console.log('disconnected on pause from bluetooth controller');
-          addToLog('Disconnected after pausing application');
-        }, function () {
-          console.log('could not disconnect on pause from bluetooth controller')
-        });
-        $scope.availableDevices = [];
-        $scope.pairedDevices = [];
-        $scope.showCalcButton = false;
-        $scope.readyForData = false;
+      if (!paused) {
+        paused = true;
+        console.log('paused: '+paused);
+        console.log('sending from bluetoothCtrl: '+sending);
+        if ($scope.isConnected === true && !sending) {
+          $window.bluetoothSerial.disconnect(function () {
+            console.log('disconnected on pause from bluetooth controller');
+            addToLog('Disconnected after pausing application');
+          }, function () {
+            console.log('could not disconnect on pause from bluetooth controller')
+          });
+          $scope.availableDevices = [];
+          $scope.pairedDevices = [];
+          $scope.showCalcButton = false;
+          $scope.readyForData = false;
+        }
+        else if ($scope.isConnected && sending) {
+          addToLog('User has paused application, continuing task in background');
+        }
       }
-      else if ($scope.isConnected && sending) {
-        addToLog('User has paused application, continuing task in background');
-      }
+
     });
 
     var reconnectTry = 1;
     $ionicPlatform.on('resume', function () {
+      paused = false;
       console.log('resume called from bluetooth controller');
       if (window.localStorage['lastConnectedDevice'] !== '' && !sending) {
         reconnectWithRetry();
@@ -773,11 +783,14 @@ angular.module('starter.controllers', [])
     //SECTION: changing & entering views
     //
 
+    $scope.$on('$ionicView.unloaded', function () {
+      console.log('\nUNLOADED\n');
+    });
 
     var skip = skipService.getSkip();
 //TODO when opening app, you enter on program, moving to runBluetooth\Test\Homing, skip is called and thus not auto connected
-    $scope.$on('$ionicView.enter',function () {
 
+    $scope.$on('$ionicView.enter',function () {
       skip = skipService.getSkip();
         console.log('enterView fired, skip = '+skip);
         if (skip === true) {
@@ -785,7 +798,12 @@ angular.module('starter.controllers', [])
           $scope.checkBluetoothEnabled(function () {
             $scope.bluetoothConnected(function () {
               if (!$scope.isConnected) {
-                $scope.getAvailableDevices();
+                if (window.localStorage['lastConnectedDevice'] !== '') {
+                  connectToLastConnectedDevice();
+                }
+                else {
+                  $scope.getAvailableDevices()
+                }
               }
             })
           });
@@ -1169,9 +1187,9 @@ angular.module('starter.controllers', [])
           }
           else {
             addToLog('Could not receive a response from the bluetooth receiver, checking connection');
-            $scope.emergencyOff();
             $scope.bluetoothConnected(function () {
               if (!$scope.isConnected) {
+                $scope.emergencyOff();
                 $scope.getAvailableDevices();
                 $ionicPopup.alert({
                   title: 'It appears that you have been disconnected',
@@ -1428,7 +1446,7 @@ angular.module('starter.controllers', [])
                 if (retry < 4) {
                   retry+=1;
                   console.log('retry number '+(retry+1)+'/3');
-                  $scope.sendSettingsData();
+                  $scope.sendSettingsData(moveXmmBoolean, moveXmmCommand, test, callback);
                 }
                 else {
                   addToLog('Maximum number of retries reached');
@@ -1463,7 +1481,7 @@ angular.module('starter.controllers', [])
             if (retry < 4) {
               retry+=1;
               console.log('retry number '+retry+'/3');
-              $scope.sendSettingsData();
+              $scope.sendSettingsData(moveXmmBoolean, moveXmmCommand, test, callback);
             }
             else {
               addToLog('Maximum number of retries reached');
@@ -1483,7 +1501,7 @@ angular.module('starter.controllers', [])
               send(commands[command], commandPlus);
             }
             //on last command check if 'rdy' has been sent
-            else if (command === commands.length-1 && response.search('rdy')> -1) {
+            else if (command === commands.length-1 && responseStr.search('rdy')> -1) {
 
               $scope.readyForData = false;
               $scope.showMovingButton = true;
@@ -1515,12 +1533,16 @@ angular.module('starter.controllers', [])
                 if (callback) callback();
               }
             }
-            else if (command === commands.length-1 && response.search('rdy') === -1){
-              addToLog('Settings have not been sent correctly');
+            else if (command === commands.length-1 && responseStr.search('kFAULT') !== -1){
+              //TODO Check this one
               sendResetCommand();
+              addToLog('Settings have not been sent correctly');
               command = 0;
               settingsDone = true;
               response = '';
+            }
+            else if (command === commands.length -1) {
+              send(commands[command], commandPlus);
             }
           }
           else if (boolean === false) {
@@ -1528,7 +1550,7 @@ angular.module('starter.controllers', [])
               if (retry < 4) {
                 retry+=1;
                 console.log('retry number '+retry+'/3');
-                $scope.sendSettingsData();
+                $scope.sendSettingsData(moveXmmBoolean, moveXmmCommand, test, callback);
               }
               else {
                 addToLog('Maximum number of retries reached');
@@ -2343,5 +2365,23 @@ angular.module('starter.controllers', [])
 
     }
 
-  });
+  })
 //end of controller runBluetoothCtrl
+
+.controller('homingCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
+                                    $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService) {
+  
+})
+//end of controller homingCtrl
+  
+.controller('testCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
+                                  $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService) {
+
+})
+//end of controller testCtrl
+  
+.controller('bluetoothConnectionCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
+                                                 $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService) {
+  
+});
+//end of controller bluetoothConnectionCtrl

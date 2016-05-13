@@ -3,6 +3,10 @@ var bugout = new debugout();
 //Force screen on while executing program
 angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
 
+  .config(function($ionicConfigProvider) {
+    $ionicConfigProvider.views.maxCache(1);
+  })
+
   .service('shareSettings', function() {
     var shareSettings = this;
     shareSettings.obj = {};
@@ -67,7 +71,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
   $ionicPlatform.on('pause', function () {
     if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
-      || $ionicHistory.currentStateName() === 'app.test') {
+      || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
       bugout.log('pause from app.js skipped');
     }
     else {
@@ -114,7 +118,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
-
+    //TODO split BluetoothCtrl into seperate controllers :'[
     .state('app', {
       name: 'app',
     url: '/app',
@@ -172,7 +176,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       views: {
         'menuContent': {
           templateUrl: 'templates/homing.html',
-          controller: 'runBluetoothCtrl'
+          controller: 'homingCtrl'
         }
       }
     })
@@ -194,7 +198,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       views: {
         'menuContent': {
           templateUrl: 'templates/test.html',
-          controller: 'runBluetoothCtrl'
+          controller: 'testCtrl'
         }
       }
     })
@@ -215,7 +219,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       views: {
         'menuContent': {
           templateUrl: 'templates/bluetoothConnection.html',
-          controller: 'runBluetoothCtrl'
+          controller: 'bluetoothConnectionCtrl'
         }
       }
     })
