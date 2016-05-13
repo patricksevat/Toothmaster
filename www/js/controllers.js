@@ -713,12 +713,12 @@ angular.module('starter.controllers', [])
 
 
   .controller('runBluetoothCtrl', function($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
-                                           $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService){
-    $scope.availableDevices = [];
-    $scope.pairedDevices = [];
-    $scope.bluetoothLog = [];
-    $scope.bluetoothEnabled =false;
-    $scope.isConnected = false;
+    $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
+    checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService){
+
+    $scope.bluetoothLog = logService.getLog();
+    $scope.bluetoothEnabled = checkBluetoothEnabledService.getValue();
+    $scope.isConnected = isConnectedService.getValue();
     $scope.platform = ionic.Platform.platform();
     var sending = false;
     var program = shareProgram.getObj();
@@ -728,7 +728,6 @@ angular.module('starter.controllers', [])
     console.log('settings:');
     console.log(JSON.stringify($scope.settings));
     $scope.showSpinner = false;
-    $scope.testRunning = false;
 
     //TODO seperate OS instructions
 
@@ -788,7 +787,6 @@ angular.module('starter.controllers', [])
     });
 
     var skip = skipService.getSkip();
-//TODO when opening app, you enter on program, moving to runBluetooth\Test\Homing, skip is called and thus not auto connected
 
     $scope.$on('$ionicView.enter',function () {
       skip = skipService.getSkip();
@@ -820,17 +818,18 @@ angular.module('starter.controllers', [])
         console.log(JSON.stringify($scope.settings));
         calculateVars();
         if (emergency) {
-          $scope.showResetButton = true;
+          setButtons({'showResetButton': true});
         }
         else {
-          $scope.showCalcButton = true;
-          $scope.showStressTest = true;
-          $scope.showHoming = true;
-          $scope.showMovingButton = false;
-          $scope.showEmergency = false;
-          $scope.readyForData = false;
-          $scope.testRunning = false;
-          $scope.showSpinner = false;
+          setButtons({
+            'showCalcButton': true,
+            'showStressTest' : true,
+            'showHoming': true,
+            'showMovingButton': false,
+            'showEmergency': false,
+            'readyForData': false,
+            'showSpinner': false
+          })
         }
     });
 
@@ -840,16 +839,15 @@ angular.module('starter.controllers', [])
       console.log('ionicView.leave called, skip = '+skip);
       if (sending === true ) {
         addToLog('Cancelling current tasks');
-        $scope.emergencyOn(function () {
-          $scope.emergencyOff();
-        })
+        emergencyService.on();
+        emergencyService.off();
       }
       else if (skip === true) {
         console.log('ionicView.leave skipped because view remains under runBluetoothCtrl');
       }
       else {
-        $cordovaBluetoothSerial.clear();
-        $window.bluetoothSerial.unsubscribeRawData();
+        $scope.clearBuffer();
+        unsubscribe();
         $window.bluetoothSerial.disconnect(function(){
           console.log('successfully disconnected')
         }, function () {
@@ -927,42 +925,24 @@ angular.module('starter.controllers', [])
     //SECTION: checks for Bluetooth turned on & Bluetooth connected
     //
 
-
-    $scope.checkBluetoothEnabled = function(callback) {
-      console.log('checkBluetoothEnabled fired');
-
-      $cordovaBluetoothSerial.isEnabled().then(function(){
-        addToLog('Bluetooth is turned on');
-        $scope.bluetoothEnabled = true;
-
-      },function(){
-        addToLog('Bluetooth is turned off');
-        $scope.bluetoothEnabled = false;
-      }).then(function () {
-        if (callback) callback();
-      })
-
+//TODO $scope.checkBluetoothEnabled replaced by checkBluetoothEnabledService
+    $scope.checkBluetoothEnabled = function(cb) {
+      $scope.bluetoothEnabled = checkBluetoothEnabledService.getValue();
+      if (cb) cb()
     };
 
+    //TODO $scope.bluetoothConnected replaced by isConnectedService
     $scope.bluetoothConnected = function (callback) {
-      $cordovaBluetoothSerial.isConnected().then(function () {
-        addToLog('Your smartphone is connected with a Bluetooth device');
-        $scope.isConnected = true;
-        if (window.localStorage['lastConnectedDevice'] !== '') {
+        $scope.isConnected = isConnectedService.getValue();
+        if (window.localStorage['lastConnectedDevice'] !== '' && $scope.isConnected) {
           var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
           $scope.deviceName = obj.name;
         }
-
-      }, function () {
-        addToLog('Your smartphone is not connected with a Bluetooth device');
-        $scope.isConnected = false;
-      }).then(function () {
         console.log('isConnected: '+$scope.isConnected);
         if (callback) callback();
-      })
     };
 
-
+//TODO replaced by turnOnBluetoothService
     $scope.bluetoothOn = function () {
       $ionicPlatform.ready(function() {
         console.log('Calling bluetoothOn');
@@ -974,15 +954,10 @@ angular.module('starter.controllers', [])
           addToLog('Bluetooth should be turned on manually');
         }
         else {
-        $cordovaBluetoothSerial.enable().then(function () {
-          addToLog('Bluetooth has been turned on by Toothmaster app');
-          $scope.checkBluetoothEnabled();
-          $scope.bluetoothConnected();
-          $scope.getAvailableDevices();
-        }, function (){
-          $cordovaBluetoothSerial.showBluetoothSettings();
-          addToLog('Bluetooth should be turned on manually, redirected to Bluetooth settings');
-          })
+          turnOnBluetoothService.turnOn();
+          $scope.checkBluetoothEnabled(function () {
+            connectToLastConnectedDevice();
+          });
         }
       })
      };
@@ -991,113 +966,13 @@ angular.module('starter.controllers', [])
     //SECTION: Getting paired & unpaired devices, userDisconnect
     //
 
-    $scope.getAvailableDevices = function () {
-      $scope.availableDevices = [];
-      $scope.pairedDevices = [];
-      if (!$scope.isConnected) {
-        $ionicPlatform.ready(function() {
-          console.log('Calling get available devices');
-          if (ionic.Platform.isAndroid) {
-            //discover unpaired
-            $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
-              addToLog('Searching for unpaired Bluetooth devices');
-              devices.forEach(function (device) {
-                  $scope.availableDevices.push(device);
-                  addToLog('Unpaired Bluetooth device found');
-                }
-              )}, function () {
-              addToLog('Cannot find unpaired Bluetooth devices');
-            });
-            //discover paired
-            $cordovaBluetoothSerial.list().then(function (devices) {
-              addToLog('Searching for paired Bluetooth devices');
-              devices.forEach(function (device) {
-                $scope.pairedDevices.push(device);
-                addToLog('Paired Bluetooth device found');
-              })
-            },function () {
-              addToLog('Cannot find paired Bluetooth devices');
-            })
-          }
-          else if (ionic.Platform.isIOS) {
-            $cordovaBluetoothSerial.list().then(function (devices) {
-              addToLog('Searching for Bluetooth devices');
-              devices.forEach(function (device) {
-                addToLog('Bluetooth device found');
-                $scope.availableDevices.push(device);
-              })
-            }, function () {
-              addToLog('No devices found');
-            })
-          }
-        })
-      }
 
-    };
-
-    $scope.connectToUnpairedDevice = function ($index) {
-      $ionicPlatform.ready(function() {
-      addToLog('Trying to connect');
-        console.log('Platform '+$scope.platform);
-      console.log('Id = '+$scope.availableDevices[$index].id);
-        if ($scope.platform === 'android') {
-          $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
-            addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
-            $scope.bluetoothConnected();
-            $scope.showCalcButton = true;
-            saveLastConnectedDevice($scope.availableDevices[$index].id, $scope.availableDevices[$index].name);
-          }, function (error) {
-            //failure callback
-            addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
-            addToLog('error: '+error);
-            $scope.bluetoothConnected();
-          })
-        }
-        else {
-          $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
-            addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
-            $scope.bluetoothConnected();
-            $scope.showCalcButton = true;
-          }, function (error) {
-            //failure callback
-            addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
-            addToLog('error: '+error);
-            $scope.bluetoothConnected();
-          })
-        }
-      })
-      };
-
-    $scope.connectToPairedDevice = function ($index) {
-      $ionicPlatform.ready(function() {
-        addToLog('Trying to connect');
-        console.log('Id = '+$scope.pairedDevices[$index].id);
-        $cordovaBluetoothSerial.connect($scope.pairedDevices[$index].id).then(function () {
-          addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
-          $scope.bluetoothConnected();
-          $scope.showCalcButton = true;
-          saveLastConnectedDevice($scope.pairedDevices[$index].id, $scope.pairedDevices[$index].name);
-      }, function (error) {
-          addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
-          addToLog('error: '+error);
-      })
-      })
-    };
-
+//TODO replaced by disconnectService
     $scope.userDisconnect = function () {
-      $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
-        $window.bluetoothSerial.disconnect(function () {
-          console.log('User disconnected');
-          addToLog('User disconnected');
-          $scope.$apply(function () {
-            $scope.isConnected = false;
-            $scope.showCalcButton = false;
-          });
-          $scope.getAvailableDevices();
-        }, function () {
-          console.log('User could not disconnected');
-          addToLog('Could not disconnect from device');
-        })
+      disconnectService.disconnect();
+      $scope.$apply(function () {
+        $scope.isConnected = false;
+        $scope.showCalcButton = false;
       });
     };
 
@@ -1106,56 +981,34 @@ angular.module('starter.controllers', [])
     //
 
 
-    //show buttons on view vars
-    $scope.readyForData = false;
-    var emergency = false;
-    $scope.showEmergency = false;
-    $scope.showMovingButton = false;
-    $scope.showCalcButton = false;
-    $scope.moving = false;
-    $scope.showResetButton = false;
-    $scope.showHoming = true;
-    $scope.showStressTest = true;
-    $scope.showVersionButton = true;
-    $scope.showMoveXMm = true;
+    //show buttons on view vars TODO replaced by buttonService
+    $scope.buttons = buttonService.getValues();
+    function setButtons(obj) {
+      buttonService.setValues(obj);
+      $scope.buttons = buttonService.getValues();
+    }
+
+    var emergency = emergencyService.getValue();
+
 
     //
     //SECTION: UI log function
     //
 
+    //TODO replaced by logService
     function addToLog(str) {
-      console.log('Added to UI log: '+str);
-      if ($scope.bluetoothLog.length > 200) {
-        $scope.bluetoothLog.pop();
-        $scope.bluetoothLog.unshift(str);
-      }
-      else {
-        $scope.bluetoothLog.unshift(str);
-      }
+      logService.addOne(str);
+      $scope.bluetoothLog = logService.getLog();
     }
 
     //
     //SECTION: setting & resetting stop buttons
     //
+//TODO replaced by emergencyService
 
-    $scope.emergencyOn = function (cb) {
-      addToLog('Stop button pressed');
-      emergency = true;
-      $scope.showEmergency = false;
-      $scope.showMovingButton = false;
-      $scope.showCalcButton = false;
-      $scope.showStressTest = false;
-      $scope.showHoming = false;
-      sentSettingsForTest = false;
-      sending = false;
-      $scope.showSpinner = false;
-      $scope.testRunning = false;
-      $scope.showVersionButton = false;
-      $scope.showMoveXMm = false;
-      $scope.readyForData = false;
-      //Send reset command
-      sendResetCommand();
-    };
+      //TODO Send reset command integration with emergencyOn
+      //sendResetCommand();
+
 
     var emergencyResetCount = 0;
     var emergencySentCount = 0;
@@ -1205,25 +1058,17 @@ angular.module('starter.controllers', [])
     $scope.emergencyOff = function () {
       console.log('emergencyOff called');
       emergency = false;
-      $scope.showCalcButton = true;
-      homingCommand = 0;
       command = 0;
       encoderCommand = 0;
       response = '';
       $scope.movements = [];
       $scope.movementsNum = 0;
       done = true;
-      $scope.showResetButton = false;
-      homingDone = true;
       settingsDone = true;
       $scope.completedTest = 0;
-      $scope.showStressTest = true;
-      $scope.showHoming = true;
-      $scope.showSpinner = false;
-      $scope.testRunning = false;
-      $scope.showVersionButton = true;
-      $scope.showMoveXMm = true;
       retry = 1;
+      emergencyService.off();
+      $scope.buttons = buttonService.getValues;
     };
 
     //
@@ -1231,16 +1076,12 @@ angular.module('starter.controllers', [])
     //
 
     var direction; //if 'change direction' is true then 1, else 0
-    var homingDirection;
-    var homingStopswitchInt;
+
     var startPositionSteps; // value can be positive or negative
     var stepsPerRPM; // value must be positive
     var maxRPM; //MaxFreq*60/dipswitch , value is max speed in RPM, floating point, must be positive
     var time; //test, value floating point, must be positive
     var stepMotorOnOff; //test, value 0 or 1
-
-    //other vars/commands
-    var softwareVersionCommand;
 
     //decoder vars
     var disableEncoder;
@@ -1251,11 +1092,6 @@ angular.module('starter.controllers', [])
     var commands;
     var command;
     var settingsDone;
-
-    //homing commands
-    var homingCommands;
-    var homingCommand;
-    var homingDone;
 
     //encoder commands
     var encoderCommands;
@@ -1274,31 +1110,16 @@ angular.module('starter.controllers', [])
     //setting vars
     var stepMotorNum = '3';
 
+    //TODO replaced by calculateVarsService
     function calculateVars() {
       console.log('calculated vars');
-      direction = ($scope.settings.direction) ? 1 : 0;
-      homingDirection = ($scope.settings.direction) ? 0 : 1;
-      homingStopswitchInt = ($scope.settings.homingStopswitch === true) ? 2 : 1;
-      startPositionSteps = Math.floor(program.startPosition / $scope.settings.spindleAdvancement * $scope.settings.dipswitch);
-      stepsPerRPM = $scope.settings.dipswitch;
-      maxRPM = ($scope.settings.maxFreq*60/$scope.settings.dipswitch).toFixed(3);
-      time = $scope.settings.time.toFixed(3);
-      stepMotorOnOff = '1';
-      disableEncoder = '<x0'+stepMotorNum+'>';
-      stepsPerRPMDevidedByStepsPerRPMEncoder = ($scope.settings.encoder.stepsPerRPM !== 0) ? ($scope.settings.dipswitch/$scope.settings.encoder.stepsPerRPM).toFixed(3) : '' ; //value floating point, allowed positive or negative value
-      stepsPerRPMDevidedByStepsPerRPMEncoder = ($scope.settings.encoder.direction) ? stepsPerRPMDevidedByStepsPerRPMEncoder*-1: stepsPerRPMDevidedByStepsPerRPMEncoder;
-      maxAllowedMiss = ($scope.settings.encoder.stepsToMiss) ? $scope.settings.encoder.stepsToMiss : '';
-      commands = ['<v'+direction+stepMotorNum+'>', '<s'+startPositionSteps+stepMotorNum+'>', '<p'+stepsPerRPM+stepMotorNum+'>',
-        '<r'+maxRPM+stepMotorNum+'>', '<f'+stepMotorOnOff+stepMotorNum+'>', '<o'+time+stepMotorNum+'>', '<kFAULT'+stepMotorNum+'>'];
+      var returnVar = calculateVarsService.getVars();
+      commands = returnVar.commands;
       command = 0;
       settingsDone = true;
-      homingCommands = ['<v'+homingDirection+stepMotorNum+'>', '<p'+stepsPerRPM+stepMotorNum+'>', '<r'+maxRPM+stepMotorNum+'>',
-        '<o'+time+stepMotorNum+'>','<h'+homingStopswitchInt+stepMotorNum+'>', '<kFAULT'+stepMotorNum+'>'];
-      homingCommand = 0;
-      homingDone = true;
-      encoderCommands = ['<x1'+stepMotorNum+'>', '<d'+stepsPerRPMDevidedByStepsPerRPMEncoder+stepMotorNum+'>', '<b'+maxAllowedMiss+stepMotorNum+'>'];
+      encoderCommands = returnVar.encoderCommands;
       encoderCommand = 0;
-      softwareVersionCommand = '<z'+stepMotorNum+'>';
+
     }
 
     //retry counter
@@ -1418,11 +1239,11 @@ angular.module('starter.controllers', [])
     $scope.sendSettingsData = function (moveXmmBoolean, moveXmmCommand, test, callback) {
       if (!emergency) {
         if (homingDone){
-          $scope.showSpinner = true;
+          setButtons({'showSpinner':true,'showEmergency':true});
           subscribe();
           sending = true;
           settingsDone = false;
-          $scope.showEmergency = true;
+
           if (moveXmmBoolean === true) {
             commands[1] = moveXmmCommand;
           }
@@ -1502,11 +1323,7 @@ angular.module('starter.controllers', [])
             }
             //on last command check if 'rdy' has been sent
             else if (command === commands.length-1 && responseStr.search('rdy')> -1) {
-
-              $scope.readyForData = false;
-              $scope.showMovingButton = true;
-              $scope.showCalcButton = false;
-              $scope.showHoming = false;
+              setButtons({'readyForData':false,'showMovingButton':true,'showCalcButton':false,'showHoming':false});
               settingsDone = true;
               command = 0;
               response = '';
@@ -1516,7 +1333,7 @@ angular.module('starter.controllers', [])
                 addToLog('Moved to start position');
                 var subCuts = program.cutWidth / program.sawWidth;
                 var cutsRoundedUp = Math.ceil(subCuts);
-                $scope.showSpinner = false;
+                setButtons({'showSpinner':false});
                 if (program.cutWidth !== program.sawWidth) {
                   $ionicPopup.alert({
                     title: 'Make the subcut 1/'+cutsRoundedUp
@@ -1566,272 +1383,6 @@ angular.module('starter.controllers', [])
     };
 
     //
-    //SECTION: homing logic
-    //
-
-    $scope.homing = function () {
-      if (!emergency) {
-        subscribe();
-        response = '';
-        console.log('homingStopswitch = '+homingStopswitchInt);
-        if (settingsDone){
-          $scope.showSpinner = true;
-          sending = true;
-          homingDone = false;
-          $scope.showEmergency = true;
-          $scope.showHoming = false;
-          //send start command
-          send('<<y8:y' + stepMotorNum + '>', function (boolean) {
-            //true boolean means a correct response has been given
-            if (boolean === true) {
-              //send encoder settings or disable encode command, after that send settings commands
-              if ($scope.settings.encoder.enable) {
-                console.log('Homing with encoder enabled');
-                send(encoderCommands[0], encoderHomingPlus);
-              }
-              else {
-                console.log('Homing with encoder disabled');
-                send(disableEncoder, function () {
-                  send(homingCommands[homingCommand], homingCommandPlus);
-                })
-              }
-            }
-            //false boolean means a timeout was encountered, retry
-            else if (boolean === false && !emergency) {
-              if (retry < 4) {
-                retry+=1;
-                console.log('retry number '+retry+'/3');
-                $scope.homing();
-              }
-              else {
-                addToLog('Maximum number of retries reached');
-              }
-            }
-          });
-        }
-        else {
-          $ionicPopup.alert({
-            title: 'Please wait untill moving to start position is done in run Bluetooth program'
-          });
-        }
-      }
-      else {
-        $ionicPopup.alert({
-          title: 'Emergency has been pressed, will not contnue homing'
-        });
-      }
-
-      function encoderHomingPlus(boolean){
-        if (boolean === true) {
-          if (!emergency) {
-            if (encoderCommand < encoderCommands.length-1){
-              encoderCommand +=1;
-              send(encoderCommands[encoderCommand], encoderPlus);
-            }
-            else if (encoderCommand === encoderCommands.length-1){
-              send(homingCommands[homingCommand], homingCommandPlus);
-            }
-          }
-        }
-        else if (boolean === false && !emergency) {
-          if (retry < 4) {
-            retry+=1;
-            console.log('retry number '+retry+'/3');
-            $scope.homing();
-          }
-          else {
-            addToLog('Maximum number of retries reached');
-          }
-        }
-      }
-
-      function homingCommandPlus(boolean, res) {
-        if (boolean === true &&!homingDone) {
-          if (!emergency){
-            console.log('homingCommandPlus called');
-            //first command is already sent in homing function
-            if (homingCommand < homingCommands.length-1) {
-              homingCommand += 1;
-              send(homingCommands[homingCommand], homingCommandPlus);
-              console.log('homingCommand = '+homingCommand);
-              console.log('homingCommands.length = '+homingCommands.length);
-            }
-            //on last command check if 'rdy' has been sent
-            else if (homingCommand === homingCommands.length -1) {
-              console.log('All homing commands sent');
-              console.log('Making homing movement');
-              if (res.search('wydone') > -1) {
-                $scope.showSpinner = false;
-                $ionicPopup.alert({
-                  title: 'Homing completed'
-                });
-                $scope.showCalcButton = true;
-                homingDone = true;
-                homingCommand = 0;
-                sending = false;
-                $scope.showEmergency = false;
-                $scope.showHoming = true;
-              }
-              else {
-                $timeout(function () {
-                  send('<w'+stepMotorNum+'>', homingCommandPlus);
-                }, 200);
-              }
-            }
-          }
-          else {
-            $ionicPopup.alert({
-              title: 'Emergency has been pressed in run Bluetooth program, will not execute homing'
-            });
-          }
-        }
-        else if (boolean === false && !emergency) {
-          if (retry < 4) {
-            retry+=1;
-            console.log('retry number '+retry+'/3');
-            $scope.homing();
-          }
-          else {
-            addToLog('Maximum number of retries reached');
-          }
-        }
-      }
-    };
-
-    //
-    //SECTION: stressTest && move X mm logic
-    //
-
-    $scope.retriesNeeded = 0;
-    $scope.completedTest = 0;
-    var sentSettingsForTest = false;
-    $scope.numberOfTests = {};
-
-    //TODO make sure that moveXMm, stresstest and normal program still function as expected
-    $scope.moveXMm = function () {
-      if (!emergency && !sending) {
-        if ($scope.numberOfTests.mm === undefined) {
-          $ionicPopup.alert({
-            title: 'Please fill in "Move X mm"'
-          })
-        }
-        else {
-          $scope.showStressTest = false;
-          $scope.showVersionButton = false;
-          var moveXMmSteps = $scope.numberOfTests.mm / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-          var moveXMmStepsCommand = '<s'+moveXMmSteps+stepMotorNum+'>';
-          //first true is moveXMm, second true is to use callback
-          $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
-            $scope.showStressTest = true;
-            $scope.showVersionButton = true;
-            $scope.showEmergency = false;
-            $scope.showSpinner = false;
-            $ionicPopup.alert({
-              title: 'Succesfully moved '+$scope.numberOfTests.mm+' mm'
-            });
-            calculateVars();
-          })
-        }
-      }
-    };
-
-    $scope.stressTest = function () {
-      $scope.showEmergency = true;
-      $scope.showResetButton = false;
-      $scope.showStressTest = false;
-      $scope.testRunning = true;
-      $scope.showVersionButton = false;
-      $scope.showMoveXMm = false;
-      if (emergency) {
-        addToLog('Emergency on, cancelling stresstest');
-        return
-      }
-      if (!sentSettingsForTest) {
-        if (!emergency) {
-          console.log('numberOfTests:'+$scope.numberOfTests.tests);
-          addToLog('Sending settings needed for testing');
-          //make sure that on setting the settings, start position = 0mm
-          var moveXMmStepsCommand = '<s0'+stepMotorNum+'>';
-          $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
-            sentSettingsForTest = true;
-            $scope.stressTest();
-          });
-        }
-
-      }
-      else {
-        if (!emergency) {
-          addToLog('Executing test '+($scope.completedTest+1)+'/'+$scope.numberOfTests.tests);
-          sending = true;
-          send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', checkTestDone);
-
-          function checkTestDone(boolean) {
-            if (!emergency) {
-              if (boolean === true) {
-                if (response.search('wydone') > -1) {
-                  response = '';
-                  $cordovaBluetoothSerial.clear();
-                  console.log('Test done, moving to next test');
-                  $scope.completedTest +=1;
-
-                  $cordovaBluetoothSerial.clear();
-                  if ($scope.completedTest < $scope.numberOfTests.tests){
-                    $timeout(function () {
-                      $scope.stressTest();
-                    }, 50)
-                  }
-                  else {
-                    $scope.showSpinner = false;
-                    $ionicPopup.alert({
-                      title: 'Test completed',
-                      template: 'You have successfully completed the tests.'
-                    });
-                    addToLog('Testing done, completed '+$scope.completedTest+' tests');
-                    $scope.showEmergency = false;
-                    $scope.completedTest = 0;
-                    $scope.showStressTest = true;
-                    $scope.showCalcButton = true;
-                    $scope.showHoming = true;
-                    sending = false;
-                    $scope.showVersionButton = true;
-                    $scope.showMoveXMm = true;
-                    calculateVars();
-                  }
-                }
-                else {
-                  $timeout(function () {
-                    send('<w'+stepMotorNum+'>', checkTestDone);
-                  }, 50);
-                }
-              }
-              else if (boolean === false && !emergency) {
-                if (retry <= 10) {
-                  console.log('retry number '+retry+'/10');
-                  retry +=1;
-                  $scope.retriesNeeded += 1;
-                  $scope.stressTest(true, moveXMmStepsCommand, true, function () {
-                    sentSettingsForTest = true;
-                    $scope.stressTest();
-                  });
-                }
-                else {
-                  addToLog('Maximum number of retries reached');
-                }
-              }
-            }
-            else {
-              addToLog('Emergency on, will not continue with stresstest');
-            }
-          }
-        }
-        else {
-          addToLog('Emergency on, will not continue with stresstest');
-        }
-      }
-
-    };
-
-    //
     //SECTION: startMoving \ take steps logic
     //
 
@@ -1841,7 +1392,7 @@ angular.module('starter.controllers', [])
         if (done) {
           sending = true;
           done = false;
-          $scope.showSpinner = true;
+          setButtons({'showSpinner':true});
           send('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
         }
         else {
@@ -1861,7 +1412,7 @@ angular.module('starter.controllers', [])
               addToLog('Movement done');
               addToLog($scope.movements[$scope.movementsNum].description);
               done = true;
-              $scope.showSpinner = false;
+              setButtons({'showSpinner':false});
               if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut' && $scope.movementsNum !== $scope.movements.length -1){
                 $ionicPopup.alert({
                   title: $scope.movements[$scope.movementsNum].description
@@ -1877,9 +1428,7 @@ angular.module('starter.controllers', [])
                     onTap: $scope.showRestartPopup()
                   }]
                 });
-                $scope.showMovingButton = false;
-                $scope.showEmergency = false;
-                $scope.showResetButton = true;
+                setButtons({'showMovingButton':false,'showEmergency':false,'showResetButton':true});
                 sending = false;
               }
               $scope.movementsNum += 1;
@@ -2370,18 +1919,391 @@ angular.module('starter.controllers', [])
 
 .controller('homingCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                     $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService) {
-  
+  var homingDirection;
+  var homingStopswitchInt;
+  //homing commands
+  var homingCommands;
+  var homingCommand;
+
+  var encoderCommands;
+  var encoderCommand;
+
+  var homingDone;
+  var sending = false;
+  var response;
+  var settingsDone = true;
+  var retry = 0;
+  var emergency = false;
+
+  //
+  //SECTION: homing logic
+  //
+
+  $scope.homing = function () {
+    if (!emergency) {
+      subscribe();
+      response = '';
+      console.log('homingStopswitch = '+homingStopswitchInt);
+      if (settingsDone){
+        $scope.showSpinner = true;
+        sending = true;
+        homingDone = false;
+        $scope.showEmergency = true;
+        $scope.showHoming = false;
+        //send start command
+        send('<<y8:y' + stepMotorNum + '>', function (boolean) {
+          //true boolean means a correct response has been given
+          if (boolean === true) {
+            //send encoder settings or disable encode command, after that send settings commands
+            if ($scope.settings.encoder.enable) {
+              console.log('Homing with encoder enabled');
+              send(encoderCommands[0], encoderHomingPlus);
+            }
+            else {
+              console.log('Homing with encoder disabled');
+              send(disableEncoder, function () {
+                send(homingCommands[homingCommand], homingCommandPlus);
+              })
+            }
+          }
+          //false boolean means a timeout was encountered, retry
+          else if (boolean === false && !emergency) {
+            if (retry < 4) {
+              retry+=1;
+              console.log('retry number '+retry+'/3');
+              $scope.homing();
+            }
+            else {
+              addToLog('Maximum number of retries reached');
+            }
+          }
+        });
+      }
+      else {
+        $ionicPopup.alert({
+          title: 'Please wait untill moving to start position is done in run Bluetooth program'
+        });
+      }
+    }
+    else {
+      $ionicPopup.alert({
+        title: 'Emergency has been pressed, will not contnue homing'
+      });
+    }
+
+    function encoderHomingPlus(boolean){
+      if (boolean === true) {
+        if (!emergency) {
+          if (encoderCommand < encoderCommands.length-1){
+            encoderCommand +=1;
+            send(encoderCommands[encoderCommand], encoderPlus);
+          }
+          else if (encoderCommand === encoderCommands.length-1){
+            send(homingCommands[homingCommand], homingCommandPlus);
+          }
+        }
+      }
+      else if (boolean === false && !emergency) {
+        if (retry < 4) {
+          retry+=1;
+          console.log('retry number '+retry+'/3');
+          $scope.homing();
+        }
+        else {
+          addToLog('Maximum number of retries reached');
+        }
+      }
+    }
+
+    function homingCommandPlus(boolean, res) {
+      if (boolean === true &&!homingDone) {
+        if (!emergency){
+          console.log('homingCommandPlus called');
+          //first command is already sent in homing function
+          if (homingCommand < homingCommands.length-1) {
+            homingCommand += 1;
+            send(homingCommands[homingCommand], homingCommandPlus);
+            console.log('homingCommand = '+homingCommand);
+            console.log('homingCommands.length = '+homingCommands.length);
+          }
+          //on last command check if 'rdy' has been sent
+          else if (homingCommand === homingCommands.length -1) {
+            console.log('All homing commands sent');
+            console.log('Making homing movement');
+            if (res.search('wydone') > -1) {
+              $scope.showSpinner = false;
+              $ionicPopup.alert({
+                title: 'Homing completed'
+              });
+              $scope.showCalcButton = true;
+              homingDone = true;
+              homingCommand = 0;
+              sending = false;
+              $scope.showEmergency = false;
+              $scope.showHoming = true;
+            }
+            else {
+              $timeout(function () {
+                send('<w'+stepMotorNum+'>', homingCommandPlus);
+              }, 200);
+            }
+          }
+        }
+        else {
+          $ionicPopup.alert({
+            title: 'Emergency has been pressed in run Bluetooth program, will not execute homing'
+          });
+        }
+      }
+      else if (boolean === false && !emergency) {
+        if (retry < 4) {
+          retry+=1;
+          console.log('retry number '+retry+'/3');
+          $scope.homing();
+        }
+        else {
+          addToLog('Maximum number of retries reached');
+        }
+      }
+    }
+  };
+
 })
 //end of controller homingCtrl
-  
+
 .controller('testCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                   $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService) {
+//other vars/commands
+  var softwareVersionCommand;
+
+  //
+  //SECTION: stressTest && move X mm logic
+  //
+
+  $scope.retriesNeeded = 0;
+  $scope.completedTest = 0;
+  var sentSettingsForTest = false;
+  $scope.numberOfTests = {};
+
+  //TODO make sure that moveXMm, stresstest and normal program still function as expected
+  $scope.moveXMm = function () {
+    if (!emergency && !sending) {
+      if ($scope.numberOfTests.mm === undefined) {
+        $ionicPopup.alert({
+          title: 'Please fill in "Move X mm"'
+        })
+      }
+      else {
+        $scope.showStressTest = false;
+        $scope.showVersionButton = false;
+        var moveXMmSteps = $scope.numberOfTests.mm / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+        var moveXMmStepsCommand = '<s'+moveXMmSteps+stepMotorNum+'>';
+        //first true is moveXMm, second true is to use callback
+        $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
+          $scope.showStressTest = true;
+          $scope.showVersionButton = true;
+          $scope.showEmergency = false;
+          $scope.showSpinner = false;
+          $ionicPopup.alert({
+            title: 'Succesfully moved '+$scope.numberOfTests.mm+' mm'
+          });
+          calculateVars();
+        })
+      }
+    }
+  };
+
+  $scope.stressTest = function () {
+    $scope.showEmergency = true;
+    $scope.showResetButton = false;
+    $scope.showStressTest = false;
+    $scope.showVersionButton = false;
+    $scope.showMoveXMm = false;
+    if (emergency) {
+      addToLog('Emergency on, cancelling stresstest');
+      return
+    }
+    if (!sentSettingsForTest) {
+      if (!emergency) {
+        console.log('numberOfTests:'+$scope.numberOfTests.tests);
+        addToLog('Sending settings needed for testing');
+        //make sure that on setting the settings, start position = 0mm
+        var moveXMmStepsCommand = '<s0'+stepMotorNum+'>';
+        $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
+          sentSettingsForTest = true;
+          $scope.stressTest();
+        });
+      }
+
+    }
+    else {
+      if (!emergency) {
+        addToLog('Executing test '+($scope.completedTest+1)+'/'+$scope.numberOfTests.tests);
+        sending = true;
+        send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', checkTestDone);
+
+        function checkTestDone(boolean) {
+          if (!emergency) {
+            if (boolean === true) {
+              if (response.search('wydone') > -1) {
+                response = '';
+                $cordovaBluetoothSerial.clear();
+                console.log('Test done, moving to next test');
+                $scope.completedTest +=1;
+
+                $cordovaBluetoothSerial.clear();
+                if ($scope.completedTest < $scope.numberOfTests.tests){
+                  $timeout(function () {
+                    $scope.stressTest();
+                  }, 50)
+                }
+                else {
+                  $scope.showSpinner = false;
+                  $ionicPopup.alert({
+                    title: 'Test completed',
+                    template: 'You have successfully completed the tests.'
+                  });
+                  addToLog('Testing done, completed '+$scope.completedTest+' tests');
+                  $scope.showEmergency = false;
+                  $scope.completedTest = 0;
+                  $scope.showStressTest = true;
+                  $scope.showCalcButton = true;
+                  $scope.showHoming = true;
+                  sending = false;
+                  $scope.showVersionButton = true;
+                  $scope.showMoveXMm = true;
+                  calculateVars();
+                }
+              }
+              else {
+                $timeout(function () {
+                  send('<w'+stepMotorNum+'>', checkTestDone);
+                }, 50);
+              }
+            }
+            else if (boolean === false && !emergency) {
+              if (retry <= 10) {
+                console.log('retry number '+retry+'/10');
+                retry +=1;
+                $scope.retriesNeeded += 1;
+                $scope.stressTest(true, moveXMmStepsCommand, true, function () {
+                  sentSettingsForTest = true;
+                  $scope.stressTest();
+                });
+              }
+              else {
+                addToLog('Maximum number of retries reached');
+              }
+            }
+          }
+          else {
+            addToLog('Emergency on, will not continue with stresstest');
+          }
+        }
+      }
+      else {
+        addToLog('Emergency on, will not continue with stresstest');
+      }
+    }
+
+  };
 
 })
 //end of controller testCtrl
-  
+
 .controller('bluetoothConnectionCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                                  $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService) {
-  
+  $scope.getAvailableDevices = function () {
+    $scope.availableDevices = [];
+    $scope.pairedDevices = [];
+    if (!$scope.isConnected) {
+      $ionicPlatform.ready(function() {
+        console.log('Calling get available devices');
+        if (ionic.Platform.isAndroid) {
+          //discover unpaired
+          $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
+            addToLog('Searching for unpaired Bluetooth devices');
+            devices.forEach(function (device) {
+                $scope.availableDevices.push(device);
+                addToLog('Unpaired Bluetooth device found');
+              }
+            )}, function () {
+            addToLog('Cannot find unpaired Bluetooth devices');
+          });
+          //discover paired
+          $cordovaBluetoothSerial.list().then(function (devices) {
+            addToLog('Searching for paired Bluetooth devices');
+            devices.forEach(function (device) {
+              $scope.pairedDevices.push(device);
+              addToLog('Paired Bluetooth device found');
+            })
+          },function () {
+            addToLog('Cannot find paired Bluetooth devices');
+          })
+        }
+        else if (ionic.Platform.isIOS) {
+          $cordovaBluetoothSerial.list().then(function (devices) {
+            addToLog('Searching for Bluetooth devices');
+            devices.forEach(function (device) {
+              addToLog('Bluetooth device found');
+              $scope.availableDevices.push(device);
+            })
+          }, function () {
+            addToLog('No devices found');
+          })
+        }
+      })
+    }
+
+  };
+
+  $scope.connectToUnpairedDevice = function ($index) {
+    $ionicPlatform.ready(function() {
+      addToLog('Trying to connect');
+      console.log('Platform '+$scope.platform);
+      console.log('Id = '+$scope.availableDevices[$index].id);
+      if ($scope.platform === 'android') {
+        $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
+          addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
+          $scope.bluetoothConnected();
+          $scope.showCalcButton = true;
+          saveLastConnectedDevice($scope.availableDevices[$index].id, $scope.availableDevices[$index].name);
+        }, function (error) {
+          //failure callback
+          addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
+          addToLog('error: '+error);
+          $scope.bluetoothConnected();
+        })
+      }
+      else {
+        $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
+          addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
+          $scope.bluetoothConnected();
+          $scope.showCalcButton = true;
+        }, function (error) {
+          //failure callback
+          addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
+          addToLog('error: '+error);
+          $scope.bluetoothConnected();
+        })
+      }
+    })
+  };
+
+  $scope.connectToPairedDevice = function ($index) {
+    $ionicPlatform.ready(function() {
+      addToLog('Trying to connect');
+      console.log('Id = '+$scope.pairedDevices[$index].id);
+      $cordovaBluetoothSerial.connect($scope.pairedDevices[$index].id).then(function () {
+        addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
+        $scope.bluetoothConnected();
+        $scope.showCalcButton = true;
+        saveLastConnectedDevice($scope.pairedDevices[$index].id, $scope.pairedDevices[$index].name);
+      }, function (error) {
+        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
+        addToLog('error: '+error);
+      })
+    })
+  };
 });
 //end of controller bluetoothConnectionCtrl
