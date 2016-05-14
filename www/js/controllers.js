@@ -1,5 +1,14 @@
 angular.module('starter.controllers', [])
 //TODO replace console.log with bugout.log
+  /*
+  * TODO:
+  * $rootScope emits:
+  * $rootScope.$on('emergencyOn')
+  * $rootScope.$on('emergencyOff')
+  * $rootScope.$on('stopswitchHit', response, stopswitchNumber)
+  * $rootScope.$on('maxSteps', response, missedSteps)
+  * $rootScope.$on('bluetoothResponse', response)
+  * */
 //controller used for debug buttons, not used anymore
 .controller('AppCtrl', function($scope) {
   /*
@@ -714,13 +723,14 @@ angular.module('starter.controllers', [])
 
   .controller('runBluetoothCtrl', function($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
     $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
-    checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService){
+    checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
+    logModalService, helpModalService, modalService, statusService){
 
     $scope.bluetoothLog = logService.getLog();
     $scope.bluetoothEnabled = checkBluetoothEnabledService.getValue();
     $scope.isConnected = isConnectedService.getValue();
     $scope.platform = ionic.Platform.platform();
-    var sending = false;
+    var sending = statusService.getSending();
     var program = shareProgram.getObj();
     console.log('program:');
     console.log(JSON.stringify(program));
@@ -729,14 +739,13 @@ angular.module('starter.controllers', [])
     console.log(JSON.stringify($scope.settings));
     $scope.showSpinner = false;
 
-    //TODO seperate OS instructions
-
     //
     //SECTION: pause & resume app
     //
 
     var paused = false;
 
+    //TODO ionicPlatform on pause has been replaced by pauseService and is controlled from app.js
     $ionicPlatform.on('pause', function () {
       console.log('pause called from bluetoothCtrl');
       //check for connection and if commands are being sent
@@ -788,6 +797,8 @@ angular.module('starter.controllers', [])
 
     var skip = skipService.getSkip();
 
+    //TODO rewrite onEnter so that reconnect is skipped (done by app.js)
+    // and only calculateVarsService.getVars('runBluetooth') is called && log is imported && correct buttons are set
     $scope.$on('$ionicView.enter',function () {
       skip = skipService.getSkip();
         console.log('enterView fired, skip = '+skip);
@@ -861,6 +872,7 @@ angular.module('starter.controllers', [])
     //
     $scope.deviceName= '';
 
+    //TODO replaced by connectToDeviceService.connectWithRetry
     function reconnectWithRetry() {
       connectToLastConnectedDevice(function () {
         if ($scope.isConnected === false && reconnectTry <= 5) {
@@ -881,6 +893,7 @@ angular.module('starter.controllers', [])
       })
     }
 
+    //TODO replaced by connectToDeviceService.connectToLastDevice
     function connectToLastConnectedDevice(cb){
       addToLog('Trying to connect with last known device');
       $scope.checkBluetoothEnabled(function () {
@@ -913,13 +926,6 @@ angular.module('starter.controllers', [])
       });
     }
 
-    function saveLastConnectedDevice(id, name) {
-      var obj = {'id':id,'name':name};
-      $scope.deviceName = name;
-      window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
-      console.log('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice']);
-      showSavedDeviceAlert();
-    }
 
     //
     //SECTION: checks for Bluetooth turned on & Bluetooth connected
@@ -1006,7 +1012,7 @@ angular.module('starter.controllers', [])
     //
 //TODO replaced by emergencyService
 
-      //TODO Send reset command integration with emergencyOn
+      //TODO set variables necessary on rootscope listener
       //sendResetCommand();
 
 
@@ -1139,6 +1145,8 @@ angular.module('starter.controllers', [])
 
     //calculate movement sequence
     $scope.calcSteps = function() {
+      program = shareProgram.getObj();
+      $scope.settings = shareSettings.getObj();
       $scope.movements = [];
       //call function to calculate steps for cuts, subcuts and pins, log $scope.movements, callback to inform user of movements
       if (program.sawWidth === undefined || program.cutWidth === undefined
@@ -1462,7 +1470,7 @@ angular.module('starter.controllers', [])
     //SECTION: sending commands and receiving responses logic
     //
 
-    //retrieve bluetooth messages from driver
+    //retrieve bluetooth messages from driver TODO: replaced by sendAndReceiveService.subscribe
     function subscribe(cb){
       var received = false;
       $window.bluetoothSerial.subscribe('#',function (data) {
@@ -1485,12 +1493,14 @@ angular.module('starter.controllers', [])
       },3000)
     }
 
+    //TODO: replaced by sendAndReceiveService.unsubscribe
     function unsubscribe() {
       $window.bluetoothSerial.unsubscribe(function () {
         console.log('unsubscribed');
       });
     }
 
+    //TODO: replaced by sendAndReceiveService.sendEmergency
     function sendResetCommand() {
       subscribe();
       $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
@@ -1501,6 +1511,8 @@ angular.module('starter.controllers', [])
       });
     }
 
+    //TODO: replaced by sendAndReceiveService.write
+    //TODO: build $rootscope.$on listeners for 'bluetoothResponse', 'stopswitchHit' and 'maxSteps'
     function send(str, callback){
       //Check for emergency
       if(!emergency) {
@@ -1661,6 +1673,7 @@ angular.module('starter.controllers', [])
       });*/
     }
 
+    //TODO replaced by sendAndReceiveService.clearBuffer
     $scope.clearBuffer = function () {
      $cordovaBluetoothSerial.clear().then(function success(){
        addToLog('Received buffer cleared');
@@ -1721,6 +1734,7 @@ angular.module('starter.controllers', [])
       })
     };
 
+    //TODO replaced by logModalService
     function createLogModal(cb) {
       $ionicModal.fromTemplateUrl('log-modal.html', {
         id: 1,
@@ -1732,6 +1746,7 @@ angular.module('starter.controllers', [])
       });
     }
 
+    //TODO replaced by helpModalService
     function createHelpModal(cb) {
       $ionicModal.fromTemplateUrl('help-modal.html', {
         id: 2,
@@ -1745,7 +1760,7 @@ angular.module('starter.controllers', [])
     }
 
 
-
+//TODO replaced by modalService.openModal, call with new!
     $scope.openModal = function(index) {
       if (index === 1) {
         if ($scope.modal1 == undefined) {
@@ -1771,24 +1786,20 @@ angular.module('starter.controllers', [])
       }
     };
 
+    //TODO replaced by modalService.closeModal, call with new!
     $scope.closeModal = function(index) {
       if (index === 1) $scope.modal1.hide();
       else $scope.modal2.hide();
     };
 
-    /* TODO figure out modal creation
-    $scope.$on('$ionicView.leave', function() {
-      if ($scope.modal1 !== undefined) $scope.modal1.remove();
-      if ($scope.modal2 !== undefined) $scope.modal2.remove();
-      console.log('modals removed')
-    });*/
-
+    //TODO replaced by modalService.showFullLog, call with new!
     $scope.showFullLog= function () {
       console.log('bluetoothLog.length'+$scope.bluetoothLog.length);
       $scope.fullLog = $scope.bluetoothLog.slice(0,19);
       $scope.openModal(1);
     };
 
+    //TODO replaced by modalService.getFullLogExtract, call with new!
     $scope.getFullLogExtract = function(start, end) {
       console.log('getFullLogExtract, start: '+start+' end: '+end);
       $scope.fullLog = $scope.bluetoothLog.slice(start, end)
@@ -1796,12 +1807,14 @@ angular.module('starter.controllers', [])
 
     $scope.fullLogPage = 0;
 
+    //TODO replaced by modalService.previousFullLogPage, call with new!
     $scope.previousFullLogPage = function () {
       console.log('prevFullLogPage');
       $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
       $scope.fullLogPage -= 1;
     };
 
+    //TODO replaced by modalService.nextFullLogPage, call with new!
     $scope.nextFullLogPage = function () {
       console.log('nextFullLogPage');
       $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
@@ -1809,6 +1822,7 @@ angular.module('starter.controllers', [])
     };
 
     //Help modal
+    //TODO: fill with actual Q&A's
     $scope.show = null;
     $scope.QAList = [];
     for (var i=1; i<11; i++) {
@@ -1822,6 +1836,7 @@ angular.module('starter.controllers', [])
       $scope.show = $scope.show === obj ? null : obj;
     };
 
+    //TODO replaced by logModal.emailFullLog
     $scope.emailFullLog = function () {
       var now = Date.now();
       cordova.plugins.email.isAvailable(
@@ -1867,51 +1882,6 @@ angular.module('starter.controllers', [])
 
     function fileSystemError(error) {
       console.log('Error getting file system: '+error.code);
-    }
-
-    function showSavedDeviceAlert() {
-      $ionicPopup.alert({
-        title: 'Bluetooth device saved',
-        template: 'This bluetooth device is saved and will connect automatically from now on.<br \>If you need to change your device later on choose a new device via Bluetooth connection in the menu',
-        buttons: [{
-          text: 'Go to program',
-          type: 'button-calm',
-          onTap: function () {
-            $state.go('app.program')
-          }
-        },
-          {
-          text: 'Close'
-          }
-        ]
-      })
-    }
-
-    $scope.getVersion = function() {
-      subscribe();
-      send('<<y8:y'+stepMotorNum+'>', function (responded, responseStr) {
-        if (responded === true && responseStr.search('8:y') > -1) {
-          send(softwareVersionCommand, function (responded, responseStr) {
-            if (responded === true) {
-              var cleanVersionStr = responseStr.slice(2);
-              retry = 1;
-              $ionicPopup.alert({
-                title: 'Version number',
-                template: 'Your STM-32 version number is '+cleanVersionStr
-              })
-            }
-            else if (retry < 3 &&!emergency) {
-              retry += 1;
-              $scope.getVersion();
-            }
-          })
-        }
-        else if (retry < 3 &&!emergency) {
-          retry += 1;
-          $scope.getVersion();
-        }
-      })
-
     }
 
   })
@@ -2208,6 +2178,32 @@ angular.module('starter.controllers', [])
 
   };
 
+  $scope.getVersion = function() {
+    subscribe();
+    send('<<y8:y'+stepMotorNum+'>', function (responded, responseStr) {
+      if (responded === true && responseStr.search('8:y') > -1) {
+        send(softwareVersionCommand, function (responded, responseStr) {
+          if (responded === true) {
+            var cleanVersionStr = responseStr.slice(2);
+            retry = 1;
+            $ionicPopup.alert({
+              title: 'Version number',
+              template: 'Your STM-32 version number is '+cleanVersionStr
+            })
+          }
+          else if (retry < 3 &&!emergency) {
+            retry += 1;
+            $scope.getVersion();
+          }
+        })
+      }
+      else if (retry < 3 &&!emergency) {
+        retry += 1;
+        $scope.getVersion();
+      }
+    })
+
+  }
 })
 //end of controller testCtrl
 
@@ -2305,5 +2301,33 @@ angular.module('starter.controllers', [])
       })
     })
   };
+
+  function saveLastConnectedDevice(id, name) {
+    var obj = {'id':id,'name':name};
+    $scope.deviceName = name;
+    window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
+    console.log('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice']);
+    showSavedDeviceAlert();
+  }
+
+
+  function showSavedDeviceAlert() {
+    $ionicPopup.alert({
+      title: 'Bluetooth device saved',
+      template: 'This bluetooth device is saved and will connect automatically from now on.<br \>If you need to change your device later on choose a new device via Bluetooth connection in the menu',
+      buttons: [{
+        text: 'Go to program',
+        type: 'button-calm',
+        onTap: function () {
+          $state.go('app.program')
+        }
+      },
+        {
+          text: 'Close'
+        }
+      ]
+    })
+  }
+
 });
 //end of controller bluetoothConnectionCtrl
