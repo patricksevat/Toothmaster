@@ -119,28 +119,21 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   })
 
-  .service('emergencyService',['buttonService', 'sendAndReceiveService', function ($rootScope, buttonService, sendAndReceiveService) {
+  .service('emergencyService',['buttonService', 'sendAndReceiveService', 'statusService', function ($rootScope, buttonService, sendAndReceiveService, statusService) {
     var emergency = this;
-    emergency.value = false;
 
-    emergency.getValue = function () {
-      return emergency.value;
-    };
-
-    emergency.on = function () {
+    emergency.on = function (cb) {
       console.log('emergencyService.on called');
-      emergency.value = true;
+      statusService.setEmergency(true);
       buttonService.setEmergencyValues();
       sendAndReceiveService.sendEmergency();
       $rootScope.$emit('emergencyOn');
+      if (cb) cb();
     };
 
-    emergency.setEmergency = function (boolean) {
-      emergency.value = boolean;
-    };
-
-    emergency.off = function () {
-      console.log('emegencyService.off called');
+    emergency.off = function (cb) {
+      console.log('emergencyService.off called');
+      statusService.setEmergency(false);
       $rootScope.$emit('emergencyOff');
       emergency.value = false;
       buttonService.setValues({
@@ -154,6 +147,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         showMoveXMm : true,
         readyForData : true
       });
+      if (cb) cb();
     }
   }])
 
@@ -194,7 +188,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     function (isConnectedService, logService, checkBluetoothEnabledService, buttonService, $rootScope, $timeout) {
     var connect = this;
       var retry = 1;
-      var deviceName;
+      var deviceName = '';
 
       $rootScope.$on('emergencyOff', function () {
         retry = 1;
@@ -265,13 +259,16 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   }])
 
   //TODO add stepmotorService
-  .service('disconnectService',['logService', function ($cordovaBluetoothSerial, logService) {
+  .service('disconnectService',['logService', 'buttonService', 'isConnectedService',
+    function ($cordovaBluetoothSerial, logService, buttonService, isConnectedService) {
     var disconnect = this;
     var stepMotorNum = '3';
     disconnect.disconnect = function () {
       $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
         $window.bluetoothSerial.disconnect(function () {
           logService.addOne('User disconnected');
+          buttonService.setValues({'showCalcButton':false});
+          isConnectedService
         }, function () {
           console.log('User could not disconnect');
           logService.addOne('Could not disconnect from device');
@@ -630,6 +627,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   .service('statusService', function () {
     var status = this;
     var sending = false;
+    var emergency = false;
 
     status.getSending = function () {
       return sending
@@ -638,6 +636,14 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     status.setSending = function (value) {
       sending = value;
     };
+    
+    status.getEmergency = function () {
+      return emergency
+    };
+    
+    status.setEmergency = function (value) {
+      emergency = value;
+    }
   })
 
   .service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService',
@@ -675,16 +681,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   var nextView;
   var prevView;
   var skip;
-  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState) {
-    nextView = toState.name;
-    prevView = fromState.name;
-    skip = ((prevView === 'app.test' || prevView === 'app.homing' || prevView === 'app.runBluetooth' ||
-    prevView === 'app.bluetoothConnection' || prevView === 'app.program') &&
-    (nextView === 'app.bluetoothConnection' || nextView === 'app.test' || nextView === 'app.homing' ||
-    nextView === 'app.runBluetooth' || nextView === 'app.program')) ? true : false;
-    skipService.setSkip(skip);
-    bugout.log('skip: '+skip+', prevView: '+prevView+', nextView'+nextView);
-  });
 
   $ionicPlatform.on('pause', function () {
     console.log('onPause called from app.js');

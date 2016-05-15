@@ -724,12 +724,11 @@ angular.module('starter.controllers', [])
   .controller('runBluetoothCtrl', function($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
     $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
     checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-    logModalService, helpModalService, modalService, statusService){
+    logModalService, helpModalService, modalService, statusService, connectToDeviceService){
 
     $scope.bluetoothLog = logService.getLog();
     $scope.bluetoothEnabled = checkBluetoothEnabledService.getValue();
     $scope.isConnected = isConnectedService.getValue();
-    $scope.platform = ionic.Platform.platform();
     var sending = statusService.getSending();
     var program = shareProgram.getObj();
     console.log('program:');
@@ -737,56 +736,11 @@ angular.module('starter.controllers', [])
     $scope.settings = shareSettings.getObj();
     console.log('settings:');
     console.log(JSON.stringify($scope.settings));
+    $scope.deviceName= connectToDeviceService.getDeviceName();
+    //TODO spinner needs to be derived from buttonService
+    //TODO aren;t these variables superfluous bevause of ionicView.enter?
     $scope.showSpinner = false;
-
-    //
-    //SECTION: pause & resume app
-    //
-
-    var paused = false;
-
-    //TODO ionicPlatform on pause has been replaced by pauseService and is controlled from app.js
-    $ionicPlatform.on('pause', function () {
-      console.log('pause called from bluetoothCtrl');
-      //check for connection and if commands are being sent
-      if (!paused) {
-        paused = true;
-        console.log('paused: '+paused);
-        console.log('sending from bluetoothCtrl: '+sending);
-        if ($scope.isConnected === true && !sending) {
-          $window.bluetoothSerial.disconnect(function () {
-            console.log('disconnected on pause from bluetooth controller');
-            addToLog('Disconnected after pausing application');
-          }, function () {
-            console.log('could not disconnect on pause from bluetooth controller')
-          });
-          $scope.availableDevices = [];
-          $scope.pairedDevices = [];
-          $scope.showCalcButton = false;
-          $scope.readyForData = false;
-        }
-        else if ($scope.isConnected && sending) {
-          addToLog('User has paused application, continuing task in background');
-        }
-      }
-
-    });
-
-    var reconnectTry = 1;
-    $ionicPlatform.on('resume', function () {
-      paused = false;
-      console.log('resume called from bluetooth controller');
-      if (window.localStorage['lastConnectedDevice'] !== '' && !sending) {
-        reconnectWithRetry();
-          }
-      else if (sending){
-        console.log('Not reconnecting, because we are sending')
-      }
-      else {
-        console.log('no stored device to be called on resume')
-        }
-    });
-
+    var runBluetoothVars;
     //
     //SECTION: changing & entering views
     //
@@ -795,47 +749,30 @@ angular.module('starter.controllers', [])
       console.log('\nUNLOADED\n');
     });
 
-    var skip = skipService.getSkip();
-
-    //TODO rewrite onEnter so that reconnect is skipped (done by app.js)
     // and only calculateVarsService.getVars('runBluetooth') is called && log is imported && correct buttons are set
     $scope.$on('$ionicView.enter',function () {
-      skip = skipService.getSkip();
-        console.log('enterView fired, skip = '+skip);
-        if (skip === true) {
-          console.log('ionicView.enter reconnect to lastConnectedDevice because view remains under runBluetoothCtrl');
-          $scope.checkBluetoothEnabled(function () {
-            $scope.bluetoothConnected(function () {
-              if (!$scope.isConnected) {
-                if (window.localStorage['lastConnectedDevice'] !== '') {
-                  connectToLastConnectedDevice();
-                }
-                else {
-                  $scope.getAvailableDevices()
-                }
-              }
-            })
-          });
-        }
-        else {
-          console.log('reconnecting on $ionicView.enter');
-          connectToLastConnectedDevice();
-        }
-        $scope.settings = shareSettings.getObj();
-        program = shareProgram.getObj();
-        console.log('program:');
-        console.log(JSON.stringify(program));
-        console.log('settings:');
-        console.log(JSON.stringify($scope.settings));
-        calculateVars();
-        if (emergency) {
+      console.log('enterView in runBluetoothCtrl fired');
+      $scope.isConnected = isConnectedService.getValue();
+      $scope.bluetoothEnabled = checkBluetoothEnabledService.getValue();
+      //no need to connect or anything, connectToLastDevice is done on app startup
+      $scope.settings = shareSettings.getObj();
+      program = shareProgram.getObj();
+      console.log('program:');
+      console.log(JSON.stringify(program));
+      console.log('settings:');
+      console.log(JSON.stringify($scope.settings));
+      $scope.bluetoothLog = logService.getLog();
+      //runBluetoothVars is an object which contains settings commands (obj.commands)
+      // and individual variables (obj.vars.*)
+      runBluetoothVars = calculateVarsService.getVars('runBluetooth');
+      $scope.deviceName= connectToDeviceService.getDeviceName();
+      $scope.buttons = buttonService.getValues();
+        if (statusService.getEmergency() === true) {
           setButtons({'showResetButton': true});
         }
         else {
           setButtons({
             'showCalcButton': true,
-            'showStressTest' : true,
-            'showHoming': true,
             'showMovingButton': false,
             'showEmergency': false,
             'readyForData': false,
@@ -844,142 +781,23 @@ angular.module('starter.controllers', [])
         }
     });
 
-
     $scope.$on('$ionicView.leave',function () {
-      skip = skipService.getSkip();
-      console.log('ionicView.leave called, skip = '+skip);
-      if (sending === true ) {
+      console.log('ionicView.leave called');
+      if (statusService.getSending() === true ) {
         addToLog('Cancelling current tasks');
-        emergencyService.on();
-        emergencyService.off();
-      }
-      else if (skip === true) {
-        console.log('ionicView.leave skipped because view remains under runBluetoothCtrl');
+        emergencyService.on(function () {
+          emergencyService.off();
+        });
       }
       else {
-        $scope.clearBuffer();
-        unsubscribe();
-        $window.bluetoothSerial.disconnect(function(){
-          console.log('successfully disconnected')
-        }, function () {
-          console.log('could not disconnect')
-        });
+        sendAndReceiveService.clearBuffer();
+        sendAndReceiveService.unsubscribe();
       }
     });
 
-    //
-    //SECTION: reconnecting to last connectedDevice & saving lastConnectedDevice
-    //
-    $scope.deviceName= '';
-
-    //TODO replaced by connectToDeviceService.connectWithRetry
-    function reconnectWithRetry() {
-      connectToLastConnectedDevice(function () {
-        if ($scope.isConnected === false && reconnectTry <= 5) {
-          console.log('Reconnecting after resume, try: '+reconnectTry);
-          $timeout(function () {
-            reconnectTry +=1;
-            connectToLastConnectedDevice(reconnectWithRetry)
-          }, 500)
-        }
-        else if ($scope.isConnected === true) {
-          console.log('reconnectWithRetry, isConnected = true');
-          reconnectTry = 1;
-        }
-        else if (reconnectTry >= 6) {
-          addToLog('Could not reconnect automatically, please connect manually');
-          $scope.getAvailableDevices()
-        }
-      })
-    }
-
-    //TODO replaced by connectToDeviceService.connectToLastDevice
-    function connectToLastConnectedDevice(cb){
-      addToLog('Trying to connect with last known device');
-      $scope.checkBluetoothEnabled(function () {
-        if (window.localStorage['lastConnectedDevice'] !== '') {
-          var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
-          $window.bluetoothSerial.connectInsecure(obj.id, function () {
-            $scope.deviceName = obj.name;
-            console.log('succesfully connected to last connected device');
-            $scope.bluetoothConnected(function () {
-              $scope.showCalcButton = true;
-              if (cb) cb();
-            });
-
-          }, function () {
-            console.log('could not connect to last connected device');
-            $scope.$apply(function () {
-              $scope.isConnected = false
-            });
-            if (cb) cb();
-          });
-        }
-        else if ($scope.bluetoothEnabled) {
-          console.log('No previously connected devices available');
-          addToLog('No previously connected devices available');
-          $scope.getAvailableDevices();
-        }
-        else {
-          console.log('Bluetooth not enabled in connecttolastdevice');
-        }
-      });
-    }
-
-
-    //
-    //SECTION: checks for Bluetooth turned on & Bluetooth connected
-    //
-
-//TODO $scope.checkBluetoothEnabled replaced by checkBluetoothEnabledService
-    $scope.checkBluetoothEnabled = function(cb) {
-      $scope.bluetoothEnabled = checkBluetoothEnabledService.getValue();
-      if (cb) cb()
-    };
-
-    //TODO $scope.bluetoothConnected replaced by isConnectedService
-    $scope.bluetoothConnected = function (callback) {
-        $scope.isConnected = isConnectedService.getValue();
-        if (window.localStorage['lastConnectedDevice'] !== '' && $scope.isConnected) {
-          var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
-          $scope.deviceName = obj.name;
-        }
-        console.log('isConnected: '+$scope.isConnected);
-        if (callback) callback();
-    };
-
-//TODO replaced by turnOnBluetoothService
-    $scope.bluetoothOn = function () {
-      $ionicPlatform.ready(function() {
-        console.log('Calling bluetoothOn');
-        if (ionic.Platform.isIOS()) {
-          $ionicPopup.alert({
-            title: 'Please open Bluetooth settings manually',
-            template: 'Automatic enable not possible on iOS'
-          });
-          addToLog('Bluetooth should be turned on manually');
-        }
-        else {
-          turnOnBluetoothService.turnOn();
-          $scope.checkBluetoothEnabled(function () {
-            connectToLastConnectedDevice();
-          });
-        }
-      })
-     };
-
-    //
-    //SECTION: Getting paired & unpaired devices, userDisconnect
-    //
-
-
-//TODO replaced by disconnectService
     $scope.userDisconnect = function () {
       disconnectService.disconnect();
-      $scope.$apply(function () {
-        $scope.isConnected = false;
-        $scope.showCalcButton = false;
-      });
+      $scope.isConnected = false;
     };
 
     //
@@ -987,8 +805,8 @@ angular.module('starter.controllers', [])
     //
 
 
-    //show buttons on view vars TODO replaced by buttonService
-    $scope.buttons = buttonService.getValues();
+    //show buttons on view vars
+
     function setButtons(obj) {
       buttonService.setValues(obj);
       $scope.buttons = buttonService.getValues();
