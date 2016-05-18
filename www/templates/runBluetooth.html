@@ -41,15 +41,15 @@
           <p class="bluetooth-text log-text">Control buttons</p>
         </div>
         <div class="item item-text-wrap" ng-show="!bluetoothEnabled">
-          <button class="button button-calm" ng-hide="bluetoothEnabled" on-tap="bluetoothOn()">Turn on Bluetooth</button>
+          <button class="button button-calm" ng-hide="bluetoothEnabled" ui-sref="app.bluetoothConnection">Turn on Bluetooth</button>
         </div>
         <div class="item item-text-wrap" ng-show="isConnected">
-          <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop</button>
-          <button class="button button-energized" ng-show="readyForData" on-tap="start()">Move to start position</button>
-          <button class="button button-energized" ng-show="showMovingButton" on-tap="startMoving()">Make movement {{movementsNum+1}}/{{movements.length}}</button>
-          <button class="button button-calm" ng-show="showCalcButton" on-tap="calcSteps()">Calculate cuts</button>
-          <button class="button button-positive" ng-show="showResetButton" on-tap="emergencyOff()">Reset program</button>
-          <br><ion-spinner ng-show="showSpinner"></ion-spinner>
+          <button class="button button-assertive" ng-show="buttons.showEmergency" on-tap="emergencyOn()">Stop</button>
+          <button class="button button-energized" ng-show="buttons.readyForData" on-tap="start()">Move to start position</button>
+          <button class="button button-energized" ng-show="buttons.showMovingButton" on-tap="startMoving()">Make movement {{movementsNum+1}}/{{movements.length}}</button>
+          <button class="button button-calm" ng-show="buttons.showCalcButton" on-tap="calcSteps()">Calculate cuts</button>
+          <button class="button button-positive" ng-show="buttons.showResetButton" on-tap="emergencyOff()">Reset program</button>
+          <br><ion-spinner ng-show="buttons.showSpinner"></ion-spinner>
         </div>
         <div class="item item-divider">
           <p class="bluetooth-text log-text">Activity log</p>

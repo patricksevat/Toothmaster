@@ -48,8 +48,9 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   })
 
-  .service('buttonService', function ($rootScope) {
+  .service('buttonService', function () {
     var button = this;
+    button.value = {};
     button.value.readyForData = false;
     button.value.showEmergency = false;
     button.value.showMovingButton = false;
@@ -118,15 +119,14 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       });
     }
   })
-
-  .service('emergencyService',['buttonService', 'sendAndReceiveService', 'statusService', function ($rootScope, buttonService, sendAndReceiveService, statusService) {
+  //TODO create a new service: emergencyService cannot be dependant on SendAndReceiveService, replace sendAndReceive.sendEmergency & resetCommandObj
+  .service('emergencyService',['buttonService', 'statusService', '$rootScope', function ($rootScope, buttonService, statusService) {
     var emergency = this;
 
     emergency.on = function (cb) {
       console.log('emergencyService.on called');
       statusService.setEmergency(true);
       buttonService.setEmergencyValues();
-      sendAndReceiveService.sendEmergency();
       $rootScope.$emit('emergencyOn');
       if (cb) cb();
     };
@@ -184,7 +184,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   })
 
-  .service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService',
+  .service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout',
     function (isConnectedService, logService, checkBluetoothEnabledService, buttonService, $rootScope, $timeout) {
     var connect = this;
       var retry = 1;
@@ -193,19 +193,19 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       $rootScope.$on('emergencyOff', function () {
         retry = 1;
       });
-      
+
       connect.getDeviceName = function () {
         return deviceName;
       };
-      
+
       connect.setDeviceName = function (str) {
         deviceName = str;
       };
-      
+
     connect.connectToLastDevice = function (cb) {
       var bluetoothOn = checkBluetoothEnabledService.getValue();
       logService.addOne('Trying to connect with last known device');
-      
+
       if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '') {
         var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
         $window.bluetoothSerial.connectInsecure(obj.id, function () {
@@ -223,7 +223,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     connect.connectWithRetry = function () {
       var isConnected = isConnectedService.getValue();
       var bluetoothOn = checkBluetoothEnabledService.getValue();
-      
+
       if (bluetoothOn && !isConnected) {
         connect.connectToLastDevice(function () {
           if (isConnectedService.getValue() === false && retry < 6) {
@@ -268,7 +268,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         $window.bluetoothSerial.disconnect(function () {
           logService.addOne('User disconnected');
           buttonService.setValues({'showCalcButton':false});
-          isConnectedService
+          isConnectedService.getValue();
         }, function () {
           console.log('User could not disconnect');
           logService.addOne('Could not disconnect from device');
@@ -286,7 +286,10 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     logService.addOne = function (str) {
-        if (logService.UILog[0].search('(') && logService.UILog[0].search(')')) {
+      if (logService.UILog.length === 0) {
+        logService.UILog.unshift(str);
+      }
+        else if (logService.UILog[0].search('(') && logService.UILog[0].search(')')) {
           var numStr = logService.UILog.slice(logService.UILog[0].indexOf('('), logService.UILog[0].indexOf(')'));
           var num = Number(numStr);
           //indexOf(')')+1 because of the extra space
@@ -362,134 +365,8 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   }])
 
-  .service('sendAndReceiveService', ['emergencyService', 'logService', 'buttonService', 'shareSettings',
-    function (emergencyService, $window, logService, $rootScope, buttonService, $ionicPopup, shareSettings) {
-    var sendAndReceive = this;
-    var stepMotorNum = '3';
-    var command;
-    var response;
-    var lastCommandTime;
-    var lastReceivedTime;
-    var subscribed = false; //TODO add subscribed to statusService
-    /*
-    * subscribe -> send command\write -> wait for subscribe to receive answer -> rootscope emit command + response
-    * -> unsubscribe when done with batch \ unsubscribe after command -> only throw new command when done
-    * TODO: create the timeout check
-    * TODO: subscribe on scope.enter and unsubscribe on scope.leave
-    * */
-
-    sendAndReceive.subscribe = function () {
-      console.log('subscribed');
-      subscribed = true;
-      $window.bluetoothSerial.subscribe('#', function (data) {
-        lastReceivedTime = Date.now();
-        console.log('response in sendAndReceive.subscribe: '+data);
-        sendAndReceive.emitResponse(data);
-      });
-    };
-
-    sendAndReceive.unsubscribe = function () {
-      $window.bluetoothSerial.unsubscribe(function () {
-        console.log('Succesfully unsubscribed');
-        subscribed = false;
-      }, function () {
-        console.log('ERROR: could not unsubscribe');
-      })
-    };
-
-    sendAndReceive.write = function (str, commandID, callingFunction) {
-      if (emergencyService.getValue() === false) {
-        var command;
-        if (commandID !== undefined || commandID !== '') {
-          //Used for buffered commands. Command with brackets: "<r34001>", without brackets: "r34001
-          var commandWithoutBrackets = str.slice(1, str.length-1);
-          command = '<c'+commandWithoutBrackets+'$'+commandID+'>';
-        }
-        else {
-          //non buffered commands
-          command = str;
-        }
-        $window.bluetoothSerial.write(command, function () {
-          console.log('sent: '+command);
-          lastCommandTime = Date.now();
-        }, function () {
-          console.log('ERROR: could not send command '+str+' , callingFunction: '+callingFunction);
-        })
-      }
-      else {
-        //TODO add UI log message
-        console.log('Emergency pressed, will not send command')
-      }
-    };
-
-    sendAndReceive.emitResponse = function (res) {
-      console.log('response in emitResponse: '+res);
-
-      //handle stopswitch hit
-      if (res.search('wydone:') > -1 && res.search('wydone:0') === -1) {
-        var posStopswitch = res.lastIndexOf('@')-3;
-        $ionicPopup.alert({
-          title: 'Error: hit stopswitch '+res.charAt(posStopswitch),
-          template: 'Unexpected stopswitch has been hit. Aborting task and resetting program.'
-        });
-        console.log('Error: hit stopswitch '+res.charAt(posStopswitch));
-        logService.addOne('Error: hit stopswitch '+res.charAt(posStopswitch));
-        //emergencyService.on sets correct buttons and sends resetcommand
-        emergencyService.on();
-        $rootScope.$emit('stopswitchHit', res, res.charAt(posStopswitch));
-      }
-
-      //handle encoder missed steps
-      //splice result from '@' till end
-      // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
-      else if (res.search('wydone:') > -1 && res.search('@5') > -1) {
-        var splicedStr = res.slice(res.lastIndexOf('@'));
-        var missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
-        var settings = shareSettings.getObj();
-        var maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : 'unknown';
-        $ionicPopup.alert({
-          title: 'You have missed the maximum number of allowed steps',
-          template: 'The program has been stopped.<p>Maximum steps to miss: '+maxAllowedMiss+'</p><p>Number of steps actually missed '+missedSteps+'</p>'
-        });
-        console.log('ERROR: hit max number of allowed steps');
-        logService.addOne('ERROR: exceeded maximum number of steps to miss (encoder setting)');
-        emergencyService.on();
-        $rootScope.$emit('maxSteps', res, missedSteps)
-      }
-
-      else {
-        $rootScope.$emit('bluetoothResponse', res);
-      }
-    };
-
-    sendAndReceive.sendEmergency = function () {
-      console.log('sendAndReceiveService.sendEmergency called');
-      if (!subscribed) sendAndReceive.subscribe();
-      $rootScope.$on('bluetoothResponse', function (event, res) {
-        if (res.search('<8:y>')) {
-          logService.addOne('Program succesfully reset');
-          emergencyService.emergencyOff();
-        }
-      });
-      $window.bluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
-        logService.addOne('Program reset command sent');
-      }, function (err) {
-        logService.addOne('Error: Program reset command could not be sent. '+err);
-      })
-    };
-
-    sendAndReceive.clearBuffer = function () {
-      $window.bluetoothSerial.clear(function () {
-        logService.addOne('Received buffer cleared');
-      }, function () {
-        logService.addOne('Error: could not clear receive buffer');
-      })
-    }
-
-  }]) //end of sendAndReceiveService
-
   //TODO for all 3 modal services: perhaps better to return the function?
-  .service('logModalService', function () {
+  .service('logModalService', function ($ionicModal) {
     var logModal = this;
 
     logModal.create = function (cb) {
@@ -574,7 +451,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   })
 
-  .service('helpModalService', function () {
+  .service('helpModalService', function ($ionicModal) {
     var helpModal = this;
 
     helpModal.create = function (cb) {
@@ -625,24 +502,34 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   }])
 
   .service('statusService', function () {
-    var status = this;
-    var sending = false;
-    var emergency = false;
+    var statusService = this;
+    statusService.sending = false;
+    statusService.emergency = false;
+    statusService.subscribed = false;
 
-    status.getSending = function () {
-      return sending
+    statusService.getSending = function () {
+      return statusService.sending
     };
 
-    status.setSending = function (value) {
-      sending = value;
+    statusService.setSending = function (value) {
+      statusService.sending = value;
     };
-    
-    status.getEmergency = function () {
-      return emergency
+
+    statusService.getEmergency = function () {
+      return statusService.emergency
     };
-    
-    status.setEmergency = function (value) {
-      emergency = value;
+
+    statusService.setEmergency = function (value) {
+      statusService.emergency = value;
+    };
+
+    statusService.getSubscribed = function () {
+      console.log('getSubscribed called');
+      return statusService.subscribed;
+    };
+
+    statusService.setSubscribed = function (boolean) {
+      statusService.subscribed = boolean;
     }
   })
 
@@ -651,7 +538,9 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     var pause = this;
 
     pause.pause = function () {
+      //var sending = statusService.getSending();
       var sending = statusService.getSending();
+      console.log('sending in pause:'+statusService.getSending());
       var connected = isConnectedService.getValue();
       console.log('pause.pause called, sending: '+sending+', connected'+connected);
       if (!sending && connected) {
@@ -676,11 +565,253 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   }])
 
-.run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService) {
-  bugout.log('version 0.8.0.13');
-  var nextView;
-  var prevView;
-  var skip;
+  .service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', '$ionicPopup', 'shareSettings',
+    function (statusService, emergencyService, $window, logService, $rootScope, buttonService, $ionicPopup, shareSettings) {
+      var sendAndReceive = this;
+      var stepMotorNum = '3';
+      var command;
+      var response;
+      var lastCommandTime;
+      var lastReceivedTime;
+      var subscribed = statusService.getSubscribed();
+      var commandIdNum = $window.localStorage['commandIdNum'];
+      var commandObj = {};
+
+      /*
+       * subscribe -> send command\write -> wait for subscribe to receive answer -> rootscope emit command + response
+       * -> unsubscribe when done with batch \ unsubscribe after command -> only throw new command when done
+       * TODO: create the timeout check
+       * TODO: subscribe on scope.enter and unsubscribe on scope.leave
+       * */
+
+      sendAndReceive.subscribe = function () {
+        console.log('subscribed');
+        statusService.setSubscribed(true);
+        $window.bluetoothSerial.subscribe('#', function (data) {
+          lastReceivedTime = Date.now();
+          console.log('response in sendAndReceive.subscribe: '+data);
+          sendAndReceive.emitResponse(data);
+        });
+      };
+
+      sendAndReceive.unsubscribe = function () {
+        $window.bluetoothSerial.unsubscribe(function () {
+          console.log('Succesfully unsubscribed');
+          statusService.setSubscribed(false);
+        }, function () {
+          console.log('ERROR: could not unsubscribe');
+        })
+      };
+
+      sendAndReceive.write = function (str, commandID, callingFunction) {
+        console.log('sendAndReceiveService.write called. Ori str: '+str+', commandID: '+commandID+', callingFunction: '+callingFunction);
+        if (emergencyService.getValue() === false) {
+          var command;
+          //if you want to use commandID, make sure to use sendAndReceive.addToCommandObj from controller
+          if (commandID !== undefined || commandID !== '') {
+            //Used for buffered commands. Command with brackets: "<r34001>", without brackets: "r34001
+            var commandWithoutBrackets = str.slice(1, str.length-1);
+            command = '<c'+commandWithoutBrackets+'$'+commandID+'>';
+          }
+          else {
+            //non buffered commands
+            command = str;
+          }
+          $window.bluetoothSerial.write(command, function () {
+            console.log('sent: '+command);
+            lastCommandTime = Date.now();
+          }, function () {
+            console.log('ERROR: could not send command '+str+' , callingFunction: '+callingFunction);
+          })
+        }
+        else {
+          //TODO add UI log message
+          console.log('Emergency pressed, will not send command')
+        }
+      };
+
+      sendAndReceive.getNewCommandID = function () {
+        commandIdNum = window.localStorage['commandIdNum'];
+        commandIdNum += 1;
+        sendAndReceive.setCommandID(commandIdNum);
+        return commandIdNum;
+      };
+
+      sendAndReceive.setCommandID = function (num) {
+        window.localStorage['commandIdNum'] = num;
+      };
+
+      sendAndReceive.resetCommandObj = function () {
+        commandObj= {};
+      };
+
+      sendAndReceive.expectedResponse = function (str) {
+        switch (str) {
+          case '<':
+            return '8:y';
+            break;
+          case 'd':
+            return '12:';
+            break;
+          case 'b':
+            return '13:';
+            break;
+          case 'x':
+            return '14:';
+            break;
+          case 'v':
+            return '9:';
+            break;
+          case 's':
+            return '6:';
+            break;
+          case 'p':
+            return '5:';
+            break;
+          case 'r':
+            return '3:';
+            break;
+          case 'o':
+            return '2:';
+            break;
+          case 'f':
+            return '11:';
+            break;
+          case 'k':
+            return ['0:rdy', 'FAULT'];
+            break;
+          case 'q':
+            buttonService.setValues({'showSpinner':true});
+            return ['rdy','wydone','q'];
+            break;
+          case 'h':
+            return '6:';
+            break;
+          case 'z':
+            return '14:';
+            break;
+          case 'w':
+            return ['wydone','w'+stepMotorNum] ;
+            break;
+        }
+      };
+
+      sendAndReceive.addToCommandObj = function (str) {
+        var id = sendAndReceive.getNewCommandID();
+        var expectedResponse = sendAndReceive.expectedResponse(str);
+        var obj = {
+          'ID': id,
+          'command': str,
+          'expectedResponse': expectedResponse,
+          'responded': false,
+          'response': ''
+        };
+        commandObj[id] = obj;
+        return obj;
+      };
+
+      //listen for bluetoothResponse and remove from commandObj is expectedResponse is found in response
+      $rootScope.$on('bluetoothResponse', function (event, res) {
+        console.log('bluetoothResponse listener within sendAndReceiveService, response:'+res);
+        if (res.search('10c') > -1){
+          //retrieve commandID from response
+          var commandId = res.slice(res.search('$'), res.search('>'));
+          //use commandId to compare actual response with expected response, if correct, remove command from commandObj
+          // & emit commandId + response
+          commandObj[commandId]['responded'] = true;
+          commandObj[commandId]['response'] = res;
+          if (typeof commandObj[commandId]['expectedResponse'] === 'string') {
+            if (res.search(commandObj[commandId]['expectedResponse']) > -1) {
+              $rootScope.$emit(commandId, res);
+              delete commandObj[commandId];
+            }
+          }
+          else if (commandObj[commandId]['expectedResponse'].isArray) {
+            for (var i = 0; i<commandObj[commandId]['expectedResponse'].length; i++) {
+              if (res.search(commandObj[commandId]['expectedResponse'][i]) > -1) {
+                $rootScope.$emit(commandId, res);
+                delete commandObj[commandId];
+                return;
+              }
+            }
+          }
+        }
+      });
+
+      $rootScope.$on('emergencyOn', function () {
+        sendAndReceive.sendEmergency();
+        sendAndReceive.resetCommandObj();
+      });
+
+      sendAndReceive.emitResponse = function (res) {
+        console.log('response in emitResponse: '+res);
+
+        //handle stopswitch hit
+        if (res.search('wydone:') > -1 && res.search('wydone:0') === -1) {
+          var posStopswitch = res.lastIndexOf('@')-3;
+          $ionicPopup.alert({
+            title: 'Error: hit stopswitch '+res.charAt(posStopswitch),
+            template: 'Unexpected stopswitch has been hit. Aborting task and resetting program.'
+          });
+          console.log('Error: hit stopswitch '+res.charAt(posStopswitch));
+          logService.addOne('Error: hit stopswitch '+res.charAt(posStopswitch));
+          //emergencyService.on sets correct buttons and sends resetcommand
+          emergencyService.on();
+          $rootScope.$emit('stopswitchHit', res, res.charAt(posStopswitch));
+        }
+
+        //handle encoder missed steps
+        //splice result from '@' till end
+        // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
+        else if (res.search('wydone:') > -1 && res.search('@5') > -1) {
+          var splicedStr = res.slice(res.lastIndexOf('@'));
+          var missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
+          var settings = shareSettings.getObj();
+          var maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : 'unknown';
+          $ionicPopup.alert({
+            title: 'You have missed the maximum number of allowed steps',
+            template: 'The program has been stopped.<p>Maximum steps to miss: '+maxAllowedMiss+'</p><p>Number of steps actually missed '+missedSteps+'</p>'
+          });
+          console.log('ERROR: hit max number of allowed steps');
+          logService.addOne('ERROR: exceeded maximum number of steps to miss (encoder setting)');
+          emergencyService.on();
+          $rootScope.$emit('maxSteps', res, missedSteps)
+        }
+
+        else {
+          $rootScope.$emit('bluetoothResponse', res);
+        }
+      };
+      //TODO add retry to sendEmergency?
+      sendAndReceive.sendEmergency = function () {
+        console.log('sendAndReceiveService.sendEmergency called');
+        if (statusService.getSubscribed() === false) sendAndReceive.subscribe();
+        $rootScope.$on('bluetoothResponse', function (event, res) {
+          if (res.search('<8:y>')) {
+            logService.addOne('Program succesfully reset');
+            emergencyService.emergencyOff();
+          }
+        });
+        $window.bluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
+          logService.addOne('Program reset command sent');
+        }, function (err) {
+          logService.addOne('Error: Program reset command could not be sent. '+err);
+        })
+      };
+
+      sendAndReceive.clearBuffer = function () {
+        $window.bluetoothSerial.clear(function () {
+          logService.addOne('Received buffer cleared');
+        }, function () {
+          logService.addOne('Error: could not clear receive buffer');
+        })
+      }
+
+    }]) //end of sendAndReceiveService
+
+
+  .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService) {
+  bugout.log('version 0.9.0.13');
 
   $ionicPlatform.on('pause', function () {
     console.log('onPause called from app.js');
@@ -693,6 +824,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   });
 
   $ionicPlatform.on('resume', function () {
+    console.log('onResume called from app.js');
     if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
       || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
       pauseService.resume();
@@ -724,6 +856,9 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   }
   if (window.localStorage['lastUsedProgram'] === undefined) {
     window.localStorage['lastUsedProgram'] = '';
+  }
+  if (window.localStorage['commandIdNum'] === undefined) {
+    window.localStorage['commandIdNum'] = 0;
   }
   if (window.localStorage['lastConnectedDevice'] === undefined) {
     window.localStorage['lastConnectedDevice'] = '';
