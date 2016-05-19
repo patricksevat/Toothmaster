@@ -786,7 +786,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         commandObj[id] = obj;
         return obj;
       };
-
+      /*
       //listen for bluetoothResponse and remove from commandObj is expectedResponse is found in response
       $rootScope.$on('bluetoothResponse', function (event, res) {
         console.log('bluetoothResponse listener within sendAndReceiveService, response:'+res);
@@ -814,6 +814,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           }
         }
       });
+      */
 
       $rootScope.$on('emergencyOn', function () {
         sendAndReceive.sendEmergency();
@@ -854,7 +855,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           emergencyService.on();
           $rootScope.$emit('maxSteps', res, missedSteps)
         }
-        else if (res.search('2:') > -1 || res.search('6:') > -1) {
+        else if (res.search('2:') > -1) {
           $rootScope.$emit('sendKfault', res);
         }
         else {
@@ -890,7 +891,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService) {
-  bugout.log('version 0.9.3.4');
+  bugout.log('version 0.9.4.4');
 
     $rootScope.$on('$stateChangeStart',
       function(event, toState, toParams, fromState, fromParams, options){

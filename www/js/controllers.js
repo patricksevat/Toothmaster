@@ -1384,6 +1384,13 @@ angular.module('starter.controllers', [])
   $scope.bluetoothLog = [];
   $scope.bluetoothEnabled = null;
   $scope.buttons = buttonService.getValues();
+  $scope.retriesNeeded = 0;
+  $scope.completedTest = 0;
+  var sentSettingsForTest = false;
+  $scope.numberOfTests = {};
+  var testsSent = 0;
+  $scope.testRunning = false;
+
   $scope.userDisconnect = function () {
     disconnectService.disconnect();
   };
@@ -1424,6 +1431,12 @@ angular.module('starter.controllers', [])
 
   $scope.$on('$ionicView.leave', function () {
     console.log('leaveView in bluetoothConnectionCtrl fired');
+    $scope.retriesNeeded = 0;
+    $scope.completedTest = 0;
+    sentSettingsForTest = false;
+    $scope.numberOfTests = {};
+    testsSent = 0;
+    $scope.testRunning = false;
     if (statusService.getSending() === true ) {
       addToLog('Cancelling current tasks');
       emergencyService.on(function () {
@@ -1445,15 +1458,16 @@ angular.module('starter.controllers', [])
   $scope.emergencyOff = function () {
     console.log('emergencyOff called');
     emergencyService.off();
+    testsSent = 0;
+    $scope.completedTest = 0;
+    $scope.retriesNeeded = 0;
+    sentSettingsForTest = false;
+    testsSent = 0;
+    $scope.testRunning = false;
   };
   //
   //SECTION: stressTest && move X mm logic
   //
-
-  $scope.retriesNeeded = 0;
-  $scope.completedTest = 0;
-  var sentSettingsForTest = false;
-  $scope.numberOfTests = {};
 
   //TODO make sure that moveXMm, stresstest and normal program still function as expected
   $scope.moveXMm = function () {
@@ -1464,7 +1478,7 @@ angular.module('starter.controllers', [])
         })
       }
       else {
-        setButtons({'showStressTest': false, 'showVersionButton': false, 'showSpinner':true});
+        setButtons({'showStressTest': false, 'showVersionButton': false, 'showSpinner':true, 'showEmergency': true});
 
         //replace standard <s0+stepMotorNum> with moveXMmStepsCommand
         var moveXMmSteps = $scope.numberOfTests.mm / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
@@ -1499,10 +1513,10 @@ angular.module('starter.controllers', [])
 
   function checkRdy(res, type) {
     var typeStr = type;
-    if (res.search('rdy:') > -1) {
+    if (res.search('wydone') > -1) {
       if (typeStr === 'moveXMm') {
         $ionicPopup.alert({
-          title: 'Moving '+$scope.numberOfTests.mm+' mm'
+          title: 'Moved '+$scope.numberOfTests.mm+' mm'
         });
         setButtons({'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false});
         calculateVarsService.getVars('test', function (obj) {
@@ -1533,88 +1547,83 @@ angular.module('starter.controllers', [])
   }
 
   $scope.stressTest = function () {
-    setButtons({'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXmm': false});
+    setButtons({'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXmm': false, 'showSpinner': true});
+    $scope.testRunning = true;
+
     if (statusService.getEmergency() === true) {
       addToLog('Emergency on, cancelling stresstest');
       return
     }
-    if (!sentSettingsForTest) {
-      if (statusService.getEmergency() === false) {
-        console.log('numberOfTests:'+$scope.numberOfTests.tests);
-        addToLog('Sending settings needed for testing');
-        sendSettings('stressTest');
-      }
+    else if ($scope.numberOfTests.tests === undefined || $scope.numberOfTests.tests === 0) {
+      $ionicPopup.alert({
+        title: 'Please fill in the number of test commands'
+      })
     }
     else {
-      if (statusService.getEmergency() === false) {
-        addToLog('Executing test '+($scope.completedTest+1)+'/'+$scope.numberOfTests.tests);
-        statusService.setSending(true);
-        send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', checkTestDone);
-
-        function checkTestDone(boolean) {
-          if (!emergency) {
-            if (boolean === true) {
-              if (response.search('wydone') > -1) {
-                response = '';
-                $cordovaBluetoothSerial.clear();
-                console.log('Test done, moving to next test');
-                $scope.completedTest +=1;
-
-                $cordovaBluetoothSerial.clear();
-                if ($scope.completedTest < $scope.numberOfTests.tests){
-                  $timeout(function () {
-                    $scope.stressTest();
-                  }, 50)
-                }
-                else {
-                  $scope.showSpinner = false;
-                  $ionicPopup.alert({
-                    title: 'Test completed',
-                    template: 'You have successfully completed the tests.'
-                  });
-                  addToLog('Testing done, completed '+$scope.completedTest+' tests');
-                  $scope.showEmergency = false;
-                  $scope.completedTest = 0;
-                  $scope.showStressTest = true;
-                  $scope.showCalcButton = true;
-                  $scope.showHoming = true;
-                  sending = false;
-                  $scope.showVersionButton = true;
-                  $scope.showMoveXMm = true;
-                  calculateVars();
-                }
-              }
-              else {
-                $timeout(function () {
-                  send('<w'+stepMotorNum+'>', checkTestDone);
-                }, 50);
-              }
-            }
-            else if (boolean === false && !emergency) {
-              if (retry <= 10) {
-                console.log('retry number '+retry+'/10');
-                retry +=1;
-                $scope.retriesNeeded += 1;
-                $scope.stressTest(true, moveXMmStepsCommand, true, function () {
-                  sentSettingsForTest = true;
-                  $scope.stressTest();
-                });
-              }
-              else {
-                addToLog('Maximum number of retries reached');
-              }
-            }
-          }
-          else {
-            addToLog('Emergency on, will not continue with stresstest');
-          }
+      if (!sentSettingsForTest) {
+        if (statusService.getEmergency() === false) {
+          console.log('numberOfTests:'+$scope.numberOfTests.tests);
+          addToLog('Sending settings needed for testing');
+          sendSettings('stressTest');
         }
       }
       else {
-        addToLog('Emergency on, will not continue with stresstest');
+        if (statusService.getEmergency() === false) {
+          addToLog('Executing test '+($scope.completedTest+1)+'/'+$scope.numberOfTests.tests);
+          statusService.setSending(true);
+
+          //with 10 or less tests, send them all at once
+          if ($scope.numberOfTests.tests <= 10) {
+            for (var i = 0; i < $scope.numberOfTests.tests; i++) {
+              //Send a random command, true = create listener, function is executed as soon as wydone+commandID has come back
+              send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', true, checkTestDone);
+            }
+          }
+
+          //with 11 or more tests, start with 10, then send a new one everytime a wydone is received
+          else {
+            for (var i = 0; i < 10; i++) {
+              //Send a random command, true = create listener, function is executed as soon as wydone+commandID has come back
+              send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', true, checkTestDone);
+            }
+            var sendNewCommand = $rootScope.$on('bluetoothResponse', function (event, res) {
+              if (statusService.getEmergency() === false) {
+                if (res.search('wydone') > -1 && testsSent < $scope.numberOfTests) {
+                  send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', true, checkTestDone);
+                }
+                else if (testsSent === $scope.numberOfTests) sendNewCommand();
+              }
+            })
+          }
+
+          function checkTestDone() {
+            if (statusService.getEmergency() === false) {
+              if (testsSent === $scope.numberOfTests.tests) {
+                setButtons({'showSpinner':true,'showEmergency':false,'showStressTest':true,'showVersionButton':true,'showMoveXMm': true});
+                addToLog('Testing done, completed '+$scope.completedTest+' out of '+testsSent+' tests');
+                statusService.setSending(false);
+                $scope.testRunning = false;
+                $ionicPopup.alert({
+                  title: 'Test completed',
+                  template: 'You have successfully completed the tests.'
+                });
+                addToLog('Testing done, completed '+$scope.completedTest+' tests');
+                calculateVarsService.getVars('test', function (obj) {
+                  console.log('resetting commands in testCtrl');
+                  commands = obj.commands;
+                });
+              }
+            }
+            else {
+              addToLog('Emergency on, will not continue with stresstest');
+            }
+          }
+        }
+        else {
+          addToLog('Emergency on, will not continue with stresstest');
+        }
       }
     }
-
   };
 
   function send(str, listenerBoolean, listenerFunction) {
@@ -1630,44 +1639,42 @@ angular.module('starter.controllers', [])
       var commandObj = sendAndReceiveService.addToCommandObj(str);
 
       //calling .write() with original command (str). commandID and callingFunction are optional.
-      sendAndReceiveService.write(str, commandObj.ID, 'send in runBluetoothCtrl');
+      sendAndReceiveService.writeBuffered(str, commandObj.ID, 'send in testCtrl -> send');
       //creates listener based on commandID, plus function to execute when listener is fired
       if (listenerBoolean === true) {
         createListener(commandObj.ID, listenerFunction);
       }
+      testsSent += 1;
     }
   }
 
+  var listeners = {};
   function createListener(commandID, functionToExecute) {
-    
+    listeners[commandID] = $rootScope.$on('bluetoothResponse', function (event, res) {
+      if (res.search('wydone')> -1 && res.search(commandID) > -1)
+      console.log(commandID+' listener fired');
+      $scope.completedTest += 1;
+      if (functionToExecute) functionToExecute();
+      listeners[commandID]();
+    })
   }
 
   $scope.getVersion = function() {
-    subscribe();
-    send('<<y8:y'+stepMotorNum+'>', function (responded, responseStr) {
-      if (responded === true && responseStr.search('8:y') > -1) {
-        send(softwareVersionCommand, function (responded, responseStr) {
-          if (responded === true) {
-            var cleanVersionStr = responseStr.slice(2);
-            retry = 1;
+    if (statusService.getEmergency() === false && statusService.getSending() === false){
+      sendAndReceiveService.write('<<y8:y'+stepMotorNum+'>');
+      sendAndReceiveService.write(softwareVersionCommand, function () {
+        var listen = $rootScope.$on('bluetoothResponse', function (event, res) {
+          if (res.search('<14:') > -1) {
             $ionicPopup.alert({
               title: 'Version number',
-              template: 'Your STM-32 version number is '+cleanVersionStr
-            })
-          }
-          else if (retry < 3 &&!emergency) {
-            retry += 1;
-            $scope.getVersion();
+              template: 'Your version number is: '+res.slice(res.lastIndexOf(':')+1,res.lastIndexOf('>'))
+            });
+            listen();
           }
         })
-      }
-      else if (retry < 3 &&!emergency) {
-        retry += 1;
-        $scope.getVersion();
-      }
-    })
-
-  }
+      });
+    }
+  };
 
   function addToLog(str) {
     logService.addOne(str);
