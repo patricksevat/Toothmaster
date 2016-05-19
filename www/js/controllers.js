@@ -1341,7 +1341,7 @@ angular.module('starter.controllers', [])
       });
     }
 
-
+//TODO !!! Check real-life homing correct handling, using my STM-32 stopswitch is automatically hit, not able to check correct homing"
     function homingResponse(res) {
       if (res.search('wydone') > -1) {
         setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
@@ -1362,14 +1362,90 @@ angular.module('starter.controllers', [])
     }
   };
 
+  function addToLog(str) {
+    logService.addOne(str);
+    logService.getLog(function (arr) {
+      $scope.bluetoothLog = arr;
+    });
+  }
+
 })
 //end of controller homingCtrl
 
 .controller('testCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
-                                  $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService) {
+                                  $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
+                                  checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
+                                  statusService, connectToDeviceService) {
 //other vars/commands
-  var softwareVersionCommand;
+  var stepMotorNum = '3';
+  var softwareVersionCommand = '<z'+stepMotorNum+'>';
+  var commands;
+  $scope.settings = shareSettings.getObj();
+  $scope.bluetoothLog = [];
+  $scope.bluetoothEnabled = null;
+  $scope.buttons = buttonService.getValues();
+  $scope.userDisconnect = function () {
+    disconnectService.disconnect();
+  };
 
+  function setButtons(obj) {
+    buttonService.setValues(obj);
+    $scope.$apply(function () {
+      $scope.buttons = buttonService.getValues()
+    });
+    console.log($scope.buttons);
+  }
+
+  $scope.$on('$ionicView.enter', function () {
+    console.log('enterView in testCtrl fired');
+    logService.getLog(function (arr) {
+      $scope.bluetoothLog = arr;
+    });
+    checkBluetoothEnabledService.getValue(function (value) {
+      $scope.bluetoothEnabled = value;
+      console.log('$scope.bluetoothEnabled: '+$scope.bluetoothEnabled);
+    });
+    connectToDeviceService.getDeviceName(function (value) {
+      $scope.deviceName= value;
+    });
+    $scope.buttons = buttonService.getValues();
+    isConnectedService.getValue(function (value) {
+      $scope.isConnected = value;
+      console.log('$scope.isConnected: '+$scope.isConnected);
+    });
+    calculateVarsService.getVars('test', function (obj) {
+      commands = obj.commands;
+      console.log('testCommands:');
+      console.log(commands);
+    });
+    $scope.settings = shareSettings.getObj();
+    sendAndReceiveService.subscribe();
+  });
+
+  $scope.$on('$ionicView.leave', function () {
+    console.log('leaveView in bluetoothConnectionCtrl fired');
+    if (statusService.getSending() === true ) {
+      addToLog('Cancelling current tasks');
+      emergencyService.on(function () {
+        emergencyService.off();
+      });
+    }
+    else {
+      sendAndReceiveService.unsubscribe();
+      sendAndReceiveService.clearBuffer();
+    }
+    //TODO perhaps create listeners in a var and cancel var on leave?
+    logService.setBulk($scope.bluetoothLog);
+  });
+
+  $scope.emergencyOn = function () {
+    emergencyService.on();
+  };
+
+  $scope.emergencyOff = function () {
+    console.log('emergencyOff called');
+    emergencyService.off();
+  };
   //
   //SECTION: stressTest && move X mm logic
   //
@@ -1381,59 +1457,98 @@ angular.module('starter.controllers', [])
 
   //TODO make sure that moveXMm, stresstest and normal program still function as expected
   $scope.moveXMm = function () {
-    if (!emergency && !sending) {
+    if (statusService.getEmergency() === false && statusService.getSending() === false) {
       if ($scope.numberOfTests.mm === undefined) {
         $ionicPopup.alert({
           title: 'Please fill in "Move X mm"'
         })
       }
       else {
-        $scope.showStressTest = false;
-        $scope.showVersionButton = false;
+        setButtons({'showStressTest': false, 'showVersionButton': false, 'showSpinner':true});
+
+        //replace standard <s0+stepMotorNum> with moveXMmStepsCommand
         var moveXMmSteps = $scope.numberOfTests.mm / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
         var moveXMmStepsCommand = '<s'+moveXMmSteps+stepMotorNum+'>';
-        //first true is moveXMm, second true is to use callback
-        $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
-          $scope.showStressTest = true;
-          $scope.showVersionButton = true;
-          $scope.showEmergency = false;
-          $scope.showSpinner = false;
-          $ionicPopup.alert({
-            title: 'Succesfully moved '+$scope.numberOfTests.mm+' mm'
-          });
-          calculateVars();
-        })
+        var position = commands.indexOf('<s0'+stepMotorNum+'>');
+        commands[position] = moveXMmStepsCommand;
+        sendSettings('moveXMm');
       }
     }
   };
 
+  function sendSettings(type) {
+    var typeStr = type;
+    console.log('Commands in testCtrl -> sendSettings:');
+    console.log(commands);
+    //send commands, except last one
+    for (var i = 0; i < commands.length -1; i++){
+      sendAndReceiveService.write(commands[i]);
+    }
+    //send last command on sendKfault notification
+    var sendKfault = $rootScope.$on('sendKfault', function () {
+      sendAndReceiveService.write(commands[commands.length-1], function () {
+        sendKfault();
+      });
+    });
+    //check if commands have been sent correctly
+    var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+      checkRdy(res, typeStr);
+      rdy();
+    });
+  }
+
+  function checkRdy(res, type) {
+    var typeStr = type;
+    if (res.search('rdy:') > -1) {
+      if (typeStr === 'moveXMm') {
+        $ionicPopup.alert({
+          title: 'Moving '+$scope.numberOfTests.mm+' mm'
+        });
+        setButtons({'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false});
+        calculateVarsService.getVars('test', function (obj) {
+          console.log('resetting commands in testCtrl');
+          commands = obj.commands;
+        });
+      }
+      else if (typeStr === 'stressTest') {
+        sentSettingsForTest = true;
+        $scope.stressTest();
+      }
+    }
+    else if (res.search('FAULT') > -1) {
+      addToLog('Error sending moveXMmResponse, aborting current task & resetting');
+      emergencyService.on(function () {
+        emergencyService.off();
+      })
+    }
+    else {
+      $timeout(function () {
+        sendAndReceiveService.write('<w'+stepMotorNum+'>');
+        var rdy = $rootScope.$on('bluetoothResponse', function (event, response) {
+          checkRdy(response, typeStr);
+          rdy();
+        })
+      }, 200);
+    }
+  }
+
   $scope.stressTest = function () {
-    $scope.showEmergency = true;
-    $scope.showResetButton = false;
-    $scope.showStressTest = false;
-    $scope.showVersionButton = false;
-    $scope.showMoveXMm = false;
-    if (emergency) {
+    setButtons({'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXmm': false});
+    if (statusService.getEmergency() === true) {
       addToLog('Emergency on, cancelling stresstest');
       return
     }
     if (!sentSettingsForTest) {
-      if (!emergency) {
+      if (statusService.getEmergency() === false) {
         console.log('numberOfTests:'+$scope.numberOfTests.tests);
         addToLog('Sending settings needed for testing');
-        //make sure that on setting the settings, start position = 0mm
-        var moveXMmStepsCommand = '<s0'+stepMotorNum+'>';
-        $scope.sendSettingsData(true, moveXMmStepsCommand, true, function () {
-          sentSettingsForTest = true;
-          $scope.stressTest();
-        });
+        sendSettings('stressTest');
       }
-
     }
     else {
-      if (!emergency) {
+      if (statusService.getEmergency() === false) {
         addToLog('Executing test '+($scope.completedTest+1)+'/'+$scope.numberOfTests.tests);
-        sending = true;
+        statusService.setSending(true);
         send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', checkTestDone);
 
         function checkTestDone(boolean) {
@@ -1502,6 +1617,31 @@ angular.module('starter.controllers', [])
 
   };
 
+  function send(str, listenerBoolean, listenerFunction) {
+    if (str === undefined){
+      $ionicPopup.alert({
+        title: 'Encountered an error',
+        template: 'Please email a bug report via \'Show full log\''
+      })
+    }
+    if (statusService.getEmergency() === false) {
+      //calling commandObj returns {'ID': num, 'command': str, 'expectedResponse': str}
+      // and adds this object to sendAndReceive.commandArray
+      var commandObj = sendAndReceiveService.addToCommandObj(str);
+
+      //calling .write() with original command (str). commandID and callingFunction are optional.
+      sendAndReceiveService.write(str, commandObj.ID, 'send in runBluetoothCtrl');
+      //creates listener based on commandID, plus function to execute when listener is fired
+      if (listenerBoolean === true) {
+        createListener(commandObj.ID, listenerFunction);
+      }
+    }
+  }
+
+  function createListener(commandID, functionToExecute) {
+    
+  }
+
   $scope.getVersion = function() {
     subscribe();
     send('<<y8:y'+stepMotorNum+'>', function (responded, responseStr) {
@@ -1527,6 +1667,13 @@ angular.module('starter.controllers', [])
       }
     })
 
+  }
+
+  function addToLog(str) {
+    logService.addOne(str);
+    logService.getLog(function (arr) {
+      $scope.bluetoothLog = arr;
+    });
   }
 })
 //end of controller testCtrl
@@ -1705,6 +1852,12 @@ angular.module('starter.controllers', [])
     showSavedDeviceAlert();
   }
 
+  function addToLog(str) {
+    logService.addOne(str);
+    logService.getLog(function (arr) {
+      $scope.bluetoothLog = arr;
+    });
+  }
 
   function showSavedDeviceAlert() {
     $ionicPopup.alert({

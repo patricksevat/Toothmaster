@@ -414,6 +414,18 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           vars.return.commands = disableEncoder.concat(vars.return.commands)
         }
       }
+      else if (type === 'test'){
+        vars.return.commands = ['<v'+vars.return.vars.direction+stepMotorNum+'>', '<s0'+stepMotorNum+'>',
+          '<p'+vars.return.vars.stepsPerRPM+stepMotorNum+'>','<r'+vars.return.vars.maxRPM+stepMotorNum+'>',
+          '<f'+vars.return.vars.stepMotorOnOff+stepMotorNum+'>', '<o'+vars.return.vars.time+stepMotorNum+'>',
+          '<kFAULT'+stepMotorNum+'>'];
+        if (settings.encoder.enable) {
+          vars.return.commands = enableEncoder.concat(vars.return.commands)
+        }
+        else {
+          vars.return.commands = disableEncoder.concat(vars.return.commands)
+        }
+      }
     if (cb) cb(vars.return);
     else  return vars.return;
     }
