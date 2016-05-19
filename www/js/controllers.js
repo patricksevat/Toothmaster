@@ -1005,10 +1005,13 @@ angular.module('starter.controllers', [])
           for (var i = 0; i < commands.length -1; i++){
             sendAndReceiveService.write(commands[i]);
             }
+          //All other setting commands need to be sent before sending kFault,
+          // so on second to last setting command a 'sendKfault' is emitted after which kFault is sent
           var sendKfault = $rootScope.$on('sendKfault', function () {
             sendAndReceiveService.write(commands[commands.length-1], function () {
               sendKfault();
             });
+            //on sending kFault, check for response
           var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
             lastSendSettingsCommand(res);
             rdy();
@@ -1179,7 +1182,7 @@ angular.module('starter.controllers', [])
             text: 'Start',
             type: 'button-balanced',
             onTap: function () {
-              $scope.sendSettingsData(false, '', false)
+              $scope.sendSettingsData()
             }
           }]
       })
@@ -1228,66 +1231,103 @@ angular.module('starter.controllers', [])
 //end of controller runBluetoothCtrl
 
 .controller('homingCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
-                                    $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService) {
-  var homingDirection;
+                                    $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
+                                    checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
+                                    statusService, connectToDeviceService) {
+
   var homingStopswitchInt;
   //homing commands
   var homingCommands;
-  var homingCommand;
+  var stepMotorNum = '3';
+  $scope.bluetoothLog = [];
+  $scope.bluetoothEnabled = null;
+  $scope.buttons = buttonService.getValues();
+  $scope.userDisconnect = function () {
+    disconnectService.disconnect();
+  };
 
-  var encoderCommands;
-  var encoderCommand;
+  function setButtons(obj) {
+    buttonService.setValues(obj);
+    $scope.$apply(function () {
+      $scope.buttons = buttonService.getValues()
+    });
+    console.log($scope.buttons);
+  }
 
-  var homingDone;
-  var sending = false;
-  var response;
-  var settingsDone = true;
-  var retry = 0;
-  var emergency = false;
+  $scope.$on('$ionicView.enter', function () {
+    console.log('enterView in homingCtrl fired');
+    logService.getLog(function (arr) {
+      $scope.bluetoothLog = arr;
+    });
+    checkBluetoothEnabledService.getValue(function (value) {
+      $scope.bluetoothEnabled = value;
+      console.log('$scope.bluetoothEnabled: '+$scope.bluetoothEnabled);
+    });
+    connectToDeviceService.getDeviceName(function (value) {
+      $scope.deviceName= value;
+    });
+    $scope.buttons = buttonService.getValues();
+    isConnectedService.getValue(function (value) {
+      $scope.isConnected = value;
+      console.log('$scope.isConnected: '+$scope.isConnected);
+    });
+    calculateVarsService.getVars('homing', function (obj) {
+      homingCommands = obj.commands;
+      console.log('homingcommands:');
+      console.log(homingCommands);
+      homingStopswitchInt = obj.vars.homingStopswitchInt;
+    });
+    sendAndReceiveService.subscribe();
+  });
+
+  $scope.$on('$ionicView.leave', function () {
+    console.log('leaveView in bluetoothConnectionCtrl fired');
+    if (statusService.getSending() === true ) {
+      addToLog('Cancelling current tasks');
+      emergencyService.on(function () {
+        emergencyService.off();
+      });
+    }
+    else {
+      sendAndReceiveService.unsubscribe();
+      sendAndReceiveService.clearBuffer();
+    }
+    //TODO perhaps create listeners in a var and cancel var on leave?
+    logService.setBulk($scope.bluetoothLog);
+  });
+
+  $scope.emergencyOn = function () {
+    emergencyService.on();
+  };
+
+  $scope.emergencyOff = function () {
+    console.log('emergencyOff called');
+    emergencyService.off();
+  };
 
   //
   //SECTION: homing logic
   //
 
   $scope.homing = function () {
-    if (!emergency) {
-      subscribe();
-      response = '';
+    if (statusService.getEmergency() === false) {
       console.log('homingStopswitch = '+homingStopswitchInt);
-      if (settingsDone){
-        $scope.showSpinner = true;
-        sending = true;
-        homingDone = false;
-        $scope.showEmergency = true;
-        $scope.showHoming = false;
+      if (statusService.getSending() === false){
+        setButtons({'showSpinner':true,'showEmergency':true,'showHoming':false});
+        statusService.setSending(true);
         //send start command
-        send('<<y8:y' + stepMotorNum + '>', function (boolean) {
-          //true boolean means a correct response has been given
-          if (boolean === true) {
-            //send encoder settings or disable encode command, after that send settings commands
-            if ($scope.settings.encoder.enable) {
-              console.log('Homing with encoder enabled');
-              send(encoderCommands[0], encoderHomingPlus);
-            }
-            else {
-              console.log('Homing with encoder disabled');
-              send(disableEncoder, function () {
-                send(homingCommands[homingCommand], homingCommandPlus);
-              })
-            }
-          }
-          //false boolean means a timeout was encountered, retry
-          else if (boolean === false && !emergency) {
-            if (retry < 4) {
-              retry+=1;
-              console.log('retry number '+retry+'/3');
-              $scope.homing();
-            }
-            else {
-              addToLog('Maximum number of retries reached');
-            }
-          }
+        for (var i = 0; i < homingCommands.length -1; i++){
+          sendAndReceiveService.write(homingCommands[i]);
+        }
+        var sendKfault = $rootScope.$on('sendKfault', function () {
+          sendAndReceiveService.write(homingCommands[homingCommands.length-1], function () {
+            sendKfault();
+          });
         });
+        var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+          homingResponse(res);
+          rdy();
+        })
       }
       else {
         $ionicPopup.alert({
@@ -1297,83 +1337,27 @@ angular.module('starter.controllers', [])
     }
     else {
       $ionicPopup.alert({
-        title: 'Emergency has been pressed, will not contnue homing'
+        title: 'Emergency has been pressed, will not continue homing'
       });
     }
 
-    function encoderHomingPlus(boolean){
-      if (boolean === true) {
-        if (!emergency) {
-          if (encoderCommand < encoderCommands.length-1){
-            encoderCommand +=1;
-            send(encoderCommands[encoderCommand], encoderPlus);
-          }
-          else if (encoderCommand === encoderCommands.length-1){
-            send(homingCommands[homingCommand], homingCommandPlus);
-          }
-        }
-      }
-      else if (boolean === false && !emergency) {
-        if (retry < 4) {
-          retry+=1;
-          console.log('retry number '+retry+'/3');
-          $scope.homing();
-        }
-        else {
-          addToLog('Maximum number of retries reached');
-        }
-      }
-    }
 
-    function homingCommandPlus(boolean, res) {
-      if (boolean === true &&!homingDone) {
-        if (!emergency){
-          console.log('homingCommandPlus called');
-          //first command is already sent in homing function
-          if (homingCommand < homingCommands.length-1) {
-            homingCommand += 1;
-            send(homingCommands[homingCommand], homingCommandPlus);
-            console.log('homingCommand = '+homingCommand);
-            console.log('homingCommands.length = '+homingCommands.length);
-          }
-          //on last command check if 'rdy' has been sent
-          else if (homingCommand === homingCommands.length -1) {
-            console.log('All homing commands sent');
-            console.log('Making homing movement');
-            if (res.search('wydone') > -1) {
-              $scope.showSpinner = false;
-              $ionicPopup.alert({
-                title: 'Homing completed'
-              });
-              $scope.showCalcButton = true;
-              homingDone = true;
-              homingCommand = 0;
-              sending = false;
-              $scope.showEmergency = false;
-              $scope.showHoming = true;
-            }
-            else {
-              $timeout(function () {
-                send('<w'+stepMotorNum+'>', homingCommandPlus);
-              }, 200);
-            }
-          }
-        }
-        else {
-          $ionicPopup.alert({
-            title: 'Emergency has been pressed in run Bluetooth program, will not execute homing'
-          });
-        }
+    function homingResponse(res) {
+      if (res.search('wydone') > -1) {
+        setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
+        $ionicPopup.alert({
+          title: 'Homing completed'
+        });
+        statusService.setSending(false);
       }
-      else if (boolean === false && !emergency) {
-        if (retry < 4) {
-          retry+=1;
-          console.log('retry number '+retry+'/3');
-          $scope.homing();
-        }
-        else {
-          addToLog('Maximum number of retries reached');
-        }
+      else {
+        $timeout(function () {
+          sendAndReceiveService.write('<w'+stepMotorNum+'>');
+          var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+            homingResponse(res);
+            rdy();
+          })
+        }, 200);
       }
     }
   };
@@ -1584,6 +1568,8 @@ angular.module('starter.controllers', [])
   }
 
   $scope.$on('$ionicView.enter', function () {
+    $scope.availableDevices = [];
+    $scope.pairedDevices = [];
     console.log('enterView in bluetoothConnectionCtrl fired');
     logService.getLog(function (arr) {
       $scope.bluetoothLog = arr;
@@ -1592,7 +1578,9 @@ angular.module('starter.controllers', [])
       $scope.bluetoothEnabled = value;
       console.log('$scope.bluetoothEnabled: '+$scope.bluetoothEnabled);
     });
-    $scope.deviceName= connectToDeviceService.getDeviceName();
+    connectToDeviceService.getDeviceName(function (value) {
+      $scope.deviceName= value;
+    });
     $scope.buttons = buttonService.getValues();
     isConnectedService.getValue(function (value) {
       $scope.isConnected = value;

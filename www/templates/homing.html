@@ -38,13 +38,13 @@
           <p class="bluetooth-text">Control buttons</p>
         </div>
         <div class="item item-text-wrap" ng-show="!bluetoothEnabled">
-          <button class="button button-calm" ng-hide="bluetoothEnabled" on-tap="bluetoothOn()">Turn on Bluetooth</button>
+          <button class="button button-calm" ng-hide="bluetoothEnabled" ui-sref="app.bluetoothConnection">Turn on Bluetooth in Bluetooth Connection</button>
         </div>
         <ion-item ng-show="isConnected">
-          <button class="button button-assertive" ng-show="showEmergency" on-tap="emergencyOn()">Stop</button>
-          <button class="button button-calm" on-tap="homing()" ng-show="showHoming">Homing</button>
-          <button class="button button-positive" ng-show="showResetButton" on-tap="emergencyOff()">Reset program</button>
-          <br><ion-spinner ng-show="showSpinner"></ion-spinner>
+          <button class="button button-assertive" ng-show="buttons.showEmergency" on-tap="emergencyOn()">Stop</button>
+          <button class="button button-calm" on-tap="homing()" ng-show="buttons.showHoming">Homing</button>
+          <button class="button button-positive" ng-show="buttons.showResetButton" on-tap="emergencyOff()">Reset program</button>
+          <br><ion-spinner ng-show="buttons.showSpinner"></ion-spinner>
         </ion-item>
         <div class="item item-divider">
           <p class="bluetooth-text log-text">Activity log</p>

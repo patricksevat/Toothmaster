@@ -187,8 +187,8 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   })
 
-  .service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout',
-    function (isConnectedService, logService, checkBluetoothEnabledService, buttonService, $rootScope, $timeout) {
+  .service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window',
+    function (isConnectedService, logService, checkBluetoothEnabledService, buttonService, $rootScope, $timeout, $window) {
     var connect = this;
       var retry = 1;
       var deviceName = '';
@@ -197,62 +197,82 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         retry = 1;
       });
 
-      connect.getDeviceName = function () {
-        return deviceName;
+      connect.getDeviceName = function (cb) {
+        if (cb) cb(deviceName);
+        else return deviceName;
       };
 
       connect.setDeviceName = function (str) {
         deviceName = str;
       };
 
-    connect.connectToLastDevice = function (cb) {
-      var bluetoothOn = checkBluetoothEnabledService.getValue();
+    connect.connectToLastDevice = function (bluetoothOnVal, cb) {
+      var bluetoothOn;
+      if (bluetoothOnVal === undefined) {
+        checkBluetoothEnabledService.getValue(function (value) {
+          bluetoothOn = value;
+          valueRetrieved();
+        });
+      }
+      else {
+        bluetoothOn = bluetoothOnVal;
+        valueRetrieved();
+      }
       logService.addOne('Trying to connect with last known device');
 
-      if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '') {
-        var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
-        $window.bluetoothSerial.connectInsecure(obj.id, function () {
-          connect.setDeviceName(obj.name);
-          console.log('succesfully connected to last connected device');
-          //TODO show buttons here?
-          if (cb) cb();
-        }, function () {
-          console.log('could not connect to last connected device');
-          if (cb) cb();
-        })
+      function valueRetrieved() {
+        if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '') {
+          console.log('actually connecting to lastConnected device');
+          var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
+          $window.bluetoothSerial.connectInsecure(obj.id, function () {
+            connect.setDeviceName(obj.name);
+            logService.addOne('Succesfully connected to last connected device');
+            if (cb) cb();
+          }, function () {
+            console.log('could not connect to last connected device');
+            if (cb) cb();
+          })
+        }
       }
+
     };
 
     connect.connectWithRetry = function () {
+      console.log('connectWithRetry called in connectService');
       var isConnected;
+      var bluetoothOn;
       isConnectedService.getValue(function (value) {
         isConnected = value;
-      });
-      var bluetoothOn;
-      checkBluetoothEnabledService.getValue(function (value) {
-        bluetoothOn = value
+        checkBluetoothEnabledService.getValue(function (value) {
+          bluetoothOn = value;
+          valuesRetrieved();
+        });
       });
 
-      if (bluetoothOn && !isConnected) {
-        connect.connectToLastDevice(function () {
-          isConnectedService.getValue(function (value) {
-            isConnected = value;
-          });
-          if (!isConnected && retry < 6) {
-            $timeout(function () {
-              retry += 1;
-              console.log('Connect with retry, try: '+retry);
-              connect.connectWithRetry();
-            }, 500)
-          }
-          else if (isConnected) {
-            retry = 1;
-          }
-          else if (!isConnected && retry >= 6) {
-            logService.addOne('Could not connect with last known device, please make sure that device is turned on. If so, turn off your phone\'s Bluetooth and restart the app' );
-            retry = 1;
-          }
-        })
+      function valuesRetrieved() {
+        if (bluetoothOn && !isConnected) {
+          console.log('connectWithRetry bluetoothOn & !isConnected');
+          connect.connectToLastDevice(bluetoothOn, function () {
+            isConnectedService.getValue(function (value) {
+              isConnected = value;
+            });
+            if (!isConnected && retry < 6) {
+              console.log('retry connectToLastDevice');
+              $timeout(function () {
+                retry += 1;
+                console.log('Connect with retry, try: '+retry);
+                connect.connectWithRetry();
+              }, 500)
+            }
+            else if (isConnected) {
+              retry = 1;
+            }
+            else if (!isConnected && retry >= 6) {
+              logService.addOne('Could not connect with last known device, please make sure that device is turned on. If so, turn off your phone\'s Bluetooth and restart the app' );
+              retry = 1;
+            }
+          })
+        }
       }
     }
   }])
@@ -304,13 +324,10 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         logService.UILog.unshift(str);
       }
       else if (logService.UILog[0].indexOf(String.fromCharCode(40)) !== -1 && logService.UILog[0].indexOf(String.fromCharCode(41)) !== -1) {
-        console.log('UIlog parentheses found');
           var numStr = logService.UILog[0].slice(logService.UILog[0].indexOf('(')+1, logService.UILog[0].indexOf(')'));
           var num = Number(numStr);
           //indexOf(')')+2 because of the extra space
           var cleanStr = logService.UILog[0].slice(logService.UILog[0].indexOf(')')+2);
-        console.log('cleanStr: '+cleanStr+' number: '+num);
-        console.log('cleanStr === str: '+cleanStr === str);
           if (str === cleanStr) {
             num += 1;
             logService.UILog[0] = '('+num+') '+cleanStr;
@@ -320,11 +337,9 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           }
         }
       else if (logService.UILog[0] === str) {
-        console.log('UIlog first duplicate');
           logService.UILog[0] = '(2) '+str;
         }
       else {
-        console.log('UIlog different');
           if (logService.UILog.length >= 200) {
             logService.UILog.pop();
             logService.UILog.unshift(str);
@@ -576,6 +591,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     function (statusService, isConnectedService, logService, disconnectService, buttonService, connectToDeviceService) {
     var pause = this;
 
+      //TODO: fix using cb's for sending & connected?
     pause.pause = function () {
       //var sending = statusService.getSending();
       var sending = statusService.getSending();
@@ -586,7 +602,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         logService.addOne('Disconnected after pausing application');
         disconnectService.disconnect();
         buttonService.setValues({'showCalcButton': false, 'readyForData': false});
-        //TODO: clear availableDevices & pairedDevices arrays --> Not necessary only used in connectBluetooth, can be done there on enter
       }
       else {
        logService.addOne('User has paused application, continuing task in background')
@@ -827,7 +842,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           emergencyService.on();
           $rootScope.$emit('maxSteps', res, missedSteps)
         }
-        else if (res.search('2:') > -1) {
+        else if (res.search('2:') > -1 || res.search('6:') > -1) {
           $rootScope.$emit('sendKfault', res);
         }
         else {
@@ -863,7 +878,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService) {
-  bugout.log('version 0.9.1.22');
+  bugout.log('version 0.9.3.4');
 
     $rootScope.$on('$stateChangeStart',
       function(event, toState, toParams, fromState, fromParams, options){
@@ -926,7 +941,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         console.log('trying to connectwithretry on startup');
         connectToDeviceService.connectWithRetry();
       });
-
     }
 
     bugout.log(window.localStorage);
