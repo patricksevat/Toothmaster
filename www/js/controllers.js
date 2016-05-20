@@ -805,6 +805,7 @@ angular.module('starter.controllers', [])
       $scope.deviceName= connectToDeviceService.getDeviceName();
       $scope.buttons = buttonService.getValues();
         if (statusService.getEmergency() === true) {
+          console.log('set resetbutton true');
           setButtons({'showResetButton': true});
         }
         else {
@@ -816,6 +817,8 @@ angular.module('starter.controllers', [])
             'showSpinner': false
           })
         }
+      $scope.movements = [];
+      $scope.movementsNum = 0;
     });
 
     $scope.$on('$ionicView.leave',function () {
@@ -876,7 +879,6 @@ angular.module('starter.controllers', [])
       $scope.movementsNum = 0;
       done = true;
       settingsDone = true;
-      $scope.completedTest = 0;
       $scope.buttons = buttonService.getValues();
     });
 
@@ -885,6 +887,7 @@ angular.module('starter.controllers', [])
     };
 
     $scope.emergencyOff = function () {
+      statusService.setSending(false);
       console.log('emergencyOff called');
       emergencyService.off();
     };
@@ -988,6 +991,8 @@ angular.module('starter.controllers', [])
             if (i=== program.numberOfCuts){
               console.log('i === numberofcuts');
               addToLog('Done calculating movements');
+              console.log('$scope.movements:');
+              console.log($scope.movements);
               if (callback) callback();
               setButtons({
                 'showCalcButton': false,
@@ -1018,13 +1023,10 @@ angular.module('starter.controllers', [])
           // so on second to last setting command a 'sendKfault' is emitted after which kFault is sent
           var sendKfault = $rootScope.$on('sendKfault', function () {
             sendAndReceiveService.write(commands[commands.length-1], function () {
+              checkWydone();
               sendKfault();
             });
             //on sending kFault, check for response
-          var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-            lastSendSettingsCommand(res);
-            rdy();
-            })
           })
         }
           console.log('cannot continue sendSettingsData, sending is true')
@@ -1034,8 +1036,19 @@ angular.module('starter.controllers', [])
       }
     };
 
+    function checkWydone() {
+      var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+        lastSendSettingsCommand(res);
+        rdy();
+      })
+    }
+//TODO why are 2 <w>'s sent --> 100ms between, response is slower
     function lastSendSettingsCommand(res) {
-    if (res.search('rdy') !== -1) {
+      if (res.search('rdy') !== -1) {
+        addToLog('Moving to start position');
+        sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+      }
+      else if (res.search('wydone') !== -1) {
         setButtons({'readyForData':false,'showMovingButton':true,'showCalcButton':false,'showHoming':false, 'showSpinner': false});
         statusService.setSending(false);
         addToLog('Moved to start position');
@@ -1059,6 +1072,12 @@ angular.module('starter.controllers', [])
           emergencyService.off()
         });
       }
+      else {
+        $timeout(function () {
+          sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+        }, 100)
+
+      }
     }
 
     //
@@ -1066,6 +1085,10 @@ angular.module('starter.controllers', [])
     //
 
     $scope.startMoving = function () {
+      console.log('$scope.movements in startMoving:');
+      console.log($scope.movements);
+      console.log('$scope.movementsNum in startMoving:');
+      console.log($scope.movementsNum);
       if (statusService.getEmergency() === false) {
         if (done) {
           statusService.setSending(true);
@@ -1089,7 +1112,7 @@ angular.module('starter.controllers', [])
               addToLog('Movement done');
               addToLog($scope.movements[$scope.movementsNum].description);
               done = true;
-              setButtons({'showSpinner':false});
+              setButtons({'showSpinner':false, 'showHoming': true, 'showResetButton': false});
               if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut'
                 && $scope.movementsNum !== $scope.movements.length -1){
                 $ionicPopup.alert({
@@ -1107,7 +1130,7 @@ angular.module('starter.controllers', [])
                     onTap: $scope.showRestartPopup()
                   }]
                 });
-                setButtons({'showMovingButton':false,'showEmergency':false,'showResetButton':true});
+                setButtons({'showMovingButton':false,'showEmergency':false,'showResetButton':false});
                 statusService.setSending(false);
                 $scope.movements = [];
                 $scope.movementsNum = 0;
@@ -1123,28 +1146,7 @@ angular.module('starter.controllers', [])
         });
       }
     };
-/*
-    function send(str, listenerBoolean, listenerFunction) {
-      if (str === undefined){
-        $ionicPopup.alert({
-          title: 'Encountered an error',
-          template: 'Please email a bug report via \'Show full log\''
-        })
-      }
-      if (statusService.getEmergency() === false) {
-        //calling commandObj returns {'ID': num, 'command': str, 'expectedResponse': str}
-        // and adds this object to sendAndReceive.commandArray
-        var commandObj = sendAndReceiveService.addToCommandObj(str);
 
-        //calling .write() with original command (str). commandID and callingFunction are optional.
-        sendAndReceiveService.write(str, commandObj.ID, 'send in runBluetoothCtrl');
-        //creates listener based on commandID, plus function to execute when listener is fired
-        if (listenerBoolean === true) {
-          createListener(commandObj.ID, listenerFunction);
-        }
-      }
-    }
-*/
     //
     //SECTION: popups && modals
     //
@@ -1164,7 +1166,7 @@ angular.module('starter.controllers', [])
             text: 'No',
             type: 'button-calm',
             onTap: function () {
-
+              setButtons({'showCalcButton': true})
             }
           },
           {
@@ -1242,7 +1244,7 @@ angular.module('starter.controllers', [])
 .controller('homingCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                     $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
                                     checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-                                    statusService, connectToDeviceService) {
+                                    statusService, connectToDeviceService, $ionicHistory) {
   $scope.$on('$ionicView.unloaded', function () {
     console.log('\nUNLOADED\n');
   });
@@ -1367,14 +1369,14 @@ angular.module('starter.controllers', [])
 
 //TODO !!! Check real-life homing correct handling, using my STM-32 stopswitch is automatically hit, not able to check correct homing"
     function homingResponse(res) {
-      if (res.search('wydone') > -1) {
+      if (res.search('wydone') > -1 && $ionicHistory.currentStateName() === 'app.homing') {
         setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
         $ionicPopup.alert({
           title: 'Homing completed'
         });
         statusService.setSending(false);
       }
-      else {
+      else if ($ionicHistory.currentStateName() === 'app.homing') {
         $timeout(function () {
           sendAndReceiveService.write('<w'+stepMotorNum+'>');
           var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
@@ -1498,6 +1500,13 @@ angular.module('starter.controllers', [])
     sentSettingsForTest = false;
     testsSent = 0;
     $scope.testRunning = false;
+    sendAndReceiveService.stopPing();
+    sendKfault();
+    rdy();
+    rdy2();
+    faulty();
+    listen();
+    newCommand();
   };
 
   $scope.emergencyOff = function () {
@@ -1530,6 +1539,14 @@ angular.module('starter.controllers', [])
     }
   };
 
+  var sendKfault;
+  var rdy;
+  var rdy2;
+  var faulty;
+  var listen;
+  var newCommand;
+
+
   function sendSettings(type) {
     var typeStr = type;
     console.log('Commands in testCtrl -> sendSettings:');
@@ -1539,7 +1556,7 @@ angular.module('starter.controllers', [])
       sendAndReceiveService.write(commands[i]);
     }
     //send last command on sendKfault notification
-    var sendKfault = $rootScope.$on('sendKfault', function () {
+    sendKfault = $rootScope.$on('sendKfault', function () {
       sendAndReceiveService.write(commands[commands.length-1], function () {
         initRdy(typeStr);
         sendKfault();
@@ -1549,7 +1566,7 @@ angular.module('starter.controllers', [])
   }
 
   function initRdy(typeStr) {
-    var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+    rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
       checkRdy(res, typeStr);
       rdy();
     });
@@ -1582,17 +1599,15 @@ angular.module('starter.controllers', [])
     else {
       $timeout(function () {
         sendAndReceiveService.write('<w'+stepMotorNum+'>');
-        var rdy = $rootScope.$on('bluetoothResponse', function (event, response) {
+        rdy2 = $rootScope.$on('bluetoothResponse', function (event, response) {
           checkRdy(response, typeStr);
-          rdy();
+          rdy2();
         })
       }, 200);
     }
   }
 
   $scope.stressTest = function () {
-    setButtons({'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXmm': false, 'showSpinner': true});
-    $scope.testRunning = true;
     if (statusService.getEmergency() === true) {
       addToLog('Emergency on, cancelling stresstest');
     }
@@ -1602,6 +1617,8 @@ angular.module('starter.controllers', [])
       })
     }
     else {
+      setButtons({'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXmm': false, 'showSpinner': true});
+      $scope.testRunning = true;
       if (!sentSettingsForTest) {
         if (statusService.getEmergency() === false) {
           console.log('numberOfTests:'+$scope.numberOfTests.tests);
@@ -1618,7 +1635,9 @@ angular.module('starter.controllers', [])
           if ($scope.numberOfTests.tests <= 10) {
             for (var i = 0; i < $scope.numberOfTests.tests; i++) {
               //Send a random command, true = create listener, function is executed as soon as wydone+commandID has come back
-              send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
+              $timeout(function () {
+                send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
+              }, 150);
             }
           }
 
@@ -1626,16 +1645,33 @@ angular.module('starter.controllers', [])
           else {
             for (var i = 0; i < 10; i++) {
               //Send a random command, true = create listener, function is executed as soon as wydone+commandID has come back
-              send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
+              $timeout(function () {
+                send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
+              }, 250);
             }
+            newCommand = $rootScope.$on('bufferedCommandDone', function (event, res, commandID) {
+              if ($scope.completedTest+10 < $scope.numberOfTests.tests) {
+                $timeout(function () {
+                  send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
+                }, 250);
+              }
+              else newCommand();
+            })
           }
+
           $timeout(function () {
             sendAndReceiveService.startPing();
-          },500);
-          var faulty = $rootScope.$on('faultyResponse', function (event, res) {
+          },1000);
+
+
+          faulty = $rootScope.$on('faultyResponse', function (event, res) {
             console.log('faultyResponse in testCtrl, sending new buffered command');
-            send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
+            $scope.retriesNeeded +=1;
+            $timeout(function () {
+              send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
+            }, 250);
           });
+
           var commandDone = $rootScope.$on('bufferedCommandDone', function (event, res, commandID) {
             $scope.completedTest += 1;
             if ($scope.completedTest === $scope.numberOfTests.tests) {
@@ -1672,13 +1708,8 @@ angular.module('starter.controllers', [])
       })
     }
     if (statusService.getEmergency() === false) {
-      //calling commandObj returns {'ID': num, 'command': str, 'expectedResponse': str}
-      // and adds this object to sendAndReceive.commandArray
-      var commandObj = sendAndReceiveService.addToCommandObj(str);
-
-      //calling .write() with original command (str). commandID and callingFunction are optional.
-      sendAndReceiveService.writeBuffered(str, commandObj.ID, 'send in testCtrl -> send');
-      //creates listener based on commandID, plus function to execute when listener is fired
+      //calling .write() with original command (str). callingFunction is optional.
+      sendAndReceiveService.writeBuffered(str, 'send in testCtrl -> send');
       testsSent += 1;
     }
   }
@@ -1687,7 +1718,7 @@ angular.module('starter.controllers', [])
     if (statusService.getEmergency() === false && statusService.getSending() === false){
       sendAndReceiveService.write('<<y8:y'+stepMotorNum+'>');
       sendAndReceiveService.write(softwareVersionCommand, function () {
-        var listen = $rootScope.$on('bluetoothResponse', function (event, res) {
+        listen = $rootScope.$on('bluetoothResponse', function (event, res) {
           if (res.search('<14:') > -1) {
             $ionicPopup.alert({
               title: 'Version number',
@@ -1711,7 +1742,7 @@ angular.module('starter.controllers', [])
 
 .controller('bluetoothConnectionCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                                  $state, $ionicPlatform, $window, turnOnBluetoothService, statusService, isConnectedService, logService,
-                                                 buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService) {
+                                                 buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService, $timeout) {
 
   $scope.availableDevices = [];
   $scope.pairedDevices = [];
@@ -1774,10 +1805,10 @@ angular.module('starter.controllers', [])
   $scope.userDisconnect = function () {
     disconnectService.disconnect();
     $scope.isConnected = false;
-    isConnectedService.getValue(function (val) {
-      $scope.isConnected = val;
+    $timeout(function () {
       $scope.getAvailableDevices();
-    })
+    }, 500);
+
   };
 
   $scope.$on('$ionicView.leave', function () {
@@ -1835,33 +1866,26 @@ angular.module('starter.controllers', [])
   $scope.connectToUnpairedDevice = function ($index) {
     $ionicPlatform.ready(function() {
       addToLog('Trying to connect');
-      console.log('Platform '+$scope.platform);
       console.log('Id = '+$scope.availableDevices[$index].id);
-      if ($scope.platform === 'android') {
-        $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
+      $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
           addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
-          $scope.isConnected = isConnectedService.getValue();
-          buttonService.setValues({'showCalcButton': true});
-          saveLastConnectedDevice($scope.availableDevices[$index].id, $scope.availableDevices[$index].name);
+        saveLastConnectedDevice($scope.availableDevices[$index].id, $scope.availableDevices[$index].name);
+        connectToDeviceService.setDeviceName($scope.availableDevices[$index].name);
+          isConnectedService.getValue(function (val) {
+            $timeout(function () {
+              $scope.$apply(function () {
+                $scope.isConnected = val;
+              })
+            }, 500);
+
+          });
+
         }, function (error) {
           //failure callback
           addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
           addToLog('error: '+error);
           $scope.isConnected = isConnectedService.getValue();
         })
-      }
-      else {
-        $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
-          addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
-          $scope.isConnected = isConnectedService.getValue();
-          buttonService.setValues({'showCalcButton': true});
-        }, function (error) {
-          //failure callback
-          addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
-          addToLog('error: '+error);
-          $scope.isConnected = isConnectedService.getValue();
-        })
-      }
     })
   };
 
@@ -1870,12 +1894,17 @@ angular.module('starter.controllers', [])
       addToLog('Trying to connect');
       console.log('Id = '+$scope.pairedDevices[$index].id);
       $cordovaBluetoothSerial.connect($scope.pairedDevices[$index].id).then(function () {
+        saveLastConnectedDevice($scope.pairedDevices[$index].id, $scope.pairedDevices[$index].name);
+        connectToDeviceService.setDeviceName($scope.pairedDevices[$index].name);
         addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
         isConnectedService.getValue(function (val) {
-          $scope.isConnected = val;
+          $timeout(function () {
+            $scope.$apply(function () {
+              $scope.isConnected = val;
+            })
+          }, 500);
+
         });
-        buttonService.setValues({'showCalcButton': true});
-        saveLastConnectedDevice($scope.pairedDevices[$index].id, $scope.pairedDevices[$index].name);
       }, function (error) {
         addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
         addToLog('error: '+error);
@@ -1899,21 +1928,21 @@ angular.module('starter.controllers', [])
   }
 
   function showSavedDeviceAlert() {
-    $ionicPopup.alert({
-      title: 'Bluetooth device saved',
-      template: 'This bluetooth device is saved and will connect automatically from now on.<br \>If you need to change your device later on choose a new device via Bluetooth connection in the menu',
-      buttons: [{
-        text: 'Go to program',
-        type: 'button-calm',
-        onTap: function () {
-          $state.go('app.program')
-        }
-      },
-        {
-          text: 'Close'
-        }
-      ]
-    })
+      $ionicPopup.alert({
+        title: 'Bluetooth device saved',
+        template: 'This bluetooth device is saved and will connect automatically from now on.<br \>If you need to change your device later on choose a new device via Bluetooth connection in the menu',
+        buttons: [{
+          text: 'Go to program',
+          type: 'button-calm',
+          onTap: function () {
+            $state.go('app.program')
+          }
+        },
+          {
+            text: 'Close'
+          }
+        ]
+      })
   }
 
 });
