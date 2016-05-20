@@ -292,8 +292,8 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   }])
 
   //TODO add stepmotorService
-  .service('disconnectService',['logService', 'buttonService', 'isConnectedService',
-    function ($cordovaBluetoothSerial, logService, buttonService, isConnectedService) {
+  .service('disconnectService',['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window',
+    function ($cordovaBluetoothSerial, logService, buttonService, isConnectedService, $window) {
     var disconnect = this;
     var stepMotorNum = '3';
     disconnect.disconnect = function () {
@@ -351,7 +351,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     logService.getLog = function (cb) {
-      console.log(logService.UILog);
       if (cb) cb(logService.UILog);
       return logService.UILog;
 
@@ -631,8 +630,8 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   }])
 
-  .service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', '$ionicPopup', 'shareSettings',
-    function (statusService, emergencyService, $window, logService, $rootScope, buttonService, $ionicPopup, shareSettings) {
+  .service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', '$ionicPopup', 'shareSettings', '$interval',
+    function (statusService, emergencyService, $window, logService, $rootScope, buttonService, $ionicPopup, shareSettings, $interval) {
       var sendAndReceive = this;
       var stepMotorNum = '3';
       var command;
@@ -642,12 +641,12 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       var subscribed = statusService.getSubscribed();
       var commandIdStr = $window.localStorage['commandIdNum'];
       var commandObj = {};
+      var ping;
 
       /*
        * subscribe -> send command\write -> wait for subscribe to receive answer -> rootscope emit command + response
        * -> unsubscribe when done with batch \ unsubscribe after command -> only throw new command when done
        * TODO: create the timeout check
-       * TODO: subscribe on scope.enter and unsubscribe on scope.leave
        * */
 
       sendAndReceive.subscribe = function () {
@@ -704,6 +703,16 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           //TODO add UI log message
           console.log('Emergency pressed, will not send command')
         }
+      };
+
+      sendAndReceive.startPing = function () {
+        ping = $interval(function () {
+          sendAndReceive.write('<w'+stepMotorNum+'>');
+        },250)
+      };
+
+      sendAndReceive.stopPing = function () {
+        $interval.cancel(ping);
       };
 
       sendAndReceive.getNewCommandID = function () {
@@ -817,6 +826,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       */
 
       $rootScope.$on('emergencyOn', function () {
+        sendAndReceive.stopPing();
         sendAndReceive.sendEmergency();
         sendAndReceive.resetCommandObj();
       });
@@ -858,6 +868,24 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         else if (res.search('2:') > -1) {
           $rootScope.$emit('sendKfault', res);
         }
+        else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
+          console.log('\nERROR:\nPotential faulty response: '+res);
+          var numStr = res.slice(res.indexOf('$')+1, res.indexOf('>'));
+          var commandID = Number(numStr);
+          var commandIDObj = commandObj[commandID];
+          console.log('commandIDObj.command: '+commandIDObj.command);
+          if (res.search(commandIDObj.command) === -1) {
+            console.log('confirmed faulty response');
+            $rootScope.$emit('faultyResponse', res);
+            delete  commandObj[commandID];
+          }
+        }
+        else if (res.search('&') > -1 && res.search('wydone')> -1) {
+          var numStr = res.slice(res.indexOf('>')+1, res.indexOf('&'));
+          var commandID = Number(numStr);
+
+          $rootScope.$emit('bufferedCommandDone', res, commandID);
+        }
         else {
           $rootScope.$emit('bluetoothResponse', res);
         }
@@ -891,7 +919,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService) {
-  bugout.log('version 0.9.4.4');
+  bugout.log('version 0.9.5.3');
 
     $rootScope.$on('$stateChangeStart',
       function(event, toState, toParams, fromState, fromParams, options){
@@ -962,7 +990,9 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
 })
 
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+  $ionicConfigProvider.views.maxCache(1);
+
   $stateProvider
     //TODO split BluetoothCtrl into seperate controllers :'[
     .state('app', {
