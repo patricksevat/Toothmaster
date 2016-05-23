@@ -1,6 +1,5 @@
 var bugout = new debugout();
-//TODO chekc permissions
-//Force screen on while executing program
+
 angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
 
   .service('shareSettings', function() {
@@ -68,7 +67,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     button.setValues = function (obj) {
-      console.log('buttonService.setValues called');
+      bugout.log('buttonService.setValues called');
       for (var keyVal in obj) {
         switch (keyVal) {
           case 'readyForData':
@@ -124,7 +123,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     var emergency = this;
 
     emergency.on = function (cb) {
-      console.log('emergencyService.on called');
+      bugout.log('emergencyService.on called');
       statusService.setEmergency(true);
       buttonService.setEmergencyValues();
       $rootScope.$emit('emergencyOn');
@@ -132,7 +131,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     emergency.off = function (cb) {
-      console.log('emergencyService.off called');
+      bugout.log('emergencyService.off called');
       statusService.setEmergency(false);
       statusService.setSending(false);
       $rootScope.$emit('emergencyOff');
@@ -172,7 +171,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
   .service('isConnectedService', function ($cordovaBluetoothSerial) {
     var isConnected = this;
-    console.log($cordovaBluetoothSerial);
     isConnected.getValue = function (cb) {
       $cordovaBluetoothSerial.isConnected().then(function () {
         isConnected.value = true;
@@ -223,14 +221,14 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
       function valueRetrieved() {
         if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '') {
-          console.log('actually connecting to lastConnected device');
+          bugout.log('actually connecting to lastConnected device');
           var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
           $window.bluetoothSerial.connectInsecure(obj.id, function () {
             connect.setDeviceName(obj.name);
             logService.addOne('Succesfully connected to last connected device');
             if (cb) cb();
           }, function () {
-            console.log('could not connect to last connected device');
+            bugout.log('could not connect to last connected device');
             if (cb) cb();
           })
         }
@@ -239,7 +237,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     connect.connectWithRetry = function () {
-      console.log('connectWithRetry called in connectService');
+      bugout.log('connectWithRetry called in connectService');
       var isConnected;
       var bluetoothOn;
       isConnectedService.getValue(function (value) {
@@ -252,16 +250,16 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
       function valuesRetrieved() {
         if (bluetoothOn && !isConnected) {
-          console.log('connectWithRetry bluetoothOn & !isConnected');
+          bugout.log('connectWithRetry bluetoothOn & !isConnected');
           connect.connectToLastDevice(bluetoothOn, function () {
             isConnectedService.getValue(function (value) {
               isConnected = value;
             });
             if (!isConnected && retry < 6) {
-              console.log('retry connectToLastDevice');
+              bugout.log('retry connectToLastDevice');
               $timeout(function () {
                 retry += 1;
-                console.log('Connect with retry, try: '+retry);
+                bugout.log('Connect with retry, try: '+retry);
                 connect.connectWithRetry();
               }, 500)
             }
@@ -293,11 +291,12 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   }])
 
   //TODO add stepmotorService
-  .service('disconnectService',['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService',
-    function ($cordovaBluetoothSerial, logService, buttonService, isConnectedService, $window, connectToDeviceService) {
+  .service('disconnectService',['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings',
+    function ($cordovaBluetoothSerial, logService, buttonService, isConnectedService, $window, connectToDeviceService, shareSettings) {
     var disconnect = this;
-    var stepMotorNum = '3';
+    var stepMotorNum = shareSettings.getObj().stepMotorNum;
     disconnect.disconnect = function () {
+      stepMotorNum = shareSettings.getObj().stepMotorNum;
       $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
         $window.bluetoothSerial.disconnect(function () {
           logService.addOne('User disconnected');
@@ -305,7 +304,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           buttonService.setValues({'showCalcButton':false});
           isConnectedService.getValue();
         }, function () {
-          console.log('User could not disconnect');
+          bugout.log('User could not disconnect');
           logService.addOne('Could not disconnect from device');
         })
       });
@@ -321,7 +320,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     logService.addOne = function (str) {
-      console.log('adding to UI log: '+str);
+      bugout.log('adding to UI log: '+str);
       if (logService.UILog.length === 0) {
         logService.UILog.unshift(str);
       }
@@ -362,10 +361,11 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   .service('calculateVarsService',['shareProgram', 'shareSettings', function (shareProgram, shareSettings) {
     var vars = this;
 
-    var stepMotorNum = '3';
+    var stepMotorNum = shareSettings.getObj().stepMotorNum;
     //type can be: homing, test or runBluetooth
     //TODO perhaps clean up the return of encoderCommands
     vars.getVars = function (type, cb) {
+      stepMotorNum = shareSettings.getObj().stepMotorNum;
       var program = shareProgram.getObj();
       var settings = shareSettings.getObj();
       vars.return = {
@@ -432,64 +432,29 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   }])
 
-  //TODO for all 3 modal services: perhaps better to return the function?
-  .service('logModalService', function ($ionicModal) {
+  .service('logModalService', function () {
     var logModal = this;
-
-    logModal.create = function (cb) {
-      $ionicModal.fromTemplateUrl('log-modal.html', {
-        id: 1,
-        scope: $scope,
-        animation: 'slide-in-up'
-      }).then(function(modal) {
-        $scope.modal1 = modal;
-        if (cb) cb();
-      });
-    };
-
-    logModal.showFullLog = function () {
-      console.log('bluetoothLog.length'+$scope.bluetoothLog.length);
-      $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-      $scope.openModal(1);
-    };
-
-    logModal.getFullLogExtract = function(start, end) {
-      console.log('getFullLogExtract, start: '+start+' end: '+end);
-      $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-    };
-
-    logModal.previousFullLogPage = function () {
-      console.log('prevFullLogPage');
-      $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-      $scope.fullLogPage -= 1;
-    };
-
-    logModal.nextFullLogPage = function () {
-      console.log('nextFullLogPage');
-      $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-      $scope.fullLogPage += 1;
-    };
 
     logModal.emailFullLog = function () {
       var now = Date.now();
       cordova.plugins.email.isAvailable(
         function(isAvailable) {
-          console.log('email available:'+isAvailable);
+          bugout.log('email available:'+isAvailable);
           if (isAvailable === true) {
             var logFile = bugout.getLog();
             // save the file locally, so it can be retrieved from emailComposer
             window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function(fileSystem) {
-              console.log('file system open: ' + fileSystem.name);
+              bugout.log('file system open: ' + fileSystem.name);
               // create the file if it doesn't exist
               fileSystem.getFile('log'+now+'.txt', {create: true, exclusive: false}, function(file) {
-                console.log("file is file?" + file.isFile.toString());
+                bugout.log("file is file?" + file.isFile.toString());
                 // create writer
                 file.createWriter(function(writer) {
                   // write
                   writer.write(logFile);
                   // when done writing, call up email composer
                   writer.onwriteend = function() {
-                    console.log('done writing');
+                    bugout.log('done writing');
                     var subject = 'Toothmaster bug report';
                     var body = 'I have encountered an error. Could you please look into this problem? \nMy logfile is attached.\n\nKind regards,\nA Toothmaster user';
                     cordova.plugins.email.open({
@@ -513,59 +478,39 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         });
 
       function fileSystemError(error) {
-        console.log('Error getting file system: '+error.code);
+        bugout.log('Error getting file system: '+error.code);
       }
     }
   })
 
-  .service('helpModalService', function ($ionicModal) {
-    var helpModal = this;
+  .service('modalService', ['$ionicModal', '$rootScope', function ($ionicModal, $rootScope) {
+    var init = function (template, $scope) {
 
-    helpModal.create = function (cb) {
-      $ionicModal.fromTemplateUrl('help-modal.html', {
-        id: 2,
+      var promise;
+      $scope = $scope || $rootScope.$new();
+      promise = $ionicModal.fromTemplateUrl(template, {
         scope: $scope,
         animation: 'slide-in-up'
-      }).then(function(modal) {
-        console.log('modal created');
-        $scope.modal2 = modal;
-        if (cb) cb();
+      }).then(function (modal) {
+        $scope.modal= modal;
+        return modal
       });
-    }
-  })
 
-  .service('modalService', ['helpModalService', 'logModalService', function (helpModalService, logModalService) {
-      var modalService = this;
-
-      modalService.openModal = function (index) {
-        if (index === 1) {
-          if ($scope.modal1 == undefined) {
-            logModalService.create(function () {
-              console.log('showing modal');
-              $scope.modal1.show();
-            });
-          }
-          else {
-            $scope.modal1.show();
-          }
-        }
-        else {
-          if ($scope.modal2 == undefined) {
-            helpModalService.create(function () {
-              console.log('showing modal');
-              $scope.modal2.show();
-            });
-          }
-          else {
-            $scope.modal2.show();
-          }
-        }
+      $scope.openModal = function() {
+        $scope.modal.show();
       };
+      $scope.closeModal = function() {
+        $scope.modal.hide();
+      };
+      $scope.$on('$destroy', function() {
+        $scope.modal.remove();
+      });
 
-      modalService.close = function (index) {
-        if (index === 1) $scope.modal1.hide();
-        else $scope.modal2.hide();
-      }
+      return promise;
+    };
+    return {
+      init: init
+    }
   }])
 
   .service('statusService', function () {
@@ -591,7 +536,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     statusService.getSubscribed = function () {
-      console.log('getSubscribed called');
+      bugout.log('getSubscribed called');
       return statusService.subscribed;
     };
 
@@ -608,9 +553,9 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     pause.pause = function () {
       //var sending = statusService.getSending();
       var sending = statusService.getSending();
-      console.log('sending in pause:'+statusService.getSending());
+      bugout.log('sending in pause:'+statusService.getSending());
       var connected = isConnectedService.getValue();
-      console.log('pause.pause called, sending: '+sending+', connected'+connected);
+      bugout.log('pause.pause called, sending: '+sending+', connected'+connected);
       if (!sending && connected) {
         logService.addOne('Disconnected after pausing application');
         disconnectService.disconnect();
@@ -627,7 +572,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         connectToDeviceService.connectWithRetry();
       }
       else if (sending) {
-        console.log('skipped reconnect, because sending is '+sending);
+        bugout.log('skipped reconnect, because sending is '+sending);
       }
     }
   }])
@@ -635,7 +580,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   .service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', '$ionicPopup', 'shareSettings', '$interval', '$timeout',
     function (statusService, emergencyService, $window, logService, $rootScope, buttonService, $ionicPopup, shareSettings, $interval, $timeout) {
       var sendAndReceive = this;
-      var stepMotorNum = '3';
+      var stepMotorNum = shareSettings.getObj().stepMotorNum;
       var command;
       var response;
       var lastCommandTime;
@@ -652,7 +597,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
        * */
 
       sendAndReceive.subscribe = function () {
-        console.log('subscribed');
+        bugout.log('subscribed');
         statusService.setSubscribed(true);
         $window.bluetoothSerial.subscribe('#', function (data) {
           lastReceivedTime = Date.now();
@@ -663,27 +608,29 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       sendAndReceive.subscribeRawData = function () {
         $window.bluetoothSerial.subscribeRawData(function (data) {
           var bytes = String.fromCharCode.apply(null, new Uint8Array(data));
-          console.log('Rawdata: '+bytes);
+          bugout.log('Rawdata: '+bytes);
         })
       };
 
       sendAndReceive.unsubscribe = function () {
         $window.bluetoothSerial.unsubscribe(function () {
-          console.log('Succesfully unsubscribed');
+          bugout.log('Succesfully unsubscribed');
           statusService.setSubscribed(false);
         }, function () {
-          console.log('ERROR: could not unsubscribe');
+          bugout.log('ERROR: could not unsubscribe');
         })
       };
 
       sendAndReceive.write = function (str, cb) {
-        $window.bluetoothSerial.write(str, function () {
-          console.log('sent: '+str);
-          lastCommandTime = Date.now();
-          if (cb) cb();
-        }, function () {
-          console.log('ERROR: could not send command '+str);
-        })
+        if (statusService.getEmergency() === false) {
+          $window.bluetoothSerial.write(str, function () {
+            bugout.log('sent: '+str);
+            lastCommandTime = Date.now();
+            if (cb) cb();
+          }, function () {
+            bugout.log('ERROR: could not send command '+str);
+          })
+        }
       };
 
       sendAndReceive.writeBuffered = function (str, callingFunction) {
@@ -695,16 +642,15 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           command = '<c'+commandWithoutBrackets+'$'+commandIDObj.ID+'>';
 
           $window.bluetoothSerial.write(command, function () {
-            console.log('sent: '+command);
+            bugout.log('sent: '+command);
             lastCommandTime = Date.now();
           }, function () {
-            console.log('ERROR: could not send command '+str+' , callingFunction: '+callingFunction);
+            bugout.log('ERROR: could not send command '+str+' , callingFunction: '+callingFunction);
           });
           sendAndReceive.checkInterpretedResponse(commandIDObj.ID);
         }
         else {
-          //TODO add UI log message
-          console.log('Emergency pressed, will not send command')
+          logService.addOne('Emergency pressed, will not send command')
         }
       };
 
@@ -718,7 +664,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         });
         $timeout(function () {
           if (!interpreted) {
-            console.log('incorrect interpretation, ID: '+commandID);
+            bugout.log('incorrect interpretation, ID: '+commandID);
             $rootScope.$emit('faultyResponse');
             checkInterpreted();
           }
@@ -726,6 +672,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       };
 
       sendAndReceive.startPing = function () {
+        stepMotorNum = shareSettings.getObj().stepMotorNum;
         ping = $interval(function () {
           sendAndReceive.write('<w'+stepMotorNum+'>');
         },500)
@@ -752,6 +699,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       };
 
       sendAndReceive.expectedResponse = function (str) {
+        stepMotorNum = shareSettings.getObj().stepMotorNum;
         switch (str) {
           case '<':
             return '8:y';
@@ -823,7 +771,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       });
 
       sendAndReceive.emitResponse = function (res) {
-        console.log('response in emitResponse: '+res);
+        bugout.log('response in emitResponse: '+res);
         var settings = shareSettings.getObj();
         //handle stopswitch hit
         if (res.search('wydone:') > -1 && res.search('wydone:0') === -1) {
@@ -832,7 +780,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
             title: 'Error: hit stopswitch '+res.charAt(posStopswitch),
             template: 'Unexpected stopswitch has been hit. Aborting task and resetting program.'
           });
-          console.log('Error: hit stopswitch '+res.charAt(posStopswitch));
+          bugout.log('Error: hit stopswitch '+res.charAt(posStopswitch));
           logService.addOne('Error: hit stopswitch '+res.charAt(posStopswitch));
           //emergencyService.on sets correct buttons and sends resetcommand
           emergencyService.on();
@@ -851,7 +799,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
             title: 'You have missed the maximum number of allowed steps',
             template: 'The program has been stopped.<p>Maximum steps to miss: '+maxAllowedMiss+'</p><p>Number of steps actually missed '+missedSteps+'</p>'
           });
-          console.log('ERROR: hit max number of allowed steps');
+          bugout.log('ERROR: hit max number of allowed steps');
           logService.addOne('ERROR: exceeded maximum number of steps to miss (encoder setting)');
           emergencyService.on();
           $rootScope.$emit('maxSteps', res, missedSteps)
@@ -860,13 +808,13 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           $rootScope.$emit('sendKfault', res);
         }
         else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
-          console.log('\nERROR:\nPotential faulty response: '+res);
+          bugout.log('\nERROR:\nPotential faulty response: '+res);
           var numStr1 = res.slice(res.indexOf('$')+1, res.indexOf('>'));
           var commandID1 = Number(numStr1);
           var commandIDObj = commandObj[commandID1];
-          console.log('commandIDObj.command: '+commandIDObj.command);
+          bugout.log('commandIDObj.command: '+commandIDObj.command);
           if (res.search(commandIDObj.command) === -1) {
-            console.log('confirmed faulty response');
+            bugout.log('confirmed faulty response');
             $rootScope.$emit('faultyResponse', res);
             delete  commandObj[commandID1];
           }
@@ -884,10 +832,11 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
       //TODO add retry to sendEmergency?
       sendAndReceive.sendEmergency = function () {
-        console.log('sendAndReceiveService.sendEmergency called');
+        bugout.log('sendAndReceiveService.sendEmergency called');
 
         if (statusService.getSubscribed() === false) sendAndReceive.subscribe();
         createResetListener( function () {
+          stepMotorNum = shareSettings.getObj().stepMotorNum;
           $window.bluetoothSerial.write('<<y8:y'+stepMotorNum+'>', function () {
             logService.addOne('Program reset command sent');
           }, function (err) {
@@ -910,9 +859,9 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
       sendAndReceive.clearBuffer = function () {
         $window.bluetoothSerial.clear(function () {
-          console.log('Received buffer cleared');
+          bugout.log('Received buffer cleared');
         }, function () {
-          console.log('Error: could not clear receive buffer');
+          bugout.log('Error: could not clear receive buffer');
         })
       }
 
@@ -920,16 +869,16 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService) {
-  bugout.log('version 0.9.7.1');
+  bugout.log('version 0.9.8.24');
 
     $rootScope.$on('$stateChangeStart',
       function(event, toState, toParams, fromState, fromParams, options){
-        console.log('startChangeStart, fromState: '+fromState.name);
-        console.log('startChangeStart, toState: '+toState.name);
+        bugout.log('startChangeStart, fromState: '+fromState.name);
+        bugout.log('startChangeStart, toState: '+toState.name);
       });
 
   $ionicPlatform.on('pause', function () {
-    console.log('onPause called from app.js');
+    bugout.log('onPause called from app.js');
     if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
       || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
       pauseService.pause();
@@ -939,7 +888,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   });
 
   $ionicPlatform.on('resume', function () {
-    console.log('onResume called from app.js');
+    bugout.log('onResume called from app.js');
     if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
       || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
       pauseService.resume();
@@ -952,7 +901,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       window.localStorage.setItem('Safety', '');
     }
     if (window.localStorage['settings'] === undefined) {
-      window.localStorage['settings'] = '{"maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
+      window.localStorage['settings'] = '{"stepMotorNum": 1,"maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
     }
     if (window.localStorage['lastUsedProgram'] === undefined) {
       window.localStorage['lastUsedProgram'] = '';
@@ -980,12 +929,12 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
     else {
       $ionicPlatform.ready(function () {
-        console.log('trying to connectwithretry on startup');
+        bugout.log('trying to connectwithretry on startup');
         connectToDeviceService.connectWithRetry();
       });
     }
 
-    bugout.log(window.localStorage);
+    //bugout.log(window.localStorage);
     bugout.log('localstorage.length ='+window.localStorage.length);
   });
 
@@ -995,13 +944,11 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   $ionicConfigProvider.views.maxCache(1);
 
   $stateProvider
-    //TODO split BluetoothCtrl into seperate controllers :'[
     .state('app', {
       name: 'app',
     url: '/app',
     abstract: true,
-    templateUrl: 'templates/menu.html',
-    controller: 'AppCtrl'
+    templateUrl: 'templates/menu.html'
   })
 
   .state('app.settings', {

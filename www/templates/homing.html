@@ -40,6 +40,9 @@
         <div class="item item-text-wrap" ng-show="!bluetoothEnabled">
           <button class="button button-calm" ng-hide="bluetoothEnabled" ui-sref="app.bluetoothConnection">Turn on Bluetooth</button>
         </div>
+        <div class="item item-text-wrap" ng-show="!isConnected">
+          <button class="button button-calm" ng-hide="isConnected" ui-sref="app.bluetoothConnection">Connect to a device</button>
+        </div>
         <ion-item ng-show="isConnected">
           <button class="button button-assertive" ng-show="buttons.showEmergency" on-tap="emergencyOn()">Stop</button>
           <button class="button button-calm" on-tap="homing()" ng-show="buttons.showHoming">Homing</button>

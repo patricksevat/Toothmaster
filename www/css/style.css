@@ -206,3 +206,6 @@ iframe {
   transition: all linear 0.5s;
 }
 
+.align-right {
+  float: right;
+}

@@ -4,34 +4,35 @@
   </ion-nav-title>
   <ion-content>
     <div class="list">
-      <!--Niet gebruikt
-      <label class="item item-input item-stacked-label" on-tap="focus()">
-
-        <span class="input-label">Minimum frequency (steps/sec)</span>
-        <input type="number" placeholder="Minimum value: 50" ng-model="settings.minFreq" ng-class="{redText: settings.minFreq < 50 && settings.minFreq !== ''}">
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Stepmotor number</span>
+        <select ng-model="settings.stepMotorNum" class="align-right margins">
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+        </select>
       </label>
-      -->
-      <!--Gebruikt-->
       <label class="item item-input item-stacked-label">
         <span class="input-label">Maximum frequency (steps/sec)</span>
         <input type="number" placeholder="Maximum value 80 000" ng-model="settings.maxFreq" ng-class="{redText: settings.maxFreq > 80000}">
       </label>
-      <!--gebruikt-->
       <label class="item item-input item-stacked-label">
         <span class="input-label">Step motor dipswitch setting (steps/revolution)</span>
         <input type="number" placeholder="Determines how many pulses are needed per revolution" ng-model="settings.dipswitch">
       </label>
-      <!--Gebruikt-->
       <label class="item item-input item-stacked-label">
         <span class="input-label">Spindle advancement (mm/revolution)</span>
         <input type="number" placeholder="Example: 5" ng-model="settings.spindleAdvancement">
       </label>
-      <!--Gebruikt-->
       <label class="item item-input item-stacked-label">
         <span class="input-label">Time to reach maximum frequency (seconds)</span>
         <input type="number" placeholder="Example: 0.5" ng-model="settings.time">
       </label>
-      <!--Gebruikt-->
       <ion-toggle toggle-class="toggle-balanced" ng-model="settings.homingStopswitch"><span class="input-label">Change homing stopswitch</span></ion-toggle>
       <ion-toggle toggle-class="toggle-energized" ng-model="settings.direction"><span class="input-label">Reverse direction</span></ion-toggle>
       <ion-toggle toggle-class="toggle-balanced" ng-model="settings.encoder.enable"><span class="input-label">Enable/disable step motor encoder </span></ion-toggle>

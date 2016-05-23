@@ -7,7 +7,7 @@
       <div class="col col-center" >
         <div class="item item-divider">
           <p class="bluetooth-text log-text">Connection status</p>
-          <button class="button button-small button-calm button-log" on-tap="openModal(2)">
+          <button class="button button-small button-calm button-log" on-tap="openHelpModal()">
             Help
           </button>
           <button class="button button-small button-assertive button-log" ng-show="isConnected" on-tap="userDisconnect()" ui-sref="app.bluetoothConnection">
@@ -41,7 +41,10 @@
           <p class="bluetooth-text log-text">Control buttons</p>
         </div>
         <div class="item item-text-wrap" ng-show="!bluetoothEnabled">
-          <button class="button button-calm" ng-hide="bluetoothEnabled" ui-sref="app.bluetoothConnection">Turn on Bluetooth in Bluetooth Connection</button>
+          <button class="button button-calm" ng-hide="bluetoothEnabled" ui-sref="app.bluetoothConnection">Turn on Bluetooth</button>
+        </div>
+        <div class="item item-text-wrap" ng-show="!isConnected">
+          <button class="button button-calm" ng-hide="isConnected" ui-sref="app.bluetoothConnection">Connect to a device</button>
         </div>
         <div class="item item-text-wrap" ng-show="isConnected">
           <button class="button button-assertive" ng-show="buttons.showEmergency" on-tap="emergencyOn()">Stop</button>

@@ -1,7 +1,6 @@
 angular.module('starter.controllers', [])
 //TODO replace console.log with bugout.log
   /*
-  * TODO:
   * $rootScope emits:
   * $rootScope.$on('emergencyOn')
   * $rootScope.$on('emergencyOff')
@@ -10,42 +9,6 @@ angular.module('starter.controllers', [])
   * $rootScope.$on('bluetoothResponse', response)
   * */
 //controller used for debug buttons, not used anymore
-.controller('AppCtrl', function($scope) {
-  /*
-  $scope.ClearLocalStor = function() {
-    localStorage.clear();
-    console.log('local storage cleared');
-  };
-
-  $scope.removeLocalSafety = function() {
-    window.localStorage['Safety'] = '';
-    console.log('Safety reset to ""');
-  };
-
-  $scope.setLocalSafety = function () {
-    window.localStorage['Safety'] = 'Completed';
-    console.log('Safety completed');
-  };
-
-  $scope.setRegister = function (){
-    window.localStorage['registered'] = 'true';
-    console.log('registered = true');
-  };
-
-  $scope.setDeregister = function (){
-    window.localStorage['registered'] = 'false';
-    console.log('registered = false');
-  };
-
-  $scope.setSettings = function () {
-    window.localStorage['settings'] = '{"minFreq":50,"maxFreq":1600,"dipswitch":6400,"spindleAdvancement":5,"time":2,"encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
-  };
- */
-  $scope.setProgram= function () {
-    var testProg = {title: 'testprog', sawWidth: 5, cutWidth: 5, pinWidth: 5, numberOfCuts: 2, startPosition: 5  };
-    window.localStorage['testProg'] = JSON.stringify(testProg);
-  }
-})
 
 .controller('SafetySlides', function($scope, $ionicModal) {
   $scope.i = 0;
@@ -524,11 +487,12 @@ angular.module('starter.controllers', [])
     }
 
     else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null &&
-      $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === false) {
+      $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.stepMotorNum !== null &&
+      $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === false) {
       console.log('checkSettings passed');
       return true;
     }
-    else if ($scope.settings.maxFreq !== null  && $scope.settings.dipswitch !== null &&
+    else if ($scope.settings.maxFreq !== null  && $scope.settings.dipswitch !== null && $scope.settings.stepMotorNum !== null &&
       $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === true &&
       $scope.settings.encoder.stepsPerRPM !== 0 && $scope.settings.encoder.stepsToMiss > 0) {
       console.log('checkSettings passed');
@@ -566,7 +530,7 @@ angular.module('starter.controllers', [])
 })
 
 .controller('SettingsCtrl', function($scope, $ionicPopup, shareSettings){
-
+//TODO add stepmotorNum
   $scope.settings = {
     encoder: {
       enable: false,
@@ -582,7 +546,7 @@ angular.module('starter.controllers', [])
     }
 
     else if ($scope.settings.maxFreq == null || $scope.settings.dipswitch == null ||
-      $scope.settings.spindleAdvancement == null || $scope.settings.time == null) {
+      $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
       $scope.showAlertSettings();
     }
     else if ($scope.settings.encoder.enable && ($scope.settings.encoder.stepsPerRPM ==undefined || $scope.settings.encoder.stepsToMiss== undefined || $scope.settings.encoder.direction == undefined)){
@@ -713,18 +677,11 @@ angular.module('starter.controllers', [])
 
   })*/
 
-  .controller('browserCtrl', function($scope, $cordovaInAppBrowser) {
-  $scope.openBrowser = function() {
-    $cordovaInAppBrowser.open('http://goodlife.nu', '_self');
-  }
-
-})
-
 
   .controller('runBluetoothCtrl', function($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
     $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
     checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-    statusService, connectToDeviceService){ //modalService, logModalService, helpModalService
+    statusService, connectToDeviceService, logModalService, modalService){ //, modalService, logModalService
 
     $scope.$on('$ionicView.beforeLeave', function () {
       console.log('BEFORE LEAVE');
@@ -747,7 +704,6 @@ angular.module('starter.controllers', [])
     console.log('settings:');
     console.log(JSON.stringify($scope.settings));
     $scope.deviceName= connectToDeviceService.getDeviceName();
-    //TODO spinner needs to be derived from buttonService
     //TODO aren;t these variables superfluous bevause of ionicView.enter?
     $scope.buttons = buttonService.getValues();
     var emergency = statusService.getEmergency();
@@ -763,7 +719,7 @@ angular.module('starter.controllers', [])
     var done = true;
 
     //setting vars
-    var stepMotorNum = '3';
+    var stepMotorNum = $scope.settings.stepMotorNum;
 
     //
     //SECTION: changing & entering views
@@ -819,6 +775,7 @@ angular.module('starter.controllers', [])
         }
       $scope.movements = [];
       $scope.movementsNum = 0;
+      stepMotorNum = $scope.settings.stepMotorNum;
     });
 
     $scope.$on('$ionicView.leave',function () {
@@ -868,7 +825,6 @@ angular.module('starter.controllers', [])
     //SECTION: setting & resetting stop buttons
     //
 
-    //TODO set variables necessary on rootscope listener
     $rootScope.$on('emergencyOn', function () {
       emergency = true;
     });
@@ -1042,7 +998,7 @@ angular.module('starter.controllers', [])
         rdy();
       })
     }
-//TODO why are 2 <w>'s sent --> 100ms between, response is slower
+
     function lastSendSettingsCommand(res) {
       if (res.search('rdy') !== -1) {
         addToLog('Moving to start position');
@@ -1066,7 +1022,6 @@ angular.module('starter.controllers', [])
         }
       }
       else if (res.search('kFAULT') !== -1){
-        //TODO Check this one
         addToLog('Settings have been sent incorrectly, please try again');
         emergencyService.on(function () {
           emergencyService.off()
@@ -1199,52 +1154,68 @@ angular.module('starter.controllers', [])
       })
     };
 
-    /*
-    var createLogModal = new logModalService.create();
-
-    var createHelpModal = new helpModalService.create();
-
-//TODO check if this new declaration works
-    $scope.openModal = new modalService.openModal;
-
-    $scope.closeModal = new modalService.close;
-
-    $scope.showFullLog = new logModalService.showFullLog;
-
-    $scope.getFullLogExtract = new logModalService.getFullLogExtract;
-
-    $scope.fullLogPage = 0;
-
-    $scope.previousFullLogPage = new logModalService.previousFullLogPage;
-
-    //TODO replaced by modalService.nextFullLogPage, call with new!
-    $scope.nextFullLogPage = new logModalService.nextFullLogPage;
-
-    //Help modal
-    //TODO: fill with actual Q&A's
-    $scope.show = null;
-    $scope.QAList = [];
-    for (var i=1; i<11; i++) {
-        $scope.QAList.push({
-          question: 'Question '+i,
-          answer: 'Lorem ipsum'
+    $scope.openHelpModal = function () {
+      modalService
+        .init('help-modal.html', $scope)
+        .then(function (modal) {
+          modal.show();
         })
-      }
+    };
+
+    $scope.show = null;
 
     $scope.showAnswer = function(obj) {
       $scope.show = $scope.show === obj ? null : obj;
     };
 
-    //TODO replaced by logModal.emailFullLog
-    $scope.emailFullLog = new logModalService.emailFullLog;
-*/
+    $scope.QAList = [];
+    for (var i=1; i<11; i++) {
+      $scope.QAList.push({
+        question: 'Question '+i,
+        answer: 'Lorem ipsum'
+      })
+    }
+
+    $scope.showFullLog = function () {
+      $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+      modalService
+        .init('log-modal.html', $scope)
+        .then(function (modal) {
+          modal.show();
+        })
+    };
+
+    $scope.emailFullLog = function () {
+      logModalService.emailFullLog();
+    } ;
+
+    $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+
+    $scope.fullLogPage = 0;
+
+    $scope.getFullLogExtract = function(start, end) {
+      console.log('getFullLogExtract, start: '+start+' end: '+end);
+      $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+    };
+
+    $scope.previousFullLogPage = function () {
+      console.log('prevFullLogPage');
+      $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+      $scope.fullLogPage -= 1;
+    };
+
+    $scope.nextFullLogPage = function () {
+      console.log('nextFullLogPage');
+      $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+      $scope.fullLogPage += 1;
+    };
   })
 //end of controller runBluetoothCtrl
 
 .controller('homingCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                     $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
                                     checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-                                    statusService, connectToDeviceService, $ionicHistory) {
+                                    statusService, connectToDeviceService, $ionicHistory, logModalService, modalService) {
   $scope.$on('$ionicView.unloaded', function () {
     console.log('\nUNLOADED\n');
   });
@@ -1262,7 +1233,8 @@ angular.module('starter.controllers', [])
   var homingStopswitchInt;
   //homing commands
   var homingCommands;
-  var stepMotorNum = '3';
+  $scope.settings = shareSettings.getObj();
+  var stepMotorNum = $scope.settings.stepMotorNum;
   $scope.bluetoothLog = [];
   $scope.bluetoothEnabled = null;
   $scope.buttons = buttonService.getValues();
@@ -1304,6 +1276,8 @@ angular.module('starter.controllers', [])
       console.log(homingCommands);
       homingStopswitchInt = obj.vars.homingStopswitchInt;
     });
+    $scope.settings = shareSettings.getObj();
+    stepMotorNum = $scope.settings.stepMotorNum;
   });
 
   $scope.$on('$ionicView.leave', function () {
@@ -1395,13 +1369,69 @@ angular.module('starter.controllers', [])
     });
   }
 
+  $scope.openHelpModal = function () {
+    modalService
+      .init('help-modal.html', $scope)
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.show = null;
+
+  $scope.showAnswer = function(obj) {
+    $scope.show = $scope.show === obj ? null : obj;
+  };
+
+  $scope.QAList = [];
+  for (var i=1; i<11; i++) {
+    $scope.QAList.push({
+      question: 'Question '+i,
+      answer: 'Lorem ipsum'
+    })
+  }
+
+  $scope.showFullLog = function () {
+    $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+    modalService
+      .init('log-modal.html', $scope)
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.emailFullLog = function () {
+    logModalService.emailFullLog();
+  } ;
+
+  $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+
+  $scope.fullLogPage = 0;
+
+  $scope.getFullLogExtract = function(start, end) {
+    console.log('getFullLogExtract, start: '+start+' end: '+end);
+    $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+  };
+
+  $scope.previousFullLogPage = function () {
+    console.log('prevFullLogPage');
+    $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+    $scope.fullLogPage -= 1;
+  };
+
+  $scope.nextFullLogPage = function () {
+    console.log('nextFullLogPage');
+    $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+    $scope.fullLogPage += 1;
+  };
+
 })
 //end of controller homingCtrl
 
 .controller('testCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                   $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
                                   checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-                                  statusService, connectToDeviceService) {
+                                  statusService, connectToDeviceService, logModalService, modalService) {
   $scope.$on('$ionicView.unloaded', function () {
     console.log('\nUNLOADED\n');
   });
@@ -1417,10 +1447,10 @@ angular.module('starter.controllers', [])
   });
 
 //other vars/commands
-  var stepMotorNum = '3';
-  var softwareVersionCommand = '<z'+stepMotorNum+'>';
   var commands;
   $scope.settings = shareSettings.getObj();
+  var stepMotorNum = $scope.settings.stepMotorNum;
+  var softwareVersionCommand = '<z'+stepMotorNum+'>';
   $scope.bluetoothLog = [];
   $scope.bluetoothEnabled = null;
   $scope.buttons = buttonService.getValues();
@@ -1469,6 +1499,7 @@ angular.module('starter.controllers', [])
       console.log(commands);
     });
     $scope.settings = shareSettings.getObj();
+    stepMotorNum = $scope.settings.stepMotorNum;
   });
 
   $scope.$on('$ionicView.leave', function () {
@@ -1489,7 +1520,6 @@ angular.module('starter.controllers', [])
 
       sendAndReceiveService.clearBuffer();
     }
-    //TODO perhaps create listeners in a var and cancel var on leave?
     logService.setBulk($scope.bluetoothLog);
   });
 
@@ -1517,7 +1547,6 @@ angular.module('starter.controllers', [])
   //SECTION: stressTest && move X mm logic
   //
 
-  //TODO make sure that moveXMm, stresstest and normal program still function as expected
   $scope.moveXMm = function () {
     if (statusService.getEmergency() === false && statusService.getSending() === false) {
       if ($scope.numberOfTests.mm === undefined) {
@@ -1713,12 +1742,68 @@ angular.module('starter.controllers', [])
       $scope.bluetoothLog = arr;
     });
   }
+
+  $scope.openHelpModal = function () {
+    modalService
+      .init('help-modal.html', $scope)
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.show = null;
+
+  $scope.showAnswer = function(obj) {
+    $scope.show = $scope.show === obj ? null : obj;
+  };
+
+  $scope.QAList = [];
+  for (var i=1; i<11; i++) {
+    $scope.QAList.push({
+      question: 'Question '+i,
+      answer: 'Lorem ipsum'
+    })
+  }
+
+  $scope.showFullLog = function () {
+    $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+    modalService
+      .init('log-modal.html', $scope)
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.emailFullLog = function () {
+    logModalService.emailFullLog();
+  } ;
+
+  $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+
+  $scope.fullLogPage = 0;
+
+  $scope.getFullLogExtract = function(start, end) {
+    console.log('getFullLogExtract, start: '+start+' end: '+end);
+    $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+  };
+
+  $scope.previousFullLogPage = function () {
+    console.log('prevFullLogPage');
+    $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+    $scope.fullLogPage -= 1;
+  };
+
+  $scope.nextFullLogPage = function () {
+    console.log('nextFullLogPage');
+    $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+    $scope.fullLogPage += 1;
+  };
 })
 //end of controller testCtrl
 
 .controller('bluetoothConnectionCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                                  $state, $ionicPlatform, $window, turnOnBluetoothService, statusService, isConnectedService, logService,
-                                                 buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService, $timeout) {
+                                                 buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService, $timeout, logModalService, modalService) {
 
   $scope.availableDevices = [];
   $scope.pairedDevices = [];
@@ -1777,7 +1862,7 @@ angular.module('starter.controllers', [])
       }
     });
   });
-//TODO Problem: enterView is fired before leaveView, thus subscribe is called before unsubscrobe
+
   $scope.userDisconnect = function () {
     disconnectService.disconnect();
     $scope.isConnected = false;
@@ -1921,5 +2006,60 @@ angular.module('starter.controllers', [])
       })
   }
 
+  $scope.openHelpModal = function () {
+    modalService
+      .init('help-modal.html', $scope)
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.show = null;
+
+  $scope.showAnswer = function(obj) {
+    $scope.show = $scope.show === obj ? null : obj;
+  };
+
+  $scope.QAList = [];
+  for (var i=1; i<11; i++) {
+    $scope.QAList.push({
+      question: 'Question '+i,
+      answer: 'Lorem ipsum'
+    })
+  }
+
+  $scope.showFullLog = function () {
+    $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+    modalService
+      .init('log-modal.html', $scope)
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.emailFullLog = function () {
+    logModalService.emailFullLog();
+  } ;
+
+  $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+
+  $scope.fullLogPage = 0;
+
+  $scope.getFullLogExtract = function(start, end) {
+    console.log('getFullLogExtract, start: '+start+' end: '+end);
+    $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+  };
+
+  $scope.previousFullLogPage = function () {
+    console.log('prevFullLogPage');
+    $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+    $scope.fullLogPage -= 1;
+  };
+
+  $scope.nextFullLogPage = function () {
+    console.log('nextFullLogPage');
+    $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+    $scope.fullLogPage += 1;
+  };
 });
 //end of controller bluetoothConnectionCtrl
