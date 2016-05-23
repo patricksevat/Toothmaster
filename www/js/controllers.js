@@ -1500,13 +1500,12 @@ angular.module('starter.controllers', [])
     sentSettingsForTest = false;
     testsSent = 0;
     $scope.testRunning = false;
-    sendAndReceiveService.stopPing();
     sendKfault();
     rdy();
     rdy2();
-    faulty();
     listen();
     newCommand();
+    nextListener();
   };
 
   $scope.emergencyOff = function () {
@@ -1542,7 +1541,6 @@ angular.module('starter.controllers', [])
   var sendKfault;
   var rdy;
   var rdy2;
-  var faulty;
   var listen;
   var newCommand;
 
@@ -1586,6 +1584,7 @@ angular.module('starter.controllers', [])
         });
       }
       else if (typeStr === 'stressTest') {
+        addToLog('Executing tests');
         sentSettingsForTest = true;
         $scope.stressTest();
       }
@@ -1607,6 +1606,7 @@ angular.module('starter.controllers', [])
     }
   }
 
+  //TODO tried to work with buffered commands, did not work, reverting back to one at a time
   $scope.stressTest = function () {
     if (statusService.getEmergency() === true) {
       addToLog('Emergency on, cancelling stresstest');
@@ -1617,7 +1617,7 @@ angular.module('starter.controllers', [])
       })
     }
     else {
-      setButtons({'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXmm': false, 'showSpinner': true});
+      setButtons({'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXMm': false, 'showSpinner': true});
       $scope.testRunning = true;
       if (!sentSettingsForTest) {
         if (statusService.getEmergency() === false) {
@@ -1628,70 +1628,15 @@ angular.module('starter.controllers', [])
       }
       else {
         if (statusService.getEmergency() === false) {
-          addToLog('Executing tests');
           statusService.setSending(true);
 
           //with 10 or less tests, send them all at once
-          if ($scope.numberOfTests.tests <= 10) {
-            for (var i = 0; i < $scope.numberOfTests.tests; i++) {
-              //Send a random command, true = create listener, function is executed as soon as wydone+commandID has come back
+          if (testsSent < $scope.numberOfTests.tests) {
+            //Send a random command, true = create listener, function is executed as soon as wydone+commandID has come back
               $timeout(function () {
-                send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
+                send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>', sendNext);
               }, 150);
-            }
           }
-
-          //TODO with 11 or more tests, start with 10, then send a new one everytime a wydone is received
-          else {
-            for (var i = 0; i < 10; i++) {
-              //Send a random command, true = create listener, function is executed as soon as wydone+commandID has come back
-              $timeout(function () {
-                send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
-              }, 250);
-            }
-            newCommand = $rootScope.$on('bufferedCommandDone', function (event, res, commandID) {
-              if ($scope.completedTest+10 < $scope.numberOfTests.tests) {
-                $timeout(function () {
-                  send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
-                }, 250);
-              }
-              else newCommand();
-            })
-          }
-
-          $timeout(function () {
-            sendAndReceiveService.startPing();
-          },1000);
-
-
-          faulty = $rootScope.$on('faultyResponse', function (event, res) {
-            console.log('faultyResponse in testCtrl, sending new buffered command');
-            $scope.retriesNeeded +=1;
-            $timeout(function () {
-              send('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>');
-            }, 250);
-          });
-
-          var commandDone = $rootScope.$on('bufferedCommandDone', function (event, res, commandID) {
-            $scope.completedTest += 1;
-            if ($scope.completedTest === $scope.numberOfTests.tests) {
-              sendAndReceiveService.stopPing();
-              setButtons({'showSpinner':false,'showEmergency':false,'showStressTest':true,'showVersionButton':true,'showMoveXMm': true});;
-              statusService.setSending(false);
-              $scope.testRunning = false;
-              $ionicPopup.alert({
-                title: 'Test completed',
-                template: 'You have successfully completed the tests.'
-              });
-              addToLog('Testing done, completed '+$scope.completedTest+' tests');
-              calculateVarsService.getVars('test', function (obj) {
-                console.log('resetting commands in testCtrl');
-                commands = obj.commands;
-              });
-              faulty();
-              commandDone();
-            }
-          });
         }
         else {
           addToLog('Emergency on, will not continue with stresstest');
@@ -1700,7 +1645,37 @@ angular.module('starter.controllers', [])
     }
   };
 
-  function send(str) {
+  var nextListener;
+  function sendNext() {
+    nextListener = $rootScope.$on('bluetoothResponse', function (event, res) {
+      if ($scope.numberOfTests.tests === testsSent && res.search('wydone')) {
+        $ionicPopup.alert({
+          title: 'Tests completed',
+          template: 'Completed '+$scope.completedTest+' out of '+$scope.numberOfTests.tests
+        });
+        setButtons({'showEmergency':false, 'showSpinner': false, 'showStressTest':true, 'showVersionButton': true, 'showMoveXMm': true});
+        $scope.testRunning = false;
+        addToLog('Tests completed');
+        console.log('completed tests: '+$scope.completedTest+' number of tests: '+$scope.numberOfTests.tests+' sent tests: '+testsSent);
+        sentSettingsForTest = false;
+        statusService.setSending(false);
+        nextListener();
+      }
+      else if (res.search('wydone') > -1) {
+        $scope.completedTest +=1;
+        $scope.stressTest();
+        nextListener();
+      }
+      else {
+        $timeout(function () {
+          sendAndReceiveService.write('<w'+stepMotorNum+'>', sendNext);
+        }, 200);
+        nextListener();
+      }
+    })
+  }
+
+  function send(str, cb) {
     if (str === undefined){
       $ionicPopup.alert({
         title: 'Encountered an error',
@@ -1709,8 +1684,9 @@ angular.module('starter.controllers', [])
     }
     if (statusService.getEmergency() === false) {
       //calling .write() with original command (str). callingFunction is optional.
-      sendAndReceiveService.writeBuffered(str, 'send in testCtrl -> send');
+      sendAndReceiveService.write(str);
       testsSent += 1;
+      if (cb) cb();
     }
   }
 

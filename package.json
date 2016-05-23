@@ -1,6 +1,6 @@
 {
   "name": "toothmaster",
-  "version": "0.7",
+  "version": "0.7.0",
   "description": "Toothmaster 0.7 beta, step motor controller for mortise tenon joints",
   "dependencies": {
     "gulp": "^3.5.6",
