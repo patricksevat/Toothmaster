@@ -1,11 +1,23 @@
 var bugout = new debugout();
+if (window.localStorage['Safety'] === undefined) {
+  window.localStorage.setItem('Safety', '');
+}
+if (window.localStorage['settings'] === undefined) {
+  window.localStorage['settings'] = '{"stepMotorNum": 1, "maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
+}
+if (window.localStorage['lastUsedProgram'] === undefined) {
+  window.localStorage['lastUsedProgram'] = '';
+}
+if (window.localStorage['commandIdNum'] === undefined) {
+  window.localStorage['commandIdNum'] = 0;
+}
 
 angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
 
   .service('shareSettings', function() {
     var shareSettings = this;
     shareSettings.obj = {};
-    if (window.localStorage['settings'] !== '') {
+    if (window.localStorage['settings'] !== '' && window.localStorage['settings'] !== undefined) {
       shareSettings.obj.settings = JSON.parse(window.localStorage['settings']);
     }
 
@@ -220,7 +232,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       logService.addOne('Trying to connect with last known device');
 
       function valueRetrieved() {
-        if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '') {
+        if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '' && window.localStorage['lastConnectedDevice'] !== undefined) {
           bugout.log('actually connecting to lastConnected device');
           var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
           $window.bluetoothSerial.connectInsecure(obj.id, function () {
@@ -290,7 +302,6 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   }])
 
-  //TODO add stepmotorService
   .service('disconnectService',['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings',
     function ($cordovaBluetoothSerial, logService, buttonService, isConnectedService, $window, connectToDeviceService, shareSettings) {
     var disconnect = this;
@@ -869,47 +880,34 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService) {
-  bugout.log('version 0.9.8.24');
-
-    $rootScope.$on('$stateChangeStart',
-      function(event, toState, toParams, fromState, fromParams, options){
-        bugout.log('startChangeStart, fromState: '+fromState.name);
-        bugout.log('startChangeStart, toState: '+toState.name);
-      });
-
-  $ionicPlatform.on('pause', function () {
-    bugout.log('onPause called from app.js');
-    if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
-      || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
-      pauseService.pause();
-    }
-    else {
-    }
-  });
-
-  $ionicPlatform.on('resume', function () {
-    bugout.log('onResume called from app.js');
-    if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
-      || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
-      pauseService.resume();
-    }
-    else {
-    }
-  });
-
-    if (window.localStorage['Safety'] === undefined) {
-      window.localStorage.setItem('Safety', '');
-    }
-    if (window.localStorage['settings'] === undefined) {
-      window.localStorage['settings'] = '{"stepMotorNum": 1,"maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
-    }
-    if (window.localStorage['lastUsedProgram'] === undefined) {
-      window.localStorage['lastUsedProgram'] = '';
-    }
-    if (window.localStorage['commandIdNum'] === undefined) {
-      window.localStorage['commandIdNum'] = 0;
-    }
-
+    bugout.log('version 0.9.9.3');
+    console.log($window.localStorage);
+      $rootScope.$on('$stateChangeStart',
+        function(event, toState, toParams, fromState, fromParams, options){
+          bugout.log('startChangeStart, fromState: '+fromState.name);
+          bugout.log('startChangeStart, toState: '+toState.name);
+        });
+  
+    $ionicPlatform.on('pause', function () {
+      bugout.log('onPause called from app.js');
+      if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
+        || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
+        pauseService.pause();
+      }
+      else {
+      }
+    });
+  
+    $ionicPlatform.on('resume', function () {
+      bugout.log('onResume called from app.js');
+      if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
+        || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
+        pauseService.resume();
+      }
+      else {
+      }
+    });
+    
   $ionicPlatform.ready(function() {
 
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard

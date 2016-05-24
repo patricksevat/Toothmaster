@@ -39,6 +39,9 @@
         },
         "cordova-plugin-crosswalk-webview": {
             "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-file": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
         }
     },
     "dependent_plugins": {}

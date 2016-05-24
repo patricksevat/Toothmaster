@@ -111,7 +111,7 @@ angular.module('starter.controllers', [])
   };
 
   (function loadLastUsedProgram() {
-    if (window.localStorage['lastUsedProgram'] !== '') {
+    if (window.localStorage['lastUsedProgram'] !== "" && window.localStorage['lastUsedProgram'] !== undefined) {
       $scope.currentProgram = JSON.parse(window.localStorage['lastUsedProgram']);
       shareProgram.setObj($scope.currentProgram);
     }
@@ -565,7 +565,7 @@ angular.module('starter.controllers', [])
 
   $scope.loadSettings = function() {
     console.log('settings: '+window.localStorage['settings']);
-    if (window.localStorage['settings'] === '') {
+    if (window.localStorage['settings'] === '' || window.localStorage['settings'] === undefined) {
 
     }
     else {
@@ -1678,6 +1678,7 @@ angular.module('starter.controllers', [])
   function sendNext() {
     nextListener = $rootScope.$on('bluetoothResponse', function (event, res) {
       if ($scope.numberOfTests.tests === testsSent && res.search('wydone')) {
+        $scope.completedTest +=1;
         $ionicPopup.alert({
           title: 'Tests completed',
           template: 'Completed '+$scope.completedTest+' out of '+$scope.numberOfTests.tests
