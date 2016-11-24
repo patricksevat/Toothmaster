@@ -8184,11 +8184,11 @@
 	
 	var _controllers2 = _interopRequireDefault(_controllers);
 	
-	var _sendAndReceiveService = __webpack_require__(388);
+	var _sendAndReceiveService = __webpack_require__(389);
 	
 	var _sendAndReceiveService2 = _interopRequireDefault(_sendAndReceiveService);
 	
-	var _crc = __webpack_require__(389);
+	var _crc = __webpack_require__(390);
 	
 	var _crc2 = _interopRequireDefault(_crc);
 	
@@ -8196,7 +8196,7 @@
 	
 	var _angularAsyncAwait2 = _interopRequireDefault(_angularAsyncAwait);
 	
-	var _router = __webpack_require__(390);
+	var _router = __webpack_require__(391);
 	
 	var _router2 = _interopRequireDefault(_router);
 	
@@ -9096,7 +9096,7 @@
 	
 	var _angularAsyncAwait2 = _interopRequireDefault(_angularAsyncAwait);
 	
-	var _asyncController = __webpack_require__(392);
+	var _asyncController = __webpack_require__(388);
 	
 	var _asyncController2 = _interopRequireDefault(_asyncController);
 	
@@ -9112,7 +9112,7 @@
 	* $rootScope.$on('bluetoothResponse', response)
 	* */
 	
-	.controller('asyncCtrl', function () {}).controller('SafetySlides', function ($scope, $ionicModal, logService) {
+	.controller('asyncCtrl', _asyncController2.default).controller('SafetySlides', function ($scope, $ionicModal, logService) {
 	  $scope.i = 0;
 	  $scope.hidePrev = false;
 	
@@ -13227,6 +13227,28 @@
 
 	'use strict';
 	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	/**
+	 * Created by Patrick on 24/11/2016.
+	 */
+	
+	function asyncCtrl($rootScope, $timeout, $async, $q) {
+	  console.log('async ctrl loaded');
+	  this.runAsync = function () {
+	    console.log('click');
+	  };
+	}
+	
+	exports.default = asyncCtrl;
+
+/***/ },
+/* 389 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/**
@@ -13652,7 +13674,7 @@
 	};
 
 /***/ },
-/* 389 */
+/* 390 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13692,7 +13714,7 @@
 	module.exports = crc16;
 
 /***/ },
-/* 390 */
+/* 391 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13770,7 +13792,7 @@
 	    url: '/test',
 	    views: {
 	      'menuContent': {
-	        templateUrl: './templates/asyncTest.html',
+	        templateUrl: './templates/test.html',
 	        controller: 'testCtrl'
 	      }
 	    }
@@ -13791,45 +13813,22 @@
 	        controller: 'bluetoothConnectionCtrl'
 	      }
 	    }
-	  })
-	
-	  // .state('app.asyncTest', {
-	  //   name: 'asyncTest',
-	  //   url: '/asyncTest',
-	  //   views: {
-	  //     'menuContent': {
-	  //       templateUrl: './templates/asyncTest.html'
-	  //     }
-	  //   }
-	  // })
-	  ;
+	  }).state('app.asyncTest', {
+	    name: 'asyncTest',
+	    url: '/asyncTest',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/asyncTest.html',
+	        controller: 'asyncCtrl',
+	        controllerAs: 'async'
+	      }
+	    }
+	  });
 	  // if none of the above states are matched, use this as the fallback
-	  // $urlRouterProvider.otherwise('/app/program');
+	  $urlRouterProvider.otherwise('/app/program');
 	}
 	
 	exports.default = router;
-
-/***/ },
-/* 391 */,
-/* 392 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	/**
-	 * Created by Patrick on 24/11/2016.
-	 */
-	
-	function asyncCtrl($rootScope, $timeout, $async, $q) {
-	  this.runAsync = function () {
-	    console.log('click');
-	  };
-	}
-	
-	exports.default = asyncCtrl;
 
 /***/ }
 /******/ ]);

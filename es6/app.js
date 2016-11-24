@@ -2,6 +2,8 @@ var bugout = new debugout();
 import controllers from './controllers';
 import sendAndReceiveService from './sendAndReceiveService';
 import crc16 from './crc16';
+import angularAsyncAwait from "angular-async-await";
+import router from './router'
 
 if (window.localStorage['Safety'] === undefined) {
   window.localStorage.setItem('Safety', '');
@@ -16,7 +18,7 @@ if (window.localStorage['commandIdNum'] === undefined) {
   window.localStorage['commandIdNum'] = 0;
 }
 
-angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
+angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch', angularAsyncAwait.name])
 
   .service('shareSettings', function() {
     var shareSettings = this;
@@ -31,8 +33,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
       shareSettings.setObj = function(value) {
         shareSettings.obj.settings = value;
       }
-    }
-  )
+    })
 
   .service('shareProgram', function() {
       var shareProgram = this;
@@ -897,7 +898,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   .service('sendAndReceiveService', sendAndReceiveService);
 
   sendAndReceiveService.$inject = ['statusService', 'emergencyService', '$window', 'logService',
-    '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout'];
+    '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async'];
 
 angular
   .module('Toothmaster')
@@ -906,8 +907,6 @@ angular
 
     crcService.appendCRC = function (str) {
       let crc = crc16(str);
-      console.log('high: '+crc.Uint8High);
-      console.log('low: '+crc.Uint8Low);
       str += String.fromCharCode(crc.Uint8High) + String.fromCharCode(crc.Uint8Low) ;
       return str;
     }
@@ -972,118 +971,7 @@ angular
 
 })
 
-.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
-  $ionicConfigProvider.views.maxCache(1);
-
-  $stateProvider
-    .state('app', {
-      name: 'app',
-    url: '/app',
-    abstract: true,
-    templateUrl: '../templates/menu.html'
-  })
-
-  .state('app.settings', {
-    name: 'settings',
-    url: '/settings',
-    views: {
-      'menuContent': {
-        templateUrl: '../templates/settings.html',
-        controller: 'SettingsCtrl'
-      }
-    }
-  })
-
-  .state('app.home', {
-      name: 'home',
-      url: '/home',
-      views: {
-        'menuContent': {
-          templateUrl: '../templates/home.html'
-        }
-      }
-  })
-
-    .state('app.safety-slide', {
-      url: '/safety-slide',
-      name: 'safety-slide',
-      views: {
-        'menuContent': {
-          templateUrl: '../templates/safety-slide.html',
-          controller: 'SafetySlides'
-        }
-      }
-    })
-
-    .state('app.program', {
-      name: 'program',
-      url: '/program',
-      views: {
-        'menuContent': {
-          templateUrl: '../templates/program.html',
-          controller: 'ProgramController'
-        }
-      }
-    })
-
-    .state('app.homing', {
-      name: 'homing',
-      url: '/homing',
-      views: {
-        'menuContent': {
-          templateUrl: '../templates/homing.html',
-          controller: 'homingCtrl'
-        }
-      }
-    })
-
-    .state('app.runBluetooth', {
-      name: 'runBluetooth',
-      url: '/runBluetooth',
-      views: {
-        'menuContent': {
-          templateUrl: '../templates/runBluetooth.html',
-          controller: 'runBluetoothCtrl'
-        }
-      }
-    })
-
-    .state('app.test', {
-      name: 'test',
-      url: '/test',
-      views: {
-        'menuContent': {
-          templateUrl: '../templates/test.html',
-          controller: 'testCtrl'
-        }
-      }
-    })
-
-    .state('app.website', {
-      name: 'website',
-      url: '/website',
-      views: {
-        'menuContent': {
-          templateUrl: '../templates/website.html'
-        }
-      }
-    })
-
-    .state('app.bluetoothConnection', {
-      name: 'bluetoothConnection',
-      url: '/bluetoothConnection',
-      views: {
-        'menuContent': {
-          templateUrl: '../templates/bluetoothConnection.html',
-          controller: 'bluetoothConnectionCtrl'
-        }
-      }
-    })
-  ;
-  // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/program');
-
-});
+.config(router);
 
 
 

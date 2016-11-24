@@ -2,21 +2,16 @@
  * Created by Patrick on 22/11/2016.
  */
 module.exports = sendAndReceiveService;
-  // angular
-  //   .module('Toothmaster')
-  //   .service('sendAndReceiveService', sendAndReceiveService);
-  //
-  // sendAndReceiveService.$inject = ['statusService', 'emergencyService', '$window', 'logService',
-  //   '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout'];
 
   function sendAndReceiveService(statusService, emergencyService, $window, logService, $rootScope,
-                                 buttonService, crcService, $ionicPopup, shareSettings, $interval, $timeout) {
+                                 buttonService, crcService, $ionicPopup, shareSettings, $interval, $timeout, $q, $async) {
     const sendAndReceive = this;
     //Available methods
     sendAndReceive.subscribe = subscribe;
     sendAndReceive.subscribeRawData = subscribeRawData;
     sendAndReceive.unsubscribe = unsubscribe;
     sendAndReceive.write = write;
+    // sendAndReceive.writeAsync = writeAsync;
     sendAndReceive.writeBuffered = writeBuffered;
     sendAndReceive.checkInterpretedResponse = checkInterpretedResponse;
     sendAndReceive.startPing = startPing;
@@ -53,9 +48,17 @@ module.exports = sendAndReceiveService;
     function subscribe() {
       logService.consoleLog('subscribed');
       statusService.setSubscribed(true);
+      let temp = '';
       $window.bluetoothSerial.subscribe('#', function (data) {
         lastReceivedTime = Date.now();
-        sendAndReceive.emitResponse(data);
+        temp += data;
+        if ((temp.match(/#/g) || []).length >= 2) {
+          console.log('\ntemp in subscribe: \n'+temp);
+          $rootScope.$emit('response', temp);
+          sendAndReceive.emitResponse(temp);
+          temp = '';
+        }
+
       });
     }
 
@@ -75,17 +78,78 @@ module.exports = sendAndReceiveService;
       })
     }
 
-    function write(str, cb) {
-      if (statusService.getEmergency() === false) {
-        const commandWithCRC = crcService.appendCRC(str);
-        $window.bluetoothSerial.write(commandWithCRC, function () {
-          logService.consoleLog('sent: '+commandWithCRC);
-          lastCommandTime = Date.now();
-          if (cb) cb();
-        }, function () {
-          logService.consoleLog('ERROR: could not send command '+str);
+    function responseListener(searchStr) {
+      return new Promise((resolve, reject) => {
+        let responseCount = 0;
+
+        $rootScope.$on('response', function (event, res) {
+          responseCount += 1;
+          let searchBool = checkResponse(res, searchStr);
+          if (searchBool) {
+            console.log('resolving OK');
+            resolve('OK');
+          }
+          else if (res.indexOf('667:') > -1) {
+            resolve('RETRY');
+          }
+          else if (responseCount >= 3)
+            reject('Too many wrong responses');
         })
+      })
+    }
+
+    function checkResponse(res, searchValues) {
+      let returnBool = false;
+      if (typeof searchValues === 'string') {
+        console.log('res: '+res+', searchValueStr: '+searchValues);
+        returnBool = (res.search(searchValues) > -1);
+        console.log('returnBool: '+returnBool);
       }
+      else if (Array.isArray(searchValues)) {
+        console.log('res: '+res+'searchValuesArr');
+        console.log(searchValues);
+        searchValues.map((value) => {
+          if (res.search(value) > -1)
+            returnBool = true;
+        });
+        console.log('returnBool: '+returnBool);
+      }
+      return returnBool
+    }
+
+    sendAndReceive.writeAsync = $async(async function (str) {
+      try {
+        await sendAndReceive.write(str);
+        const expectedResponseShouldContain = sendAndReceive.expectedResponse(str[1]);
+        let resolveValue = await responseListener(expectedResponseShouldContain);
+
+        return new Promise((resolve, reject) => {
+          console.log('resolve with resolveValue: '+resolveValue);
+          resolve(resolveValue);
+        });
+      }
+      catch (err) {
+        console.log('ERR: '+err);
+        return new Promise((resolve, reject) => reject(err));
+      }
+    });
+
+    function write(str, cb) {
+      return new Promise((resolve, reject) => {
+        if (statusService.getEmergency() === false) {
+          const commandWithCRC = crcService.appendCRC(str);
+          $window.bluetoothSerial.write(commandWithCRC, function () {
+            console.log('sent: '+commandWithCRC);
+            lastCommandTime = Date.now();
+            if (cb) cb();
+            resolve();
+          }, function () {
+            console.log('ERROR: could not send command '+str);
+            reject();
+          })
+        }
+      })
+
     }
 
     function writeBuffered() {
@@ -156,7 +220,7 @@ module.exports = sendAndReceiveService;
     function expectedResponse(str) {
       stepMotorNum = shareSettings.getObj().stepMotorNum;
       switch (str) {
-        case '<':
+        case 'y':
           return '8:y';
           break;
         case 'd':
@@ -220,7 +284,7 @@ module.exports = sendAndReceiveService;
     }
 
     function emitResponse(res) {
-      logService.consoleLog('response in emitResponse: '+res);
+
       var settings = shareSettings.getObj();
       //handle stopswitch hit
       if (res.search('wydone:') > -1 && res.search('wydone:0') === -1) {

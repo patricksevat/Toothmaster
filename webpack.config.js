@@ -1,11 +1,12 @@
-const webpack = require('webpack');
 require('babel-polyfill');
+const webpack = require('webpack');
+
 
 module.exports = {
-  entry: "./es6/app.js",
+  entry: ["babel-polyfill","./es6/app.js"],
   devtool: 'source-map',
   output: {
-    path: __dirname + "/www/js",
+    path: __dirname + "/www",
     publicPath: '/',
     filename: "bundle.js"
   },
@@ -19,6 +20,10 @@ module.exports = {
           presets: ['es2015'],
           plugins: ["syntax-async-functions", "transform-regenerator"]
         }
+      },
+      {
+        test: /\.html$/,
+        loader: "raw-loader"
       }
     ]
   },
