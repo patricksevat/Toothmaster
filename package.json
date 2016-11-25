@@ -14,7 +14,8 @@
     "gulp-minify-css": "^0.3.0",
     "gulp-plumber": "^1.1.0",
     "gulp-rename": "^1.2.0",
-    "gulp-sass": "^2.0.4"
+    "gulp-sass": "^2.0.4",
+    "ng-async": "^1.1.0"
   },
   "devDependencies": {
     "babel-plugin-syntax-async-functions": "^6.13.0",

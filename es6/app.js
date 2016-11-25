@@ -2,7 +2,7 @@ var bugout = new debugout();
 import controllers from './controllers';
 import sendAndReceiveService from './sendAndReceiveService';
 import crc16 from './crc16';
-import angularAsyncAwait from "angular-async-await";
+// import angularAsyncAwait from "angular-async-await";
 import router from './router'
 
 if (window.localStorage['Safety'] === undefined) {
@@ -18,7 +18,7 @@ if (window.localStorage['commandIdNum'] === undefined) {
   window.localStorage['commandIdNum'] = 0;
 }
 
-angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch', angularAsyncAwait.name])
+angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
 
   .service('shareSettings', function() {
     var shareSettings = this;

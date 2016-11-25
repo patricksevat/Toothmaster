@@ -1,8 +1,9 @@
-import angularAsyncAwait from "angular-async-await";
+// import angularAsyncAwait from "angular-async-await";
+import ngAsync from './ng-async';
 import asyncController from '../es6/asyncTest/asyncController';
 
 module.exports =
-angular.module('starter.controllers', [angularAsyncAwait.name])
+angular.module('starter.controllers', [ngAsync.name])
   /*
   * $rootScope emits:
   * $rootScope.$on('emergencyOn')
@@ -611,6 +612,8 @@ angular.module('starter.controllers', [angularAsyncAwait.name])
     checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
     statusService, connectToDeviceService, logModalService, modalService, $async, $q){
 
+    const self = this;
+
     $scope.$on('$ionicView.beforeLeave', function () {
       logService.consoleLog('BEFORE LEAVE');
       sendAndReceiveService.unsubscribe();
@@ -891,27 +894,41 @@ angular.module('starter.controllers', [angularAsyncAwait.name])
     //SECTION: send settings before homing, test and makeMovement logic
     //
 
-    $scope.sendWithRetry = $async(async function (str) {
+    self.writeAndGetResponse = $async(async function (str) {
       try {
-        for (let i = 0; i < 5; i++) {
-          let res = await sendAndReceiveService.writeAsync(str);
-          console.log('res in sendWithRetry: '+res);
+        let res = await sendAndReceiveService.writeAsync(str);
+        return $q((resolve, reject) => {
+          if (res === 'OK')
+            resolve(res);
+          else
+            reject(res);
 
-          if (res != 'OK') {
-            console.log('not ok');
-            continue;
-          }
-          break;
-        }
-        console.log('ok');
-        return new Promise((resolve, reject) => {
-          resolve('iets');
+          // for (let i = 0; i < 5; i++) {
+          //   console.log('going to await try number '+i+', for command: '+str);
+          //
+          //   console.log('awaited try '+i+', response: '+res);
+          //
+          //   if (res != 'OK') {
+          //     console.log('not ok');
+          //     continue;
+          //   }
+          //   break;
+          // }
+          // console.log('ok');
+          // resolve('iets');
         })
       }
       catch (err) {
         console.log('ERR in sendWithRetry: '+err);
       }
     });
+
+    self.retryCounter = 1;
+
+    // self.sendWithRetry = $async(async function (str) {
+    //   if ()
+    // })
+
 
     //user clicks button front end, sendSettingsData() called
     $scope.sendSettingsData = $async(async function () {
@@ -923,8 +940,9 @@ angular.module('starter.controllers', [angularAsyncAwait.name])
             settingsDone = false;
 
             for (let command of commands){
-              let res = await $scope.sendWithRetry(command);
-              console.log('res in for-of loop: '+res );
+              console.log('going to await for command reply to command: '+command);
+              let res = await self.sendWithRetry(command);
+              console.log('awaited reply for command: '+command+', response: '+res );
             }
 
           }

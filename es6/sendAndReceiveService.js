@@ -123,7 +123,7 @@ module.exports = sendAndReceiveService;
         const expectedResponseShouldContain = sendAndReceive.expectedResponse(str[1]);
         let resolveValue = await responseListener(expectedResponseShouldContain);
 
-        return new Promise((resolve, reject) => {
+        return $q((resolve, reject) => {
           console.log('resolve with resolveValue: '+resolveValue);
           resolve(resolveValue);
         });
