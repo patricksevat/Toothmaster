@@ -894,44 +894,27 @@ angular.module('starter.controllers', [ngAsync.name])
     //SECTION: send settings before homing, test and makeMovement logic
     //
 
-    self.writeAndGetResponse = $async(async function (str) {
-      try {
-        let res = await sendAndReceiveService.writeAsync(str);
-        return $q((resolve, reject) => {
-          if (res === 'OK')
-            resolve(res);
-          else
-            reject(res);
-
-          // for (let i = 0; i < 5; i++) {
-          //   console.log('going to await try number '+i+', for command: '+str);
-          //
-          //   console.log('awaited try '+i+', response: '+res);
-          //
-          //   if (res != 'OK') {
-          //     console.log('not ok');
-          //     continue;
-          //   }
-          //   break;
-          // }
-          // console.log('ok');
-          // resolve('iets');
-        })
-      }
-      catch (err) {
-        console.log('ERR in sendWithRetry: '+err);
+    self.sendWithRetry = $async(function* (str) {
+      let res;
+      for (let i = 0; i < 5; i++) {
+        console.log('try: '+i+', command: '+str);
+        res = yield sendAndReceiveService.writeAsync(str);
+        console.log('res in sendWithretry: '+res);
+        if (i === 4)
+          return new Promise((resolve, reject) => {
+            reject('exceeded num of tries');
+          });
+        else if (res === 'OK')
+          return new Promise((resolve, reject) => {
+            console.log('resolve value: '+res);
+            resolve('resolve value: '+res);
+          });
       }
     });
 
-    self.retryCounter = 1;
-
-    // self.sendWithRetry = $async(async function (str) {
-    //   if ()
-    // })
-
 
     //user clicks button front end, sendSettingsData() called
-    $scope.sendSettingsData = $async(async function () {
+    $scope.sendSettingsData = $async(function* () {
       try {
         if (statusService.getEmergency() === false) {
           if (statusService.getSending() === false){
@@ -939,14 +922,21 @@ angular.module('starter.controllers', [ngAsync.name])
             statusService.setSending(true);
             settingsDone = false;
 
-            for (let command of commands){
-              console.log('going to await for command reply to command: '+command);
-              let res = await self.sendWithRetry(command);
-              console.log('awaited reply for command: '+command+', response: '+res );
-            }
+            for (let i = 0; i < commands.length; i++){
+              console.log('going to await for command reply to command: '+commands[i]);
+              let res = yield self.sendWithRetry(commands[i]);
+              console.log('awaited reply for command: '+commands[i]+', i='+i+', response: '+res );
 
+              if (i === commands.length-1) {
+                console.log('commands');
+                console.log(commands);
+                console.log('commands.length');
+                console.log(commands.length);
+                console.log('last command of sendSettings is OK');
+                lastSendSettingsCommand(res);
+              }
+            }
           }
-          logService.consoleLog('cannot continue sendSettingsData, sending is true')
         }
         else {
           addToLog('Emergency on, will not continue sending settings data');
@@ -958,6 +948,7 @@ angular.module('starter.controllers', [ngAsync.name])
     });
 
     function checkWydone() {
+      console.log('checkWydone');
       var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
         lastSendSettingsCommand(res);
         rdy();
@@ -965,16 +956,26 @@ angular.module('starter.controllers', [ngAsync.name])
     }
 
     function lastSendSettingsCommand(res) {
-      if (res.search('rdy') !== -1) {
+      //Settings have been sent correctly, start pinging for update
+      if (res.search('rdy') > -1) {
         addToLog('Moving to start position');
         sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
       }
-      else if (res.search('wydone') !== -1) {
-        setButtons({'readyForData':false,'showMovingButton':true,'showCalcButton':false,'showHoming':false, 'showSpinner': false});
+      //Movement is complete
+      else if (res.search('wydone') > -1) {
+        setButtons({
+          'readyForData':false,
+          'showMovingButton':true,
+          'showCalcButton':false,
+          'showHoming':false,
+          'showSpinner': false
+        });
         statusService.setSending(false);
         addToLog('Moved to start position');
         var subCuts = program.cutWidth / program.sawWidth;
         var cutsRoundedUp = Math.ceil(subCuts);
+        //On popup user is able to indicate that cut is complete
+        //Button on popup triggers startMoving()
         if (program.cutWidth !== program.sawWidth) {
           $ionicPopup.alert({
             title: 'Make the subcut 1/'+cutsRoundedUp
@@ -986,12 +987,14 @@ angular.module('starter.controllers', [ngAsync.name])
           });
         }
       }
+      //  Setting have been sent incorrectly
       else if (res.search('kFAULT') !== -1){
         addToLog('Settings have been sent incorrectly, please try again');
         emergencyService.on(function () {
           emergencyService.off()
         });
       }
+      //  Keep connection alive
       else {
         $timeout(function () {
           sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
@@ -1029,32 +1032,7 @@ angular.module('starter.controllers', [ngAsync.name])
         var check = $rootScope.$on('bluetoothResponse', function (event, res) {
           logService.consoleLog('on bluetoothResponse in checkDone called');
             if (res.search('wydone:0') > -1) {
-              addToLog('Movement done');
-              addToLog($scope.movements[$scope.movementsNum].description);
-              done = true;
-              setButtons({'showSpinner':false, 'showHoming': true, 'showResetButton': false});
-              if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut'
-                && $scope.movementsNum !== $scope.movements.length -1){
-                $ionicPopup.alert({
-                  title: $scope.movements[$scope.movementsNum].description
-                });
-                $scope.movementsNum += 1;
-            }
-              //once last movement is completed show restart program popup
-              else if ($scope.movementsNum === $scope.movements.length -1) {
-                $ionicPopup.alert({
-                  title: $scope.movements[$scope.movementsNum].description,
-                  buttons: [{
-                    type: 'button-calm',
-                    text: 'OK',
-                    onTap: $scope.showRestartPopup()
-                  }]
-                });
-                setButtons({'showMovingButton':false,'showEmergency':false,'showResetButton':false});
-                statusService.setSending(false);
-                $scope.movements = [];
-                $scope.movementsNum = 0;
-              }
+              checkDoneReceivedWydone()
             }
           else {
               $timeout(function () {
@@ -1065,7 +1043,38 @@ angular.module('starter.controllers', [ngAsync.name])
           check();
         });
       }
+
+      function checkDoneReceivedWydone() {
+        addToLog('Movement done');
+        addToLog($scope.movements[$scope.movementsNum].description);
+        done = true;
+        setButtons({'showSpinner':false, 'showHoming': true, 'showResetButton': false});
+        if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut'
+          && $scope.movementsNum !== $scope.movements.length -1){
+          $ionicPopup.alert({
+            title: $scope.movements[$scope.movementsNum].description
+          });
+          $scope.movementsNum += 1;
+        }
+        //once last movement is completed show restart program popup
+        else if ($scope.movementsNum === $scope.movements.length -1) {
+          $ionicPopup.alert({
+            title: $scope.movements[$scope.movementsNum].description,
+            buttons: [{
+              type: 'button-calm',
+              text: 'OK',
+              onTap: $scope.showRestartPopup()
+            }]
+          });
+          setButtons({'showMovingButton':false,'showEmergency':false,'showResetButton':false});
+          statusService.setSending(false);
+          $scope.movements = [];
+          $scope.movementsNum = 0;
+        }
+      }
     };
+
+
 
     //
     //SECTION: popups && modals
@@ -1118,6 +1127,8 @@ angular.module('starter.controllers', [ngAsync.name])
           }]
       })
     };
+
+    //Q&A section
 
     $scope.openHelpModal = function () {
       modalService

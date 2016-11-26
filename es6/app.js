@@ -1,8 +1,14 @@
-var bugout = new debugout();
+
 import controllers from './controllers';
-import sendAndReceiveService from './sendAndReceiveService';
+import sendAndReceiveService from './services/sendAndReceiveService';
+import shareSettingsService from './services/shareSettingsService';
+import shareProgramService from './services/shareProgramService';
+import skipService from './services/skipService';
+import buttonService from './services/buttonService';
+import emergencyService from './services/emergencyService';
+import {bluetoothEnabledService, bluetoothConnectedService} from './services/bluetoothService';
 import crc16 from './crc16';
-// import angularAsyncAwait from "angular-async-await";
+import ngAsync from './ng-async';
 import router from './router'
 
 if (window.localStorage['Safety'] === undefined) {
@@ -18,193 +24,20 @@ if (window.localStorage['commandIdNum'] === undefined) {
   window.localStorage['commandIdNum'] = 0;
 }
 
-angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch'])
-
-  .service('shareSettings', function() {
-    var shareSettings = this;
-    shareSettings.obj = {};
-    if (window.localStorage['settings'] !== '' && window.localStorage['settings'] !== undefined) {
-      shareSettings.obj.settings = JSON.parse(window.localStorage['settings']);
-    }
-
-      shareSettings.getObj = function() {
-        return shareSettings.obj.settings;
-      };
-      shareSettings.setObj = function(value) {
-        shareSettings.obj.settings = value;
-      }
-    })
-
-  .service('shareProgram', function() {
-      var shareProgram = this;
-      shareProgram.obj = {
-        "program": {}
-      };
-
-      shareProgram.getObj = function() {
-        if (shareProgram.obj.program.startPosition === undefined) {
-          bugout.log('shareProgram.obj.program is undefined, setting start position to nill');
-          shareProgram.obj.program.startPosition = 0;
-        }
-        return shareProgram.obj.program;
-      };
-      shareProgram.setObj = function(value) {
-        shareProgram.obj.program = value;
-      }
-    })
-
-  .service('skipService', function () {
-    var skip = this;
-    skip.value = undefined;
-    skip.getSkip = function () {
-      return skip.value;
-    };
-    skip.setSkip = function (boolean) {
-      skip.value = boolean;
-    }
+angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch', ngAsync.name])
+  .service('bugout', function () {
+    const bugout = new debugout();
+    this.bugout = bugout;
   })
-
-  .service('buttonService', function () {
-    var button = this;
-    button.value = {};
-    button.value.readyForData = false;
-    button.value.showEmergency = false;
-    button.value.showMovingButton = false;
-    button.value.showCalcButton = false;
-    button.value.showResetButton = false;
-    button.value.showHoming = true;
-    button.value.showStressTest = true;
-    button.value.showVersionButton = true;
-    button.value.showMoveXMm = true;
-    button.value.showSpinner = false;
-
-
-    button.getValues = function () {
-      return button.value;
-    };
-
-    button.setValues = function (obj) {
-      bugout.log('buttonService.setValues called');
-      for (var keyVal in obj) {
-        switch (keyVal) {
-          case 'readyForData':
-                button.value.readyForData = obj.readyForData;
-                break;
-          case 'showEmergency':
-                button.value.showEmergency = obj.showEmergency;
-                break;
-          case 'showMovingButton':
-            button.value.showMovingButton = obj.showMovingButton;
-            break;
-          case 'showCalcButton':
-            button.value.showCalcButton = obj.showCalcButton;
-            break;
-          case 'showResetButton':
-            button.value.showResetButton = obj.showResetButton;
-            break;
-          case 'showHoming':
-            button.value.showHoming = obj.showHoming;
-            break;
-          case 'showStressTest':
-            button.value.showStressTest= obj.showStressTest;
-            break;
-          case 'showVersionButton':
-            button.value.showVersionButton= obj.showVersionButton;
-            break;
-          case 'showMoveXMm':
-            button.value.showMoveXMm= obj.showMoveXMm;
-            break;
-          case 'showSpinner':
-                button.value.showSpinner = obj.showSpinner;
-        }
-      }
-    };
-
-    button.setEmergencyValues = function () {
-      button.setValues({
-        showEmergency : false,
-        showMovingButton : false,
-        showCalcButton : false,
-        showStressTest : false,
-        showHoming : false,
-        showSpinner : false,
-        showVersionButton : false,
-        showMoveXMm : false,
-        readyForData : false,
-        showResetButton: true
-      });
-    }
-  })
-
-  .service('emergencyService',['buttonService', 'statusService', '$rootScope', function (buttonService, statusService, $rootScope) {
-    var emergency = this;
-
-    emergency.on = function (cb) {
-      bugout.log('emergencyService.on called');
-      statusService.setEmergency(true);
-      buttonService.setEmergencyValues();
-      $rootScope.$emit('emergencyOn');
-      if (cb) cb();
-    };
-
-    emergency.off = function (cb) {
-      bugout.log('emergencyService.off called');
-      statusService.setEmergency(false);
-      statusService.setSending(false);
-      $rootScope.$emit('emergencyOff');
-      emergency.value = false;
-      buttonService.setValues({
-        showEmergency : false,
-        showMovingButton : false,
-        showResetButton: false,
-        showCalcButton : true,
-        showStressTest : true,
-        showHoming : true,
-        showSpinner : false,
-        showVersionButton : true,
-        showMoveXMm : true,
-        readyForData : false
-      });
-      if (cb) cb();
-    }
-  }])
-
-  .service('checkBluetoothEnabledService', function ($cordovaBluetoothSerial) {
-    var bluetoothEnabled = this;
-    bluetoothEnabled.getValue = function (cb) {
-      $cordovaBluetoothSerial.isEnabled().then(function () {
-        bluetoothEnabled.value = true;
-        bugout.log('checkBluetoothEnabledService.value ='+bluetoothEnabled.value);
-        if (cb) cb(bluetoothEnabled.value);
-        else return bluetoothEnabled.value;
-      }, function () {
-        bluetoothEnabled.value = false;
-        bugout.log('checkBluetoothEnabledService.value ='+bluetoothEnabled.value);
-        if (cb) cb(bluetoothEnabled.value);
-        else return bluetoothEnabled.value;
-      })
-    }
-  })
-
-  .service('isConnectedService', function ($cordovaBluetoothSerial) {
-    var isConnected = this;
-    isConnected.getValue = function (cb) {
-      $cordovaBluetoothSerial.isConnected().then(function () {
-        isConnected.value = true;
-        bugout.log('isConnectedService.value ='+isConnected.value);
-        return isConnected.value;
-      }, function () {
-        isConnected.value = false;
-        bugout.log('isConnectedService.value ='+isConnected.value);
-        return isConnected.value;
-      }).then(function () {
-        if (cb) cb(isConnected.value)
-      })
-    }
-  })
-
-  .service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window',
-    function (isConnectedService, logService, checkBluetoothEnabledService, buttonService, $rootScope, $timeout, $window) {
+  .service('shareSettings', [shareSettingsService])
+  .service('shareProgram', ['bugout', shareProgramService])
+  .service('skipService', skipService)
+  .service('buttonService', ['bugout', buttonService])
+  .service('emergencyService',['buttonService', 'statusService', '$rootScope', 'bugout', emergencyService])
+  .service('checkBluetoothEnabledService', ['bugout', bluetoothEnabledService])
+  .service('isConnectedService', ['bugout', bluetoothConnectedService])
+  .service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout',
+    function (isConnectedService, logService, checkBluetoothEnabledService, buttonService, $rootScope, $timeout, $window, bugout) {
     var connect = this;
       var retry = 1;
       var deviceName = '';
@@ -238,14 +71,14 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
       function valueRetrieved() {
         if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '' && window.localStorage['lastConnectedDevice'] !== undefined) {
-          bugout.log('actually connecting to lastConnected device');
+          bugout.bugout.log('actually connecting to lastConnected device');
           var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
           $window.bluetoothSerial.connectInsecure(obj.id, function () {
             connect.setDeviceName(obj.name);
             logService.addOne('Succesfully connected to last connected device');
             if (cb) cb();
           }, function () {
-            bugout.log('could not connect to last connected device');
+            bugout.bugout.log('could not connect to last connected device');
             if (cb) cb();
           })
         }
@@ -254,7 +87,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     connect.connectWithRetry = function () {
-      bugout.log('connectWithRetry called in connectService');
+      bugout.bugout.log('connectWithRetry called in connectService');
       var isConnected;
       var bluetoothOn;
       isConnectedService.getValue(function (value) {
@@ -267,16 +100,16 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
 
       function valuesRetrieved() {
         if (bluetoothOn && !isConnected) {
-          bugout.log('connectWithRetry bluetoothOn & !isConnected');
+          bugout.bugout.log('connectWithRetry bluetoothOn & !isConnected');
           connect.connectToLastDevice(bluetoothOn, function () {
             isConnectedService.getValue(function (value) {
               isConnected = value;
             });
             if (!isConnected && retry < 6) {
-              bugout.log('retry connectToLastDevice');
+              bugout.bugout.log('retry connectToLastDevice');
               $timeout(function () {
                 retry += 1;
-                bugout.log('Connect with retry, try: '+retry);
+                bugout.bugout.log('Connect with retry, try: '+retry);
                 connect.connectWithRetry();
               }, 500)
             }
@@ -307,8 +140,8 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   }])
 
-  .service('disconnectService',['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings',
-    function ($cordovaBluetoothSerial, logService, buttonService, isConnectedService, $window, connectToDeviceService, shareSettings) {
+  .service('disconnectService',['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout',
+    function ($cordovaBluetoothSerial, logService, buttonService, isConnectedService, $window, connectToDeviceService, shareSettings, bugout) {
     var disconnect = this;
     var stepMotorNum = shareSettings.getObj().stepMotorNum;
     disconnect.disconnect = function () {
@@ -320,14 +153,14 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
           buttonService.setValues({'showCalcButton':false});
           isConnectedService.getValue();
         }, function () {
-          bugout.log('User could not disconnect');
+          bugout.bugout.log('User could not disconnect');
           logService.addOne('Could not disconnect from device');
         })
       });
     }
   }])
 
-  .service('logService', function () {
+  .service('logService', ['bugout', function (bugout) {
     var logService = this;
     //Available methods
     logService.setBulk = setBulk;
@@ -344,7 +177,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
 
     function addOne(str) {
-      bugout.log('adding to UI log: '+str);
+      bugout.bugout.log('adding to UI log: '+str);
       if (logService.UILog.length === 0) {
         logService.UILog.unshift(str);
       }
@@ -381,10 +214,10 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
 
     function consoleLog(str) {
-      bugout.log(str);
+      bugout.bugout.log(str);
     }
 
-  })
+  }])
 
   .service('calculateVarsService',['shareProgram', 'shareSettings', function (shareProgram, shareSettings) {
     var vars = this;
@@ -460,29 +293,29 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   }])
 
-  .service('logModalService', function () {
+  .service('logModalService', ['bugout',function (bugout) {
     var logModal = this;
 
     logModal.emailFullLog = function () {
       var now = Date.now();
       cordova.plugins.email.isAvailable(
         function(isAvailable) {
-          bugout.log('email available:'+isAvailable);
+          bugout.bugout.log('email available:'+isAvailable);
           if (isAvailable === true) {
-            var logFile = bugout.getLog();
+            var logFile = bugout.bugout.getLog();
             // save the file locally, so it can be retrieved from emailComposer
             window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function(fileSystem) {
-              bugout.log('file system open: ' + fileSystem.name);
+              bugout.bugout.log('file system open: ' + fileSystem.name);
               // create the file if it doesn't exist
               fileSystem.getFile('log'+now+'.txt', {create: true, exclusive: false}, function(file) {
-                bugout.log("file is file?" + file.isFile.toString());
+                bugout.bugout.log("file is file?" + file.isFile.toString());
                 // create writer
                 file.createWriter(function(writer) {
                   // write
                   writer.write(logFile);
                   // when done writing, call up email composer
                   writer.onwriteend = function() {
-                    bugout.log('done writing');
+                    bugout.bugout.log('done writing');
                     var subject = 'Toothmaster bug report';
                     var body = 'I have encountered an error. Could you please look into this problem? \nMy logfile is attached.\n\nKind regards,\nA Toothmaster user';
                     cordova.plugins.email.open({
@@ -506,10 +339,10 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         });
 
       function fileSystemError(error) {
-        bugout.log('Error getting file system: '+error.code);
+        bugout.bugout.log('Error getting file system: '+error.code);
       }
     }
-  })
+  }])
 
   .service('modalService', ['$ionicModal', '$rootScope', function ($ionicModal, $rootScope) {
     var init = function (template, $scope) {
@@ -541,7 +374,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     }
   }])
 
-  .service('statusService', function () {
+  .service('statusService', ['bugout', function (bugout) {
     var statusService = this;
     statusService.sending = false;
     statusService.emergency = false;
@@ -564,26 +397,26 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
     };
 
     statusService.getSubscribed = function () {
-      bugout.log('getSubscribed called');
+      bugout.bugout.log('getSubscribed called');
       return statusService.subscribed;
     };
 
     statusService.setSubscribed = function (boolean) {
       statusService.subscribed = boolean;
     }
-  })
+  }])
 
-  .service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService',
-    function (statusService, isConnectedService, logService, disconnectService, buttonService, connectToDeviceService) {
+  .service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout',
+    function (statusService, isConnectedService, logService, disconnectService, buttonService, connectToDeviceService, bugout) {
     var pause = this;
 
       //TODO: fix using cb's for sending & connected?
     pause.pause = function () {
       //var sending = statusService.getSending();
       var sending = statusService.getSending();
-      bugout.log('sending in pause:'+statusService.getSending());
+      bugout.bugout.log('sending in pause:'+statusService.getSending());
       var connected = isConnectedService.getValue();
-      bugout.log('pause.pause called, sending: '+sending+', connected'+connected);
+      bugout.bugout.log('pause.pause called, sending: '+sending+', connected'+connected);
       if (!sending && connected) {
         logService.addOne('Disconnected after pausing application');
         disconnectService.disconnect();
@@ -600,301 +433,11 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
         connectToDeviceService.connectWithRetry();
       }
       else if (sending) {
-        bugout.log('skipped reconnect, because sending is '+sending);
+        bugout.bugout.log('skipped reconnect, because sending is '+sending);
       }
     }
   }])
-  //
-  // .service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout',
-  //   function (statusService, emergencyService, $window, logService, $rootScope, buttonService, crcService, $ionicPopup, shareSettings, $interval, $timeout) {
-  //     var sendAndReceive = this;
-  //     var stepMotorNum = shareSettings.getObj().stepMotorNum;
-  //     var command;
-  //     var response;
-  //     var lastCommandTime;
-  //     var lastReceivedTime;
-  //     var subscribed = statusService.getSubscribed();
-  //     var commandIdStr = $window.localStorage['commandIdNum'];
-  //     var commandObj = {};
-  //     var ping;
-  //
-  //     /*
-  //      * subscribe -> send command\write -> wait for subscribe to receive answer -> rootscope emit command + response
-  //      * -> unsubscribe when done with batch \ unsubscribe after command -> only throw new command when done
-  //      * TODO: create the timeout check
-  //      * */
-  //
-  //     sendAndReceive.subscribe = function () {
-  //       bugout.log('subscribed');
-  //       statusService.setSubscribed(true);
-  //       $window.bluetoothSerial.subscribe('#', function (data) {
-  //         lastReceivedTime = Date.now();
-  //         sendAndReceive.emitResponse(data);
-  //       });
-  //     };
-  //
-  //     sendAndReceive.subscribeRawData = function () {
-  //       $window.bluetoothSerial.subscribeRawData(function (data) {
-  //         var bytes = String.fromCharCode.apply(null, new Uint8Array(data));
-  //         bugout.log('Rawdata: '+bytes);
-  //       })
-  //     };
-  //
-  //     sendAndReceive.unsubscribe = function () {
-  //       $window.bluetoothSerial.unsubscribe(function () {
-  //         bugout.log('Succesfully unsubscribed');
-  //         statusService.setSubscribed(false);
-  //       }, function () {
-  //         bugout.log('ERROR: could not unsubscribe');
-  //       })
-  //     };
-  //
-  //     sendAndReceive.write = function (str, cb) {
-  //       if (statusService.getEmergency() === false) {
-  //         const commandWithCRC = crcService.appendCRC(str);
-  //         $window.bluetoothSerial.write(commandWithCRC, function () {
-  //           bugout.log('sent: '+commandWithCRC);
-  //           lastCommandTime = Date.now();
-  //           if (cb) cb();
-  //         }, function () {
-  //           bugout.log('ERROR: could not send command '+str);
-  //         })
-  //       }
-  //     };
-  //
-  //     sendAndReceive.writeBuffered = function (str, callingFunction) {
-  //       var commandIDObj = sendAndReceive.addToCommandObj(str);
-  //       if (statusService.getEmergency() === false) {
-  //         var command;
-  //           //Used for buffered commands. Command with brackets: "<r34001>", without brackets: "r34001
-  //         var commandWithoutBrackets = str.slice(1, str.length-1);
-  //         command = '<c'+commandWithoutBrackets+'$'+commandIDObj.ID+'>';
-  //
-  //         $window.bluetoothSerial.write(command, function () {
-  //           bugout.log('sent: '+command);
-  //           lastCommandTime = Date.now();
-  //         }, function () {
-  //           bugout.log('ERROR: could not send command '+str+' , callingFunction: '+callingFunction);
-  //         });
-  //         sendAndReceive.checkInterpretedResponse(commandIDObj.ID);
-  //       }
-  //       else {
-  //         logService.addOne('Emergency pressed, will not send command')
-  //       }
-  //     };
-  //
-  //     sendAndReceive.checkInterpretedResponse = function (commandID) {
-  //       var interpreted = false;
-  //       var checkInterpreted = $rootScope.$on('bluetoothResponse', function (event, res) {
-  //         if (res.search('10:<c') > -1 && res.search(commandID) > -1) {
-  //           interpreted = true;
-  //           checkInterpreted();
-  //         }
-  //       });
-  //       $timeout(function () {
-  //         if (!interpreted) {
-  //           bugout.log('incorrect interpretation, ID: '+commandID);
-  //           $rootScope.$emit('faultyResponse');
-  //           checkInterpreted();
-  //         }
-  //       },2500)
-  //     };
-  //
-  //     sendAndReceive.startPing = function () {
-  //       stepMotorNum = shareSettings.getObj().stepMotorNum;
-  //       ping = $interval(function () {
-  //         sendAndReceive.write('<w'+stepMotorNum+'>');
-  //       },500)
-  //     };
-  //
-  //     sendAndReceive.stopPing = function () {
-  //       $interval.cancel(ping);
-  //     };
-  //
-  //     sendAndReceive.getNewCommandID = function () {
-  //       commandIdStr = window.localStorage['commandIdNum'];
-  //       var commandIdNum = Number(commandIdStr);
-  //       commandIdNum += 1;
-  //       sendAndReceive.setCommandID(commandIdNum);
-  //       return commandIdNum;
-  //     };
-  //
-  //     sendAndReceive.setCommandID = function (num) {
-  //       window.localStorage['commandIdNum'] = num;
-  //     };
-  //
-  //     sendAndReceive.resetCommandObj = function () {
-  //       commandObj= {};
-  //     };
-  //
-  //     sendAndReceive.expectedResponse = function (str) {
-  //       stepMotorNum = shareSettings.getObj().stepMotorNum;
-  //       switch (str) {
-  //         case '<':
-  //           return '8:y';
-  //           break;
-  //         case 'd':
-  //           return '12:';
-  //           break;
-  //         case 'b':
-  //           return '13:';
-  //           break;
-  //         case 'x':
-  //           return '14:';
-  //           break;
-  //         case 'v':
-  //           return '9:';
-  //           break;
-  //         case 's':
-  //           return '6:';
-  //           break;
-  //         case 'p':
-  //           return '5:';
-  //           break;
-  //         case 'r':
-  //           return '3:';
-  //           break;
-  //         case 'o':
-  //           return '2:';
-  //           break;
-  //         case 'f':
-  //           return '11:';
-  //           break;
-  //         case 'k':
-  //           return ['0:rdy', 'FAULT'];
-  //           break;
-  //         case 'q':
-  //           buttonService.setValues({'showSpinner':true});
-  //           return ['rdy','wydone','q'];
-  //           break;
-  //         case 'h':
-  //           return '6:';
-  //           break;
-  //         case 'z':
-  //           return '14:';
-  //           break;
-  //         case 'w':
-  //           return ['wydone','w'+stepMotorNum] ;
-  //           break;
-  //       }
-  //     };
-  //
-  //     sendAndReceive.addToCommandObj = function (str) {
-  //       var id = sendAndReceive.getNewCommandID();
-  //       var expectedResponse = sendAndReceive.expectedResponse(str);
-  //       var obj = {
-  //         'ID': id,
-  //         'command': str, //ex: <q2456>
-  //         'expectedResponse': expectedResponse,
-  //         'interpreted': false,
-  //         'response': ''
-  //       };
-  //       commandObj[id] = obj;
-  //       return obj;
-  //     };
-  //
-  //     $rootScope.$on('emergencyOn', function () {
-  //       sendAndReceive.stopPing();
-  //       sendAndReceive.sendEmergency();
-  //       sendAndReceive.resetCommandObj();
-  //     });
-  //
-  //     sendAndReceive.emitResponse = function (res) {
-  //       bugout.log('response in emitResponse: '+res);
-  //       var settings = shareSettings.getObj();
-  //       //handle stopswitch hit
-  //       if (res.search('wydone:') > -1 && res.search('wydone:0') === -1) {
-  //         var posStopswitch = res.lastIndexOf('@')-3;
-  //         $ionicPopup.alert({
-  //           title: 'Error: hit stopswitch '+res.charAt(posStopswitch),
-  //           template: 'Unexpected stopswitch has been hit. Aborting task and resetting program.'
-  //         });
-  //         bugout.log('Error: hit stopswitch '+res.charAt(posStopswitch));
-  //         logService.addOne('Error: hit stopswitch '+res.charAt(posStopswitch));
-  //         //emergencyService.on sets correct buttons and sends resetcommand
-  //         emergencyService.on();
-  //         $rootScope.$emit('stopswitchHit', res, res.charAt(posStopswitch));
-  //       }
-  //
-  //       //handle encoder missed steps
-  //       //splice result from '@' till end
-  //       // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
-  //       else if (res.search('wydone:') > -1 && res.search('@5') > -1 && settings.encoder.enable === true) {
-  //
-  //         var splicedStr = res.slice(res.lastIndexOf('@'));
-  //         var missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
-  //         var maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : 'unknown';
-  //         $ionicPopup.alert({
-  //           title: 'You have missed the maximum number of allowed steps',
-  //           template: 'The program has been stopped.<p>Maximum steps to miss: '+maxAllowedMiss+'</p><p>Number of steps actually missed '+missedSteps+'</p>'
-  //         });
-  //         bugout.log('ERROR: hit max number of allowed steps');
-  //         logService.addOne('ERROR: exceeded maximum number of steps to miss (encoder setting)');
-  //         emergencyService.on();
-  //         $rootScope.$emit('maxSteps', res, missedSteps)
-  //       }
-  //       else if (res.search('2:') > -1) {
-  //         $rootScope.$emit('sendKfault', res);
-  //       }
-  //       else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
-  //         bugout.log('\nERROR:\nPotential faulty response: '+res);
-  //         var numStr1 = res.slice(res.indexOf('$')+1, res.indexOf('>'));
-  //         var commandID1 = Number(numStr1);
-  //         var commandIDObj = commandObj[commandID1];
-  //         bugout.log('commandIDObj.command: '+commandIDObj.command);
-  //         if (res.search(commandIDObj.command) === -1) {
-  //           bugout.log('confirmed faulty response');
-  //           $rootScope.$emit('faultyResponse', res);
-  //           delete  commandObj[commandID1];
-  //         }
-  //       }
-  //       else if (res.search('&') > -1 && res.search('wydone')> -1) {
-  //         var numStr = res.slice(res.indexOf('>')+1, res.indexOf('&'));
-  //         var commandID = Number(numStr);
-  //
-  //         $rootScope.$emit('bufferedCommandDone', res, commandID);
-  //       }
-  //       else {
-  //         $rootScope.$emit('bluetoothResponse', res);
-  //       }
-  //     };
-  //
-  //     //TODO add retry to sendEmergency?
-  //     sendAndReceive.sendEmergency = function () {
-  //       bugout.log('sendAndReceiveService.sendEmergency called');
-  //
-  //       if (statusService.getSubscribed() === false) sendAndReceive.subscribe();
-  //       createResetListener( function () {
-  //         stepMotorNum = shareSettings.getObj().stepMotorNum;
-  //         $window.bluetoothSerial.write('<<y8:y'+stepMotorNum+'>', function () {
-  //           logService.addOne('Program reset command sent');
-  //         }, function (err) {
-  //           logService.addOne('Error: Program reset command could not be sent. '+err);
-  //         });
-  //       });
-  //
-  //
-  //
-  //       function createResetListener(cb) {
-  //         var emergencyResponse = $rootScope.$on('bluetoothResponse', function (event, res) {
-  //           if (res.search('<8:y>')) {
-  //             logService.addOne('Program succesfully reset');
-  //             emergencyResponse();
-  //           }
-  //         });
-  //         if (cb) cb();
-  //       }
-  //     };
-  //
-  //     sendAndReceive.clearBuffer = function () {
-  //       $window.bluetoothSerial.clear(function () {
-  //         bugout.log('Received buffer cleared');
-  //       }, function () {
-  //         bugout.log('Error: could not clear receive buffer');
-  //       })
-  //     }
-  //
-  //   }]) //end of sendAndReceiveService
+
   .service('sendAndReceiveService', sendAndReceiveService);
 
   sendAndReceiveService.$inject = ['statusService', 'emergencyService', '$window', 'logService',
@@ -912,17 +455,17 @@ angular
     }
   }])
 
-  .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService) {
-    bugout.log('version 0.9.9.4');
+  .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
+    bugout.bugout.log('version 0.9.9.14');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){
-          bugout.log('startChangeStart, fromState: '+fromState.name);
-          bugout.log('startChangeStart, toState: '+toState.name);
+          bugout.bugout.log('startChangeStart, fromState: '+fromState.name);
+          bugout.bugout.log('startChangeStart, toState: '+toState.name);
         });
 
     $ionicPlatform.on('pause', function () {
-      bugout.log('onPause called from app.js');
+      bugout.bugout.log('onPause called from app.js');
       if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
         || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
         pauseService.pause();
@@ -932,7 +475,7 @@ angular
     });
 
     $ionicPlatform.on('resume', function () {
-      bugout.log('onResume called from app.js');
+      bugout.bugout.log('onResume called from app.js');
       if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
         || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
         pauseService.resume();
@@ -960,13 +503,13 @@ angular
     }
     else {
       $ionicPlatform.ready(function () {
-        bugout.log('trying to connectwithretry on startup');
+        bugout.bugout.log('trying to connectwithretry on startup');
         connectToDeviceService.connectWithRetry();
       });
     }
 
     //bugout.log(window.localStorage);
-    bugout.log('localstorage.length ='+window.localStorage.length);
+    bugout.bugout.log('localstorage.length ='+window.localStorage.length);
   });
 
 })

@@ -50,15 +50,16 @@ module.exports = sendAndReceiveService;
       statusService.setSubscribed(true);
       let temp = '';
       $window.bluetoothSerial.subscribe('#', function (data) {
+        console.log('raw data: '+data);
         lastReceivedTime = Date.now();
         temp += data;
-        if ((temp.match(/#/g) || []).length >= 2) {
+        // if (((temp.match(/#/g) || []).length >= 2 ) || (temp.search('rdy>') > -1)) {
+        if (temp.search(';') > -1 && temp.search('#') > -1) {
           console.log('\ntemp in subscribe: \n'+temp);
           $rootScope.$emit('response', temp);
           sendAndReceive.emitResponse(temp);
           temp = '';
         }
-
       });
     }
 
@@ -82,12 +83,14 @@ module.exports = sendAndReceiveService;
       return new Promise((resolve, reject) => {
         let responseCount = 0;
 
-        $rootScope.$on('response', function (event, res) {
+        let listener = $rootScope.$on('response', function (event, res) {
           responseCount += 1;
           let searchBool = checkResponse(res, searchStr);
           if (searchBool) {
             console.log('resolving OK');
+            responseCount = 0;
             resolve('OK');
+            listener();
           }
           else if (res.indexOf('667:') > -1) {
             resolve('RETRY');
@@ -109,21 +112,27 @@ module.exports = sendAndReceiveService;
         console.log('res: '+res+'searchValuesArr');
         console.log(searchValues);
         searchValues.map((value) => {
-          if (res.search(value) > -1)
+          if (res.search(value) > -1) {
             returnBool = true;
+          }
+
+
         });
         console.log('returnBool: '+returnBool);
       }
       return returnBool
     }
 
-    sendAndReceive.writeAsync = $async(async function (str) {
+    sendAndReceive.writeAsync = $async(function* (str) {
       try {
-        await sendAndReceive.write(str);
-        const expectedResponseShouldContain = sendAndReceive.expectedResponse(str[1]);
-        let resolveValue = await responseListener(expectedResponseShouldContain);
+        yield sendAndReceive.write(str);
+        let expectedResponseShouldContain = sendAndReceive.expectedResponse(str[1]);
+        console.log('expectedResponseShouldContain: ');
+        console.log(expectedResponseShouldContain);
+        let resolveValue = yield responseListener(expectedResponseShouldContain);
+        expectedResponseShouldContain = null;
 
-        return $q((resolve, reject) => {
+        return new Promise((resolve, reject) => {
           console.log('resolve with resolveValue: '+resolveValue);
           resolve(resolveValue);
         });
@@ -348,7 +357,7 @@ module.exports = sendAndReceiveService;
       if (statusService.getSubscribed() === false) sendAndReceive.subscribe();
       createResetListener( function () {
         stepMotorNum = shareSettings.getObj().stepMotorNum;
-        $window.bluetoothSerial.write('<<y8:y'+stepMotorNum+'>', function () {
+        $window.bluetoothSerial.write('<y8:y'+stepMotorNum+'>', function () {
           logService.addOne('Program reset command sent');
         }, function (err) {
           logService.addOne('Error: Program reset command could not be sent. '+err);
@@ -358,6 +367,7 @@ module.exports = sendAndReceiveService;
 
     function createResetListener(cb) {
       var emergencyResponse = $rootScope.$on('bluetoothResponse', function (event, res) {
+
         if (res.search('<8:y>')) {
           logService.addOne('Program succesfully reset');
           emergencyResponse();

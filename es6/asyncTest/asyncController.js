@@ -28,15 +28,12 @@ function asyncCtrl($rootScope, $timeout, $async, $q) {
       console.log('i: '+i);
       value = yield self.timeout(i);
 
-      if (i=== 1) {
-        $q((resolve, reject) => {
+      if (i=== 4) {
+        return new Promise((resolve, reject) => {
           reject('exceeded num of tries');
-        })
+        });
       }
-      // else if (value != 'resolved') {
-      //   continue;
-      // }
-      else {
+      else if (value == 'resolved') {
         return new Promise((resolve, reject) => {
           console.log('resolve value: '+value);
           resolve('resolve value: '+value);
@@ -47,7 +44,7 @@ function asyncCtrl($rootScope, $timeout, $async, $q) {
 
   this.timeout = function (i) {
     console.log('timeout called');
-    return $q((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       $timeout(function () {
         console.log('timeout 2s, i: '+i);
         if (i === 3) {
