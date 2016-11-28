@@ -766,6 +766,7 @@ angular.module('starter.controllers', [ngAsync.name])
       done = true;
       settingsDone = true;
       $scope.buttons = buttonService.getValues();
+      sendAndReceiveService.subscribe();
     });
 
     $scope.emergencyOn = function () {
@@ -918,6 +919,7 @@ angular.module('starter.controllers', [ngAsync.name])
       try {
         if (statusService.getEmergency() === false) {
           if (statusService.getSending() === false){
+            sendAndReceiveService.subscribeRawData();
             setButtons({'showSpinner':true,'showEmergency':true, 'readyForData':false});
             statusService.setSending(true);
             settingsDone = false;
@@ -963,6 +965,7 @@ angular.module('starter.controllers', [ngAsync.name])
       }
       //Movement is complete
       else if (res.search('wydone') > -1) {
+        //showMoving button becomes available, which allows user to call startMoving()
         setButtons({
           'readyForData':false,
           'showMovingButton':true,
@@ -1031,7 +1034,7 @@ angular.module('starter.controllers', [ngAsync.name])
       function checkDone() {
         var check = $rootScope.$on('bluetoothResponse', function (event, res) {
           logService.consoleLog('on bluetoothResponse in checkDone called');
-            if (res.search('wydone:0') > -1) {
+            if (res.search('wydone') > -1) {
               checkDoneReceivedWydone()
             }
           else {
@@ -1054,6 +1057,8 @@ angular.module('starter.controllers', [ngAsync.name])
           $ionicPopup.alert({
             title: $scope.movements[$scope.movementsNum].description
           });
+          //increment movementsNum, so when user clicks Start Moving button again,
+          // startMoving() will be called with next command
           $scope.movementsNum += 1;
         }
         //once last movement is completed show restart program popup
