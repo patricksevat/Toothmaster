@@ -53,7 +53,7 @@ export default function calculateVarsService(shareProgram, shareSettings) {
       }
     }
     else if (type === 'runBluetooth') {
-      vars.return.commands = ['<v'+vars.return.vars.direction+stepMotorNum+'>', '<s'+vars.return.vars.startPositionSteps+stepMotorNum+'>',
+      vars.return.commands = ['<v'+(vars.return.vars.direction+stepMotorNum || 1)+'>', '<s'+vars.return.vars.startPositionSteps+stepMotorNum+'>',
         '<p'+vars.return.vars.stepsPerRPM+stepMotorNum+'>','<r'+vars.return.vars.maxRPM+stepMotorNum+'>',
         '<f'+vars.return.vars.stepMotorOnOff+stepMotorNum+'>', '<o'+vars.return.vars.time+stepMotorNum+'>',
         '<kFAULT'+stepMotorNum+'>'];

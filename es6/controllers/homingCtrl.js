@@ -1,0 +1,246 @@
+export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
+                         $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
+                         checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
+                         statusService, connectToDeviceService, $ionicHistory, logModalService, modalService, $async) {
+  $scope.$on('$ionicView.unloaded', function () {
+    logService.consoleLog('\nUNLOADED\n');
+  });
+
+  $scope.$on('$ionicView.beforeLeave', function () {
+    logService.consoleLog('BEFORE LEAVE');
+    sendAndReceiveService.unsubscribe();
+  });
+
+  $scope.$on('$ionicView.afterEnter', function () {
+    logService.consoleLog('AFTER ENTER');
+    sendAndReceiveService.subscribe();
+  });
+
+  var homingStopswitchInt;
+  //homing commands
+  var homingCommands;
+  $scope.settings = shareSettings.getObj();
+  var stepMotorNum = $scope.settings.stepMotorNum;
+  $scope.bluetoothLog = [];
+  $scope.bluetoothEnabled = null;
+  $scope.buttons = buttonService.getValues();
+  $scope.userDisconnect = function () {
+    disconnectService.disconnect();
+    isConnectedService.getValue(function (val) {
+      $scope.isConnected = val;
+    })
+  };
+  $scope.homingDone = false;
+
+  function setButtons(obj) {
+    buttonService.setValues(obj);
+    $scope.$apply(function () {
+      $scope.buttons = buttonService.getValues()
+    });
+    logService.consoleLog($scope.buttons);
+  }
+
+  $scope.$on('$ionicView.enter', function () {
+    logService.consoleLog('enterView in homingCtrl fired');
+    logService.getLog(function (arr) {
+      $scope.bluetoothLog = arr;
+    });
+    checkBluetoothEnabledService.getValue(function (value) {
+      $scope.bluetoothEnabled = value;
+      logService.consoleLog('$scope.bluetoothEnabled: '+$scope.bluetoothEnabled);
+    });
+    connectToDeviceService.getDeviceName(function (value) {
+      $scope.deviceName= value;
+    });
+    $scope.buttons = buttonService.getValues();
+    isConnectedService.getValue(function (value) {
+      $scope.isConnected = value;
+      logService.consoleLog('$scope.isConnected: '+$scope.isConnected);
+    });
+    calculateVarsService.getVars('homing', function (obj) {
+      homingCommands = obj.commands;
+      logService.consoleLog('homingcommands:');
+      logService.consoleLog(homingCommands);
+      homingStopswitchInt = obj.vars.homingStopswitchInt;
+    });
+    $scope.settings = shareSettings.getObj();
+    stepMotorNum = $scope.settings.stepMotorNum;
+    $scope.homingDone = false;
+  });
+
+  $scope.$on('$ionicView.leave', function () {
+    logService.consoleLog('leaveView in bluetoothConnectionCtrl fired');
+    if (statusService.getSending() === true ) {
+      addToLog('Cancelling current tasks');
+      emergencyService.on(function () {
+        emergencyService.off();
+      });
+    }
+    else {
+      sendAndReceiveService.clearBuffer();
+    }
+    //TODO perhaps create listeners in a var and cancel var on leave?
+    logService.setBulk($scope.bluetoothLog);
+  });
+
+  $scope.emergencyOn = function () {
+    emergencyService.on();
+  };
+
+  $scope.emergencyOff = function () {
+    logService.consoleLog('emergencyOff called');
+    emergencyService.off();
+  };
+
+  //
+  //SECTION: homing logic
+  //
+
+  $scope.sendWithRetry = $async(function* (str) {
+    let res;
+    for (let i = 0; i < 5; i++) {
+      console.log('try: '+i+', command: '+str);
+      res = yield sendAndReceiveService.writeAsync(str);
+      console.log('res in sendWithretry: '+res);
+      if (i === 4)
+        return new Promise((resolve, reject) => {
+          reject('exceeded num of tries');
+        });
+      else if (res === 'OK')
+        return new Promise((resolve, reject) => {
+          console.log('resolve value: '+res);
+          resolve('resolve value: '+res);
+        });
+    }
+  });
+
+  $scope.homing = $async(function* () {
+    if (statusService.getEmergency() === false) {
+      logService.consoleLog('homingStopswitch = '+homingStopswitchInt);
+      if (statusService.getSending() === false){
+        setButtons({'showSpinner':true,'showEmergency':true,'showHoming':false});
+        statusService.setSending(true);
+
+        for (let i = 0; i < homingCommands.length; i++){
+          console.log('going to await for command reply to command: '+homingCommands[i]);
+          let res = yield $scope.sendWithRetry(homingCommands[i]);
+          console.log('awaited reply for command: '+homingCommands[i]+', i='+i+', response: '+res );
+
+          if (i === homingCommands.length-1) {
+            console.log('commands');
+            console.log(homingCommands);
+            console.log('commands.length');
+            console.log(homingCommands.length);
+            console.log('last command of sendSettings is OK');
+            lastHomingCommand(res);
+          }
+        }
+      }
+      else {
+        $ionicPopup.alert({
+          title: 'Please wait untill moving to start position is done in run Bluetooth program'
+        });
+      }
+    }
+    else {
+      $ionicPopup.alert({
+        title: 'Emergency has been pressed, will not continue homing'
+      });
+    }
+  });
+
+  function checkWydone() {
+    console.log('checkWydone');
+    var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+      lastHomingCommand(res);
+      rdy();
+    })
+  }
+
+  function lastHomingCommand(res) {
+    console.log('res in lastHomingCommand: ' + res);
+    if (res.search('wydone:') > -1) {
+      $scope.homingDone = true;
+      setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
+      $ionicPopup.alert({
+        title: 'Homing completed'
+      });
+      statusService.setSending(false);
+    }
+    else if (res.search('kFAULT') !== -1){
+      addToLog('Settings have been sent incorrectly, please try again');
+      emergencyService.on(function () {
+        emergencyService.off()
+      });
+    }
+    else if (!$scope.homingDone) {
+      $timeout(function () {
+        sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+      }, 100)
+    }
+  }
+
+  function addToLog(str) {
+    logService.addOne(str);
+    logService.getLog(function (arr) {
+      $scope.bluetoothLog = arr;
+    });
+  }
+
+  $scope.openHelpModal = function () {
+    modalService
+      .init('help-modal.html', $scope)
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.show = null;
+
+  $scope.showAnswer = function(obj) {
+    $scope.show = $scope.show === obj ? null : obj;
+  };
+
+  $scope.QAList = [];
+  for (var i=1; i<11; i++) {
+    $scope.QAList.push({
+      question: 'Question '+i,
+      answer: 'Lorem ipsum'
+    })
+  }
+
+  $scope.showFullLog = function () {
+    $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+    modalService
+      .init('log-modal.html', $scope)
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.emailFullLog = function () {
+    logModalService.emailFullLog();
+  } ;
+
+  $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+
+  $scope.fullLogPage = 0;
+
+  $scope.getFullLogExtract = function(start, end) {
+    logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
+    $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+  };
+
+  $scope.previousFullLogPage = function () {
+    logService.consoleLog('prevFullLogPage');
+    $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+    $scope.fullLogPage -= 1;
+  };
+
+  $scope.nextFullLogPage = function () {
+    logService.consoleLog('nextFullLogPage');
+    $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+    $scope.fullLogPage += 1;
+  };
+
+}

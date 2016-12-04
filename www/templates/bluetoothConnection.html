@@ -39,14 +39,38 @@
       </div>
 
       <!-- TODO explainer for Windows Phone that unpaired devices must be connected manually-->
-      <div  id="bluetooth-available-devices-div" ng-model="availableDevices" ng-hide="isConnected || !bluetoothEnabled">
-        <div class="item item-text-wrap" ng-repeat="device in availableDevices track by $index" on-tap="connectToUnpairedDevice($index)">
+      <div id="bluetooth-available-devices-div" ng-model="availableDevices" ng-hide="isConnected || !bluetoothEnabled">
+
+        <!--Shown when searching for unpaired devices-->
+        <div
+          class="item item-text-wrap"
+          ng-show="availableDevices.length === 0 && !noUnpairedDevices"
+        >
+          <p class="bluetooth-text">Searching for unpaired devices...</p>
+        </div>
+
+        <!--Shown when unpaired devices are found-->
+        <div
+          class="item item-text-wrap"
+          ng-repeat="device in availableDevices track by $index"
+          on-tap="connectToUnpairedDevice($index)"
+          ng-show="!noUnpairedDevices"
+        >
           <p class="bluetooth-text">{{device.name}} {{device.id}}</p>
           <button class="button button-small button-calm">Connect</button>
         </div>
-        <div class="item item-text-wrap" ng-show="!availableDevices.length">
-          <p class="bluetooth-text">Searching for unpaired devices...</p>
+
+        <!--Shown when no unpaired devices are found-->
+        <div class="item item-text-wrap" ng-show="availableDevices.length === 0 && noUnpairedDevices">
+          <p class="bluetooth-text">
+            No devices could be discovered.
+            <br>If you're sure that your device is powered on, click this button to pair manually:
+            <button class="button button-small button-calm" on-tap="openBluetoothSettings()">
+              Bluetooth settings
+            </button>
+          </p>
         </div>
+
       </div>
 
       <div class="item item-divider" ng-hide="isConnected || !bluetoothEnabled">

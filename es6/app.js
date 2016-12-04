@@ -1,4 +1,4 @@
-import controllers from './controllers';
+import toothmasterControllers from './controllers';
 import sendAndReceiveService from './services/sendAndReceiveService';
 import shareSettingsService from './services/shareSettingsService';
 import shareProgramService from './services/shareProgramService';
@@ -30,7 +30,7 @@ if (window.localStorage['commandIdNum'] === undefined) {
   window.localStorage['commandIdNum'] = 0;
 }
 
-angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngTouch', ngAsync.name])
+angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', 'ngTouch', ngAsync.name])
   .service('bugout', function () {
     const bugout = new debugout();
     this.bugout = bugout;
@@ -60,7 +60,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   .service('crcService', [crcService])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-    bugout.bugout.log('version 0.9.9.38');
+    bugout.bugout.log('version 0.9.9.41');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){
