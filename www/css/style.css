@@ -209,3 +209,16 @@ iframe {
 .align-right {
   float: right;
 }
+
+/*bluetoothConnection.html*/
+#bluetooth-available-devices-div .bluetooth-text,
+#bluetooth-paired-devices-div .bluetooth-text {
+  display: inline;
+}
+
+#bluetooth-available-devices-div .bluetooth-connect-button,
+#bluetooth-paired-devices-div .bluetooth-connect-button {
+  float: right
+}
+
+

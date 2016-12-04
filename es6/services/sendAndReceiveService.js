@@ -289,6 +289,7 @@ module.exports = sendAndReceiveService;
     }
 
     function emitResponse(res) {
+      console.log('res in emiteResponse: '+res);
 
       const settings = shareSettings.getObj();
       //handle stopswitch hit
@@ -308,12 +309,12 @@ module.exports = sendAndReceiveService;
       else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
         faultyResponse(res);
       }
-      else if (res.search('&') > -1 && res.search('wydone')> -1) {
-        bugout.bugout.log('bufferedCommand done: \n'+res);
-        const numStr = res.slice(res.indexOf('>')+1, res.indexOf('&'));
-        const commandID = Number(numStr);
-        $rootScope.$emit('bufferedCommandDone', res, commandID);
-      }
+      // else if (res.search('&') > -1 && res.search('wydone')> -1) {
+      //   bugout.bugout.log('bufferedCommand done: \n'+res);
+      //   const numStr = res.slice(res.indexOf('>')+1, res.indexOf('&'));
+      //   const commandID = Number(numStr);
+      //   $rootScope.$emit('bufferedCommandDone', res, commandID);
+      // }
       else {
         $rootScope.$emit('bluetoothResponse', res);
       }

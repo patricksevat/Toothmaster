@@ -3,21 +3,21 @@ export default function calculateVarsService(shareProgram, shareSettings) {
   const vars = this;
   //Available methods
   vars.getVars = getVars;
-  
+
   //Scoped variables
   let stepMotorNum = shareSettings.getObj().stepMotorNum;
-  
+
   function getVars(type, cb) {
     stepMotorNum = shareSettings.getObj().stepMotorNum;
     const program = shareProgram.getObj();
     const settings = shareSettings.getObj();
-    
+
     //this will be the return obj
     vars.return = {
       commands: [],
       vars: {}
     };
-    
+
     //these variables are always needed
     vars.return.vars.direction = (settings.direction) ? 1:0;
     vars.return.vars.startPositionSteps =  Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch);
@@ -39,9 +39,8 @@ export default function calculateVarsService(shareProgram, shareSettings) {
     //depends on type of movement
     //type can be: homing, test or runBluetooth
     if (type === 'homing') {
-      vars.return.vars.homingDirection = (settings.direction) ? 0:1;
       vars.return.vars.homingStopswitchInt = (settings.homingStopswitch) ? 0 : 1;
-      vars.return.commands = ['<v'+vars.return.vars.homingDirection+stepMotorNum+'>',
+      vars.return.commands = ['<v'+settings.direction+stepMotorNum+'>',
         '<p'+vars.return.vars.stepsPerRPM+stepMotorNum+'>', '<r'+vars.return.vars.maxRPM+stepMotorNum+'>',
         '<o'+vars.return.vars.time+stepMotorNum+'>','<h'+vars.return.vars.homingStopswitchInt+stepMotorNum+'>',
         '<kFAULT'+stepMotorNum+'>'];

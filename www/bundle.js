@@ -8184,65 +8184,65 @@
 	
 	var _controllers2 = _interopRequireDefault(_controllers);
 	
-	var _sendAndReceiveService = __webpack_require__(302);
+	var _sendAndReceiveService = __webpack_require__(300);
 	
 	var _sendAndReceiveService2 = _interopRequireDefault(_sendAndReceiveService);
 	
-	var _shareSettingsService = __webpack_require__(303);
+	var _shareSettingsService = __webpack_require__(301);
 	
 	var _shareSettingsService2 = _interopRequireDefault(_shareSettingsService);
 	
-	var _shareProgramService = __webpack_require__(304);
+	var _shareProgramService = __webpack_require__(302);
 	
 	var _shareProgramService2 = _interopRequireDefault(_shareProgramService);
 	
-	var _skipService = __webpack_require__(305);
+	var _skipService = __webpack_require__(303);
 	
 	var _skipService2 = _interopRequireDefault(_skipService);
 	
-	var _buttonService = __webpack_require__(306);
+	var _buttonService = __webpack_require__(304);
 	
 	var _buttonService2 = _interopRequireDefault(_buttonService);
 	
-	var _emergencyService = __webpack_require__(307);
+	var _emergencyService = __webpack_require__(305);
 	
 	var _emergencyService2 = _interopRequireDefault(_emergencyService);
 	
-	var _bluetoothService = __webpack_require__(308);
+	var _bluetoothService = __webpack_require__(306);
 	
-	var _logService = __webpack_require__(309);
+	var _logService = __webpack_require__(307);
 	
 	var _logService2 = _interopRequireDefault(_logService);
 	
-	var _calculateVarsService = __webpack_require__(310);
+	var _calculateVarsService = __webpack_require__(308);
 	
 	var _calculateVarsService2 = _interopRequireDefault(_calculateVarsService);
 	
-	var _logModalService = __webpack_require__(311);
+	var _logModalService = __webpack_require__(309);
 	
 	var _logModalService2 = _interopRequireDefault(_logModalService);
 	
-	var _modalService = __webpack_require__(312);
+	var _modalService = __webpack_require__(310);
 	
 	var _modalService2 = _interopRequireDefault(_modalService);
 	
-	var _statusService = __webpack_require__(313);
+	var _statusService = __webpack_require__(311);
 	
 	var _statusService2 = _interopRequireDefault(_statusService);
 	
-	var _pauseService = __webpack_require__(314);
+	var _pauseService = __webpack_require__(312);
 	
 	var _pauseService2 = _interopRequireDefault(_pauseService);
 	
-	var _crcService = __webpack_require__(315);
+	var _crcService = __webpack_require__(313);
 	
 	var _crcService2 = _interopRequireDefault(_crcService);
 	
-	var _ngAsync = __webpack_require__(300);
+	var _ngAsync = __webpack_require__(315);
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _router = __webpack_require__(317);
+	var _router = __webpack_require__(316);
 	
 	var _router2 = _interopRequireDefault(_router);
 	
@@ -8265,7 +8265,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('checkBluetoothEnabledService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothEnabledService]).service('isConnectedService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothConnectedService]).service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout', _bluetoothService.bluetoothConnectedToDeviceService]).service('turnOnBluetoothService', ['$cordovaBluetoothSerial', 'checkBluetoothEnabledService', 'logService', _bluetoothService.turnOnBluetoothService]).service('disconnectService', ['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout', _bluetoothService.disconnectService]).service('logService', ['bugout', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-	  bugout.bugout.log('version 0.9.9.21');
+	  bugout.bugout.log('version 0.9.9.38');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8319,17 +8319,12 @@
 
 	'use strict';
 	
-	var _ngAsync = __webpack_require__(300);
+	var _ngAsync = __webpack_require__(315);
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _asyncController = __webpack_require__(301);
-	
-	var _asyncController2 = _interopRequireDefault(_asyncController);
-	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	// import angularAsyncAwait from "angular-async-await";
 	module.exports = angular.module('starter.controllers', [_ngAsync2.default.name])
 	/*
 	* $rootScope emits:
@@ -8340,7 +8335,7 @@
 	* $rootScope.$on('bluetoothResponse', response)
 	* */
 	
-	.controller('asyncCtrl', _asyncController2.default).controller('SafetySlides', function ($scope, $ionicModal, logService) {
+	.controller('SafetySlides', function ($scope, $ionicModal, logService) {
 	  $scope.i = 0;
 	  $scope.hidePrev = false;
 	
@@ -8787,32 +8782,60 @@
 	      return true;
 	    }
 	  }*/
-	}).controller('SettingsCtrl', function ($scope, $ionicPopup, shareSettings, logService) {
-	  //TODO add stepmotorNum
+	}).controller('SettingsCtrl', function ($rootScope, $scope, $ionicPopup, $state, shareSettings, logService) {
 	  $scope.settings = {
 	    encoder: {
 	      enable: false,
-	      stepsPerRPM: undefined,
-	      stepsToMiss: undefined
+	      stepsPerRPM: null,
+	      stepsToMiss: null
 	    },
 	    homingStopswitch: false
 	  };
 	
-	  $scope.saveSettings = function () {
-	    if ($scope.settings.maxFreq > 80000) {
-	      $scope.showAlertMaxFreq();
-	    } else if ($scope.settings.maxFreq == null || $scope.settings.dipswitch == null || $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
-	      $scope.showAlertSettings();
-	    } else if ($scope.settings.encoder.enable && ($scope.settings.encoder.stepsPerRPM == undefined || $scope.settings.encoder.stepsToMiss == undefined || $scope.settings.encoder.direction == undefined)) {
-	      $scope.showAlertSettings();
-	    } else {
-	      var settingsJSON = JSON.stringify($scope.settings);
-	      logService.consoleLog(settingsJSON);
-	      window.localStorage['settings'] = settingsJSON;
-	      //call shareSettings service so that settings can be used in programCtrl & runBluetoothCtrl
-	      shareSettings.setObj($scope.settings);
-	      $scope.showAlertSaved();
+	  //On leaving warn if settings are not saved
+	  $scope.settingsChanged = false;
+	  $scope.skipCheck = false;
+	
+	  $scope.settingsHaveChanged = function () {
+	    $scope.settingsChanged = true;
+	    console.log('settingsChanged: ' + $scope.settingsChanged);
+	  };
+	
+	  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
+	    if (fromState.name == 'app.settings' && $scope.settingsChanged && $scope.skipCheck === false) {
+	      event.preventDefault();
+	      $scope.showAlertUnsavedChanges(toState);
 	    }
+	  });
+	
+	  $scope.saveSettings = function () {
+	    //Make sure that the frequency is not too high
+	    if ($scope.settings.maxFreq > 20000) {
+	      $scope.showAlertMaxFreq();
+	    }
+	
+	    //  Make sure all regular settings are filled in correctly
+	    else if ($scope.settings.maxFreq == null || $scope.settings.dipswitch == null || $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
+	        $scope.showAlertSettings();
+	      }
+	
+	      //  make sure all encoder seting are filled in correctly
+	      else if ($scope.settings.encoder.enable && ($scope.settings.encoder.stepsPerRPM == undefined || $scope.settings.encoder.stepsToMiss == undefined || $scope.settings.encoder.direction == undefined)) {
+	          $scope.showAlertSettings();
+	        }
+	
+	        //  Save settings as JSON to localStorage
+	        else {
+	            $scope.settingsChanged = false;
+	
+	            var settingsJSON = JSON.stringify($scope.settings);
+	            logService.consoleLog(settingsJSON);
+	            window.localStorage['settings'] = settingsJSON;
+	
+	            //call shareSettings service so that settings can be used in programCtrl & runBluetoothCtrl
+	            shareSettings.setObj($scope.settings);
+	            $scope.showAlertSaved();
+	          }
 	  };
 	
 	  $scope.loadSettings = function () {
@@ -8822,7 +8845,47 @@
 	    }
 	  };
 	
-	  $scope.loadSettings();
+	  // $scope.loadSettings();
+	
+	  //Load settings on enter
+	  $scope.$on('$ionicView.afterEnter', function () {
+	    logService.consoleLog('AFTER ENTER');
+	    $scope.settingsChanged = false;
+	    $scope.skipCheck = false;
+	    $scope.loadSettings();
+	  });
+	
+	  //
+	  //Alerts
+	  //
+	
+	  $scope.showAlertUnsavedChanges = function (toState) {
+	    console.log('toState in alert unsaved changes');
+	    console.log(toState);
+	    $ionicPopup.alert({
+	      title: 'You have unsaved changes',
+	      template: 'Do you want to save your changes before leaving?',
+	      buttons: [{
+	        text: 'Yes',
+	        type: 'button-positive',
+	        onTap: function onTap() {
+	          console.log('toState in alert unsaved changes onTap');
+	          console.log(toState);
+	          $scope.saveSettings();
+	          $state.go(toState.name);
+	        }
+	      }, {
+	        text: 'No',
+	        type: 'button-energized',
+	        onTap: function onTap() {
+	          console.log('toState in alert unsaved changes onTap');
+	          console.log(toState);
+	          $scope.skipCheck = true;
+	          $state.go(toState.name);
+	        }
+	      }]
+	    });
+	  };
 	
 	  $scope.showAlertMaxFreq = function () {
 	    $ionicPopup.alert({
@@ -9189,33 +9252,32 @@
 	            _context2.prev = 0;
 	
 	            if (!(statusService.getEmergency() === false)) {
-	              _context2.next = 20;
+	              _context2.next = 19;
 	              break;
 	            }
 	
 	            if (!(statusService.getSending() === false)) {
-	              _context2.next = 18;
+	              _context2.next = 17;
 	              break;
 	            }
 	
-	            sendAndReceiveService.subscribeRawData();
 	            setButtons({ 'showSpinner': true, 'showEmergency': true, 'readyForData': false });
 	            statusService.setSending(true);
 	            settingsDone = false;
 	
 	            _i2 = 0;
 	
-	          case 8:
+	          case 7:
 	            if (!(_i2 < commands.length)) {
-	              _context2.next = 18;
+	              _context2.next = 17;
 	              break;
 	            }
 	
 	            console.log('going to await for command reply to command: ' + commands[_i2]);
-	            _context2.next = 12;
+	            _context2.next = 11;
 	            return self.sendWithRetry(commands[_i2]);
 	
-	          case 12:
+	          case 11:
 	            res = _context2.sent;
 	
 	            console.log('awaited reply for command: ' + commands[_i2] + ', i=' + _i2 + ', response: ' + res);
@@ -9229,34 +9291,34 @@
 	              lastSendSettingsCommand(res);
 	            }
 	
-	          case 15:
+	          case 14:
 	            _i2++;
-	            _context2.next = 8;
+	            _context2.next = 7;
 	            break;
 	
-	          case 18:
-	            _context2.next = 21;
+	          case 17:
+	            _context2.next = 20;
 	            break;
 	
-	          case 20:
+	          case 19:
 	            addToLog('Emergency on, will not continue sending settings data');
 	
-	          case 21:
-	            _context2.next = 26;
+	          case 20:
+	            _context2.next = 25;
 	            break;
 	
-	          case 23:
-	            _context2.prev = 23;
+	          case 22:
+	            _context2.prev = 22;
 	            _context2.t0 = _context2['catch'](0);
 	
 	            console.log('ERR: ' + _context2.t0);
 	
-	          case 26:
+	          case 25:
 	          case 'end':
 	            return _context2.stop();
 	        }
 	      }
-	    }, _callee2, this, [[0, 23]]);
+	    }, _callee2, this, [[0, 22]]);
 	  }));
 	
 	  function checkWydone() {
@@ -9485,7 +9547,7 @@
 	})
 	//end of controller runBluetoothCtrl
 	
-	.controller('homingCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService, statusService, connectToDeviceService, $ionicHistory, logModalService, modalService) {
+	.controller('homingCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService, statusService, connectToDeviceService, $ionicHistory, logModalService, modalService, $async) {
 	  $scope.$on('$ionicView.unloaded', function () {
 	    logService.consoleLog('\nUNLOADED\n');
 	  });
@@ -9514,6 +9576,7 @@
 	      $scope.isConnected = val;
 	    });
 	  };
+	  $scope.homingDone = false;
 	
 	  function setButtons(obj) {
 	    buttonService.setValues(obj);
@@ -9548,6 +9611,7 @@
 	    });
 	    $scope.settings = shareSettings.getObj();
 	    stepMotorNum = $scope.settings.stepMotorNum;
+	    $scope.homingDone = false;
 	  });
 	
 	  $scope.$on('$ionicView.leave', function () {
@@ -9578,55 +9642,171 @@
 	  //SECTION: homing logic
 	  //
 	
-	  $scope.homing = function () {
-	    if (statusService.getEmergency() === false) {
-	      logService.consoleLog('homingStopswitch = ' + homingStopswitchInt);
-	      if (statusService.getSending() === false) {
-	        setButtons({ 'showSpinner': true, 'showEmergency': true, 'showHoming': false });
-	        statusService.setSending(true);
-	        //send start command
-	        for (var i = 0; i < homingCommands.length - 1; i++) {
-	          sendAndReceiveService.write(homingCommands[i]);
-	        }
-	        var sendKfault = $rootScope.$on('sendKfault', function () {
-	          sendAndReceiveService.write(homingCommands[homingCommands.length - 1], function () {
-	            sendKfault();
-	          });
-	        });
-	        var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-	          homingResponse(res);
-	          rdy();
-	        });
-	      } else {
-	        $ionicPopup.alert({
-	          title: 'Please wait untill moving to start position is done in run Bluetooth program'
-	        });
-	      }
-	    } else {
-	      $ionicPopup.alert({
-	        title: 'Emergency has been pressed, will not continue homing'
-	      });
-	    }
+	  $scope.sendWithRetry = $async(regeneratorRuntime.mark(function _callee3(str) {
+	    var res, _i3;
 	
-	    //TODO !!! Check real-life homing correct handling, using my STM-32 stopswitch is automatically hit, not able to check correct homing"
-	    function homingResponse(res) {
-	      if (res.search('wydone') > -1 && $ionicHistory.currentStateName() === 'app.homing') {
-	        setButtons({ 'showSpinner': false, 'showEmergency': false, 'showHoming': true });
-	        $ionicPopup.alert({
-	          title: 'Homing completed'
-	        });
-	        statusService.setSending(false);
-	      } else if ($ionicHistory.currentStateName() === 'app.homing') {
-	        $timeout(function () {
-	          sendAndReceiveService.write('<w' + stepMotorNum + '>');
-	          var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-	            homingResponse(res);
-	            rdy();
-	          });
-	        }, 200);
+	    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+	      while (1) {
+	        switch (_context3.prev = _context3.next) {
+	          case 0:
+	            res = void 0;
+	            _i3 = 0;
+	
+	          case 2:
+	            if (!(_i3 < 5)) {
+	              _context3.next = 17;
+	              break;
+	            }
+	
+	            console.log('try: ' + _i3 + ', command: ' + str);
+	            _context3.next = 6;
+	            return sendAndReceiveService.writeAsync(str);
+	
+	          case 6:
+	            res = _context3.sent;
+	
+	            console.log('res in sendWithretry: ' + res);
+	
+	            if (!(_i3 === 4)) {
+	              _context3.next = 12;
+	              break;
+	            }
+	
+	            return _context3.abrupt('return', new Promise(function (resolve, reject) {
+	              reject('exceeded num of tries');
+	            }));
+	
+	          case 12:
+	            if (!(res === 'OK')) {
+	              _context3.next = 14;
+	              break;
+	            }
+	
+	            return _context3.abrupt('return', new Promise(function (resolve, reject) {
+	              console.log('resolve value: ' + res);
+	              resolve('resolve value: ' + res);
+	            }));
+	
+	          case 14:
+	            _i3++;
+	            _context3.next = 2;
+	            break;
+	
+	          case 17:
+	          case 'end':
+	            return _context3.stop();
+	        }
 	      }
+	    }, _callee3, this);
+	  }));
+	
+	  $scope.homing = $async(regeneratorRuntime.mark(function _callee4() {
+	    var _i4, res;
+	
+	    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+	      while (1) {
+	        switch (_context4.prev = _context4.next) {
+	          case 0:
+	            if (!(statusService.getEmergency() === false)) {
+	              _context4.next = 21;
+	              break;
+	            }
+	
+	            logService.consoleLog('homingStopswitch = ' + homingStopswitchInt);
+	
+	            if (!(statusService.getSending() === false)) {
+	              _context4.next = 18;
+	              break;
+	            }
+	
+	            setButtons({ 'showSpinner': true, 'showEmergency': true, 'showHoming': false });
+	            statusService.setSending(true);
+	
+	            _i4 = 0;
+	
+	          case 6:
+	            if (!(_i4 < homingCommands.length)) {
+	              _context4.next = 16;
+	              break;
+	            }
+	
+	            console.log('going to await for command reply to command: ' + homingCommands[_i4]);
+	            _context4.next = 10;
+	            return $scope.sendWithRetry(homingCommands[_i4]);
+	
+	          case 10:
+	            res = _context4.sent;
+	
+	            console.log('awaited reply for command: ' + homingCommands[_i4] + ', i=' + _i4 + ', response: ' + res);
+	
+	            if (_i4 === homingCommands.length - 1) {
+	              console.log('commands');
+	              console.log(homingCommands);
+	              console.log('commands.length');
+	              console.log(homingCommands.length);
+	              console.log('last command of sendSettings is OK');
+	              lastHomingCommand(res);
+	            }
+	
+	          case 13:
+	            _i4++;
+	            _context4.next = 6;
+	            break;
+	
+	          case 16:
+	            _context4.next = 19;
+	            break;
+	
+	          case 18:
+	            $ionicPopup.alert({
+	              title: 'Please wait untill moving to start position is done in run Bluetooth program'
+	            });
+	
+	          case 19:
+	            _context4.next = 22;
+	            break;
+	
+	          case 21:
+	            $ionicPopup.alert({
+	              title: 'Emergency has been pressed, will not continue homing'
+	            });
+	
+	          case 22:
+	          case 'end':
+	            return _context4.stop();
+	        }
+	      }
+	    }, _callee4, this);
+	  }));
+	
+	  function checkWydone() {
+	    console.log('checkWydone');
+	    var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+	      lastHomingCommand(res);
+	      rdy();
+	    });
+	  }
+	
+	  function lastHomingCommand(res) {
+	    console.log('res in lastHomingCommand: ' + res);
+	    if (res.search('wydone:') > -1) {
+	      $scope.homingDone = true;
+	      setButtons({ 'showSpinner': false, 'showEmergency': false, 'showHoming': true });
+	      $ionicPopup.alert({
+	        title: 'Homing completed'
+	      });
+	      statusService.setSending(false);
+	    } else if (res.search('kFAULT') !== -1) {
+	      addToLog('Settings have been sent incorrectly, please try again');
+	      emergencyService.on(function () {
+	        emergencyService.off();
+	      });
+	    } else if (!$scope.homingDone) {
+	      $timeout(function () {
+	        sendAndReceiveService.write('<w' + stepMotorNum + '>', checkWydone());
+	      }, 100);
 	    }
-	  };
+	  }
 	
 	  function addToLog(str) {
 	    logService.addOne(str);
@@ -10116,6 +10296,7 @@
 	    logService.setBulk($scope.bluetoothLog);
 	  });
 	
+	  //TODO not working correctly for unpaired devices
 	  $scope.getAvailableDevices = function () {
 	    $scope.availableDevices = [];
 	    $scope.pairedDevices = [];
@@ -10125,8 +10306,10 @@
 	          logService.consoleLog('Calling get available devices');
 	          if (ionic.Platform.isAndroid) {
 	            //discover unpaired
+	            addToLog('Searching for unpaired Bluetooth devices');
 	            $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
-	              addToLog('Searching for unpaired Bluetooth devices');
+	              console.log('unpaired devices');
+	              console.log(devices);
 	              devices.forEach(function (device) {
 	                $scope.availableDevices.push(device);
 	                addToLog('Unpaired Bluetooth device found');
@@ -10290,235 +10473,10 @@
 	  };
 	});
 	//end of controller bluetoothConnectionCtrl
+	// import angularAsyncAwait from "angular-async-await";
 
 /***/ },
 /* 300 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	// import angular from 'angular';
-	
-	exports.default = angular.module('mm.$async', []).factory('$async', ['$q', function ($q) {
-	  return function (generator) {
-	    return function () {
-	      var _this = this;
-	
-	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-	        args[_key] = arguments[_key];
-	      }
-	
-	      return $q(function (resolve, reject) {
-	        var it = void 0;
-	        try {
-	          it = generator.apply(_this, args);
-	        } catch (e) {
-	          reject(e);
-	          return;
-	        }
-	        function next(val) {
-	          var isError = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-	
-	          var state = void 0;
-	          try {
-	            state = isError ? it.throw(val) : it.next(val);
-	          } catch (e) {
-	            reject(e);
-	            return;
-	          }
-	
-	          if (state.done) {
-	            resolve(state.value);
-	          } else {
-	            $q.when(state.value).then(next, function (err) {
-	              next(err, true);
-	            });
-	          }
-	        }
-	        //kickstart the generator function
-	        next();
-	      });
-	    };
-	  };
-	}]);
-	
-	/**
-	 * Wrapper to make an entire service/controller async.
-	 *
-	 * The async service MUST be explicitely annotated for this to work.
-	 *
-	 * Example usage:
-	 *
-	 * angular.controller($async(['$http', function*($http) {
-	 *   const data =yield $http.get('somedata');
-	 * })]);
-	 *
-	 * It also works well together with ng-annotate:
-	 *
-	 * angular.controller($async(function*($http) {
-	 *   'ngInject';
-	 *   const data =yield $http.get('somedata');
-	 * }));
-	 */
-	
-	var $async = exports.$async = function $async(annotatedService) {
-	  var _this2 = this;
-	
-	  if (!Array.isArray(annotatedService)) {
-	    throw new Error('$async services must use explicit annotations for its dependencies');
-	  }
-	
-	  //We're going to wrap the async service function, so we first need to extract it from the array
-	  var serviceFunction = annotatedService.pop();
-	
-	  //Our wrapper needs $async to work. We pre-prend it to the dependencies such that the wrapper gets
-	  //it as the first argument
-	  annotatedService.unshift('$async');
-	  //The wrapper simply wraps the serviceFunction with $async and then proxies the dependencies to
-	  //the async service
-	  annotatedService.push(function ($async) {
-	    for (var _len2 = arguments.length, deps = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-	      deps[_key2 - 1] = arguments[_key2];
-	    }
-	
-	    return $async(serviceFunction).apply(_this2, deps);
-	  });
-	
-	  return annotatedService;
-	};
-
-/***/ },
-/* 301 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	/**
-	 * Created by Patrick on 24/11/2016.
-	 */
-	
-	function asyncCtrl($rootScope, $timeout, $async, $q) {
-	  var self = this;
-	  console.log('async ctrl loaded');
-	
-	  this.runAsync = function () {
-	    console.log('click');
-	  };
-	
-	  this.asyncFunction = $async(regeneratorRuntime.mark(function _callee() {
-	    var timeout;
-	    return regeneratorRuntime.wrap(function _callee$(_context) {
-	      while (1) {
-	        switch (_context.prev = _context.next) {
-	          case 0:
-	            _context.prev = 0;
-	
-	            console.log('asyncFunction');
-	            timeout = void 0;
-	            _context.next = 5;
-	            return self.retryFunc();
-	
-	          case 5:
-	            timeout = _context.sent;
-	
-	            console.log('async timeout resolved: ' + timeout);
-	            _context.next = 12;
-	            break;
-	
-	          case 9:
-	            _context.prev = 9;
-	            _context.t0 = _context['catch'](0);
-	
-	            console.log('async timeout rejected: ' + _context.t0);
-	
-	          case 12:
-	          case 'end':
-	            return _context.stop();
-	        }
-	      }
-	    }, _callee, this, [[0, 9]]);
-	  }));
-	
-	  this.retryFunc = $async(regeneratorRuntime.mark(function _callee2() {
-	    var value, returnValue, i;
-	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-	      while (1) {
-	        switch (_context2.prev = _context2.next) {
-	          case 0:
-	            value = void 0, returnValue = void 0;
-	            i = 0;
-	
-	          case 2:
-	            if (!(i < 5)) {
-	              _context2.next = 16;
-	              break;
-	            }
-	
-	            console.log('i: ' + i);
-	            _context2.next = 6;
-	            return self.timeout(i);
-	
-	          case 6:
-	            value = _context2.sent;
-	
-	            if (!(i === 4)) {
-	              _context2.next = 11;
-	              break;
-	            }
-	
-	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
-	              reject('exceeded num of tries');
-	            }));
-	
-	          case 11:
-	            if (!(value == 'resolved')) {
-	              _context2.next = 13;
-	              break;
-	            }
-	
-	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
-	              console.log('resolve value: ' + value);
-	              resolve('resolve value: ' + value);
-	            }));
-	
-	          case 13:
-	            i++;
-	            _context2.next = 2;
-	            break;
-	
-	          case 16:
-	          case 'end':
-	            return _context2.stop();
-	        }
-	      }
-	    }, _callee2, this);
-	  }));
-	
-	  this.timeout = function (i) {
-	    console.log('timeout called');
-	    return new Promise(function (resolve, reject) {
-	      $timeout(function () {
-	        console.log('timeout 2s, i: ' + i);
-	        if (i === 3) {
-	          resolve('resolved');
-	        } else {
-	          resolve('rejected');
-	        }
-	      }, 2000);
-	    });
-	  };
-	}
-	
-	exports.default = asyncCtrl;
-
-/***/ },
-/* 302 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10867,6 +10825,7 @@
 	  }
 	
 	  function emitResponse(res) {
+	    console.log('res in emiteResponse: ' + res);
 	
 	    var settings = shareSettings.getObj();
 	    //handle stopswitch hit
@@ -10883,14 +10842,16 @@
 	        $rootScope.$emit('sendKfault', res);
 	      } else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
 	        faultyResponse(res);
-	      } else if (res.search('&') > -1 && res.search('wydone') > -1) {
-	        bugout.bugout.log('bufferedCommand done: \n' + res);
-	        var numStr = res.slice(res.indexOf('>') + 1, res.indexOf('&'));
-	        var commandID = Number(numStr);
-	        $rootScope.$emit('bufferedCommandDone', res, commandID);
-	      } else {
-	        $rootScope.$emit('bluetoothResponse', res);
 	      }
+	      // else if (res.search('&') > -1 && res.search('wydone')> -1) {
+	      //   bugout.bugout.log('bufferedCommand done: \n'+res);
+	      //   const numStr = res.slice(res.indexOf('>')+1, res.indexOf('&'));
+	      //   const commandID = Number(numStr);
+	      //   $rootScope.$emit('bufferedCommandDone', res, commandID);
+	      // }
+	      else {
+	          $rootScope.$emit('bluetoothResponse', res);
+	        }
 	  }
 	
 	  function sendEmergency() {
@@ -10969,7 +10930,7 @@
 	}
 
 /***/ },
-/* 303 */
+/* 301 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11002,7 +10963,7 @@
 	}
 
 /***/ },
-/* 304 */
+/* 302 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11034,7 +10995,7 @@
 	};
 
 /***/ },
-/* 305 */
+/* 303 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11059,7 +11020,7 @@
 	};
 
 /***/ },
-/* 306 */
+/* 304 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11114,7 +11075,7 @@
 	};
 
 /***/ },
-/* 307 */
+/* 305 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11159,7 +11120,7 @@
 	};
 
 /***/ },
-/* 308 */
+/* 306 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11208,6 +11169,7 @@
 	  connect.getDeviceName = getDeviceName;
 	  connect.setDeviceName = setDeviceName;
 	  connect.connectToLastDevice = connectToLastDevice;
+	  connect.connectWithRetry = connectWithRetry;
 	
 	  var retry = 1;
 	  var deviceName = '';
@@ -11332,7 +11294,7 @@
 	exports.disconnectService = disconnectService;
 
 /***/ },
-/* 309 */
+/* 307 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11396,7 +11358,7 @@
 	exports.default = logService;
 
 /***/ },
-/* 310 */
+/* 308 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11444,9 +11406,8 @@
 	    //depends on type of movement
 	    //type can be: homing, test or runBluetooth
 	    if (type === 'homing') {
-	      vars.return.vars.homingDirection = settings.direction ? 0 : 1;
 	      vars.return.vars.homingStopswitchInt = settings.homingStopswitch ? 0 : 1;
-	      vars.return.commands = ['<v' + vars.return.vars.homingDirection + stepMotorNum + '>', '<p' + vars.return.vars.stepsPerRPM + stepMotorNum + '>', '<r' + vars.return.vars.maxRPM + stepMotorNum + '>', '<o' + vars.return.vars.time + stepMotorNum + '>', '<h' + vars.return.vars.homingStopswitchInt + stepMotorNum + '>', '<kFAULT' + stepMotorNum + '>'];
+	      vars.return.commands = ['<v' + settings.direction + stepMotorNum + '>', '<p' + vars.return.vars.stepsPerRPM + stepMotorNum + '>', '<r' + vars.return.vars.maxRPM + stepMotorNum + '>', '<o' + vars.return.vars.time + stepMotorNum + '>', '<h' + vars.return.vars.homingStopswitchInt + stepMotorNum + '>', '<kFAULT' + stepMotorNum + '>'];
 	      //add encoder commands
 	      if (settings.encoder.enable) {
 	        vars.return.commands = enableEncoder.concat(vars.return.commands);
@@ -11475,7 +11436,7 @@
 	}
 
 /***/ },
-/* 311 */
+/* 309 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11534,7 +11495,7 @@
 	}
 
 /***/ },
-/* 312 */
+/* 310 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11574,7 +11535,7 @@
 	}
 
 /***/ },
-/* 313 */
+/* 311 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11625,7 +11586,7 @@
 	}
 
 /***/ },
-/* 314 */
+/* 312 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11665,7 +11626,7 @@
 	};
 
 /***/ },
-/* 315 */
+/* 313 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11675,7 +11636,7 @@
 	});
 	exports.default = crcService;
 	
-	var _crc = __webpack_require__(316);
+	var _crc = __webpack_require__(314);
 	
 	var _crc2 = _interopRequireDefault(_crc);
 	
@@ -11692,7 +11653,7 @@
 	}
 
 /***/ },
-/* 316 */
+/* 314 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11732,7 +11693,106 @@
 	module.exports = crc16;
 
 /***/ },
-/* 317 */
+/* 315 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	// import angular from 'angular';
+	
+	exports.default = angular.module('mm.$async', []).factory('$async', ['$q', function ($q) {
+	  return function (generator) {
+	    return function () {
+	      var _this = this;
+	
+	      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	        args[_key] = arguments[_key];
+	      }
+	
+	      return $q(function (resolve, reject) {
+	        var it = void 0;
+	        try {
+	          it = generator.apply(_this, args);
+	        } catch (e) {
+	          reject(e);
+	          return;
+	        }
+	        function next(val) {
+	          var isError = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+	
+	          var state = void 0;
+	          try {
+	            state = isError ? it.throw(val) : it.next(val);
+	          } catch (e) {
+	            reject(e);
+	            return;
+	          }
+	
+	          if (state.done) {
+	            resolve(state.value);
+	          } else {
+	            $q.when(state.value).then(next, function (err) {
+	              next(err, true);
+	            });
+	          }
+	        }
+	        //kickstart the generator function
+	        next();
+	      });
+	    };
+	  };
+	}]);
+	
+	/**
+	 * Wrapper to make an entire service/controller async.
+	 *
+	 * The async service MUST be explicitely annotated for this to work.
+	 *
+	 * Example usage:
+	 *
+	 * angular.controller($async(['$http', function*($http) {
+	 *   const data =yield $http.get('somedata');
+	 * })]);
+	 *
+	 * It also works well together with ng-annotate:
+	 *
+	 * angular.controller($async(function*($http) {
+	 *   'ngInject';
+	 *   const data =yield $http.get('somedata');
+	 * }));
+	 */
+	
+	var $async = exports.$async = function $async(annotatedService) {
+	  var _this2 = this;
+	
+	  if (!Array.isArray(annotatedService)) {
+	    throw new Error('$async services must use explicit annotations for its dependencies');
+	  }
+	
+	  //We're going to wrap the async service function, so we first need to extract it from the array
+	  var serviceFunction = annotatedService.pop();
+	
+	  //Our wrapper needs $async to work. We pre-prend it to the dependencies such that the wrapper gets
+	  //it as the first argument
+	  annotatedService.unshift('$async');
+	  //The wrapper simply wraps the serviceFunction with $async and then proxies the dependencies to
+	  //the async service
+	  annotatedService.push(function ($async) {
+	    for (var _len2 = arguments.length, deps = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+	      deps[_key2 - 1] = arguments[_key2];
+	    }
+	
+	    return $async(serviceFunction).apply(_this2, deps);
+	  });
+	
+	  return annotatedService;
+	};
+
+/***/ },
+/* 316 */
 /***/ function(module, exports) {
 
 	'use strict';

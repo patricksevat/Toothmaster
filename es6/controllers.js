@@ -1,6 +1,5 @@
 // import angularAsyncAwait from "angular-async-await";
 import ngAsync from './ng-async';
-import asyncController from '../es6/asyncTest/asyncController';
 
 module.exports =
 angular.module('starter.controllers', [ngAsync.name])
@@ -12,8 +11,6 @@ angular.module('starter.controllers', [ngAsync.name])
   * $rootScope.$on('maxSteps', response, missedSteps)
   * $rootScope.$on('bluetoothResponse', response)
   * */
-
-  .controller('asyncCtrl', asyncController)
 
 .controller('SafetySlides', function($scope, $ionicModal, logService) {
   $scope.i = 0;
@@ -534,33 +531,57 @@ angular.module('starter.controllers', [ngAsync.name])
   }*/
 })
 
-.controller('SettingsCtrl', function($scope, $ionicPopup, shareSettings, logService){
-//TODO add stepmotorNum
+.controller('SettingsCtrl', function($rootScope, $scope, $ionicPopup, $state, shareSettings, logService){
   $scope.settings = {
     encoder: {
       enable: false,
-      stepsPerRPM: undefined,
-      stepsToMiss: undefined
+      stepsPerRPM: null,
+      stepsToMiss: null
     },
     homingStopswitch: false
   };
 
+  //On leaving warn if settings are not saved
+  $scope.settingsChanged = false;
+  $scope.skipCheck = false;
+
+  $scope.settingsHaveChanged = function () {
+    $scope.settingsChanged = true;
+    console.log('settingsChanged: '+$scope.settingsChanged);
+  };
+
+  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
+    if (fromState.name == 'app.settings' && $scope.settingsChanged && $scope.skipCheck === false) {
+      event.preventDefault();
+      $scope.showAlertUnsavedChanges(toState);
+    }
+  });
+
   $scope.saveSettings = function() {
-    if ($scope.settings.maxFreq > 80000) {
+    //Make sure that the frequency is not too high
+    if ($scope.settings.maxFreq > 20000) {
       $scope.showAlertMaxFreq();
     }
 
+    //  Make sure all regular settings are filled in correctly
     else if ($scope.settings.maxFreq == null || $scope.settings.dipswitch == null ||
       $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
       $scope.showAlertSettings();
     }
+
+    //  make sure all encoder seting are filled in correctly
     else if ($scope.settings.encoder.enable && ($scope.settings.encoder.stepsPerRPM ==undefined || $scope.settings.encoder.stepsToMiss== undefined || $scope.settings.encoder.direction == undefined)){
       $scope.showAlertSettings();
     }
+
+    //  Save settings as JSON to localStorage
     else {
-      var settingsJSON = JSON.stringify($scope.settings);
+      $scope.settingsChanged = false;
+
+      const settingsJSON = JSON.stringify($scope.settings);
       logService.consoleLog(settingsJSON);
       window.localStorage['settings'] = settingsJSON;
+
       //call shareSettings service so that settings can be used in programCtrl & runBluetoothCtrl
       shareSettings.setObj($scope.settings);
       $scope.showAlertSaved();
@@ -578,7 +599,50 @@ angular.module('starter.controllers', [ngAsync.name])
     }
   };
 
-  $scope.loadSettings();
+  // $scope.loadSettings();
+
+  //Load settings on enter
+  $scope.$on('$ionicView.afterEnter', function () {
+    logService.consoleLog('AFTER ENTER');
+    $scope.settingsChanged = false;
+    $scope.skipCheck = false;
+    $scope.loadSettings();
+  });
+
+
+  //
+  //Alerts
+  //
+
+  $scope.showAlertUnsavedChanges = function(toState){
+    console.log('toState in alert unsaved changes');
+    console.log(toState);
+    $ionicPopup.alert(
+      {
+        title: 'You have unsaved changes',
+        template: 'Do you want to save your changes before leaving?',
+        buttons: [{
+          text: 'Yes',
+          type: 'button-positive',
+          onTap: () => {
+            console.log('toState in alert unsaved changes onTap');
+            console.log(toState);
+            $scope.saveSettings();
+            $state.go(toState.name);
+          }
+        },{
+          text: 'No',
+          type: 'button-energized',
+          onTap: () => {
+            console.log('toState in alert unsaved changes onTap');
+            console.log(toState);
+            $scope.skipCheck = true;
+            $state.go(toState.name);
+          }
+        }]
+      }
+    )
+  };
 
   $scope.showAlertMaxFreq = function(){
     $ionicPopup.alert(
@@ -919,7 +983,6 @@ angular.module('starter.controllers', [ngAsync.name])
       try {
         if (statusService.getEmergency() === false) {
           if (statusService.getSending() === false){
-            sendAndReceiveService.subscribeRawData();
             setButtons({'showSpinner':true,'showEmergency':true, 'readyForData':false});
             statusService.setSending(true);
             settingsDone = false;
@@ -1196,7 +1259,7 @@ angular.module('starter.controllers', [ngAsync.name])
 .controller('homingCtrl', function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                                     $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
                                     checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-                                    statusService, connectToDeviceService, $ionicHistory, logModalService, modalService) {
+                                    statusService, connectToDeviceService, $ionicHistory, logModalService, modalService, $async) {
   $scope.$on('$ionicView.unloaded', function () {
     logService.consoleLog('\nUNLOADED\n');
   });
@@ -1225,6 +1288,7 @@ angular.module('starter.controllers', [ngAsync.name])
       $scope.isConnected = val;
     })
   };
+  $scope.homingDone = false;
 
   function setButtons(obj) {
     buttonService.setValues(obj);
@@ -1259,6 +1323,7 @@ angular.module('starter.controllers', [ngAsync.name])
     });
     $scope.settings = shareSettings.getObj();
     stepMotorNum = $scope.settings.stepMotorNum;
+    $scope.homingDone = false;
   });
 
   $scope.$on('$ionicView.leave', function () {
@@ -1290,25 +1355,45 @@ angular.module('starter.controllers', [ngAsync.name])
   //SECTION: homing logic
   //
 
-  $scope.homing = function () {
+  $scope.sendWithRetry = $async(function* (str) {
+    let res;
+    for (let i = 0; i < 5; i++) {
+      console.log('try: '+i+', command: '+str);
+      res = yield sendAndReceiveService.writeAsync(str);
+      console.log('res in sendWithretry: '+res);
+      if (i === 4)
+        return new Promise((resolve, reject) => {
+          reject('exceeded num of tries');
+        });
+      else if (res === 'OK')
+        return new Promise((resolve, reject) => {
+          console.log('resolve value: '+res);
+          resolve('resolve value: '+res);
+        });
+    }
+  });
+
+  $scope.homing = $async(function* () {
     if (statusService.getEmergency() === false) {
       logService.consoleLog('homingStopswitch = '+homingStopswitchInt);
       if (statusService.getSending() === false){
         setButtons({'showSpinner':true,'showEmergency':true,'showHoming':false});
         statusService.setSending(true);
-        //send start command
-        for (var i = 0; i < homingCommands.length -1; i++){
-          sendAndReceiveService.write(homingCommands[i]);
+
+        for (let i = 0; i < homingCommands.length; i++){
+          console.log('going to await for command reply to command: '+homingCommands[i]);
+          let res = yield $scope.sendWithRetry(homingCommands[i]);
+          console.log('awaited reply for command: '+homingCommands[i]+', i='+i+', response: '+res );
+
+          if (i === homingCommands.length-1) {
+            console.log('commands');
+            console.log(homingCommands);
+            console.log('commands.length');
+            console.log(homingCommands.length);
+            console.log('last command of sendSettings is OK');
+            lastHomingCommand(res);
+          }
         }
-        var sendKfault = $rootScope.$on('sendKfault', function () {
-          sendAndReceiveService.write(homingCommands[homingCommands.length-1], function () {
-            sendKfault();
-          });
-        });
-        var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-          homingResponse(res);
-          rdy();
-        })
       }
       else {
         $ionicPopup.alert({
@@ -1321,27 +1406,38 @@ angular.module('starter.controllers', [ngAsync.name])
         title: 'Emergency has been pressed, will not continue homing'
       });
     }
+  });
 
-//TODO !!! Check real-life homing correct handling, using my STM-32 stopswitch is automatically hit, not able to check correct homing"
-    function homingResponse(res) {
-      if (res.search('wydone') > -1 && $ionicHistory.currentStateName() === 'app.homing') {
-        setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
-        $ionicPopup.alert({
-          title: 'Homing completed'
-        });
-        statusService.setSending(false);
-      }
-      else if ($ionicHistory.currentStateName() === 'app.homing') {
-        $timeout(function () {
-          sendAndReceiveService.write('<w'+stepMotorNum+'>');
-          var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-            homingResponse(res);
-            rdy();
-          })
-        }, 200);
-      }
+  function checkWydone() {
+    console.log('checkWydone');
+    var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+      lastHomingCommand(res);
+      rdy();
+    })
+  }
+
+  function lastHomingCommand(res) {
+    console.log('res in lastHomingCommand: ' + res);
+    if (res.search('wydone:') > -1) {
+      $scope.homingDone = true;
+      setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
+      $ionicPopup.alert({
+        title: 'Homing completed'
+      });
+      statusService.setSending(false);
     }
-  };
+    else if (res.search('kFAULT') !== -1){
+      addToLog('Settings have been sent incorrectly, please try again');
+      emergencyService.on(function () {
+        emergencyService.off()
+      });
+    }
+    else if (!$scope.homingDone) {
+      $timeout(function () {
+        sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+      }, 100)
+    }
+  }
 
   function addToLog(str) {
     logService.addOne(str);
@@ -1859,6 +1955,7 @@ angular.module('starter.controllers', [ngAsync.name])
     logService.setBulk($scope.bluetoothLog);
   });
 
+  //TODO not working correctly for unpaired devices
   $scope.getAvailableDevices = function () {
     $scope.availableDevices = [];
     $scope.pairedDevices = [];
@@ -1868,8 +1965,10 @@ angular.module('starter.controllers', [ngAsync.name])
           logService.consoleLog('Calling get available devices');
           if (ionic.Platform.isAndroid) {
             //discover unpaired
+            addToLog('Searching for unpaired Bluetooth devices');
             $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
-              addToLog('Searching for unpaired Bluetooth devices');
+              console.log('unpaired devices');
+              console.log(devices);
               devices.forEach(function (device) {
                   $scope.availableDevices.push(device);
                   addToLog('Unpaired Bluetooth device found');
@@ -1902,8 +2001,6 @@ angular.module('starter.controllers', [ngAsync.name])
         })
       }
     })
-
-
   };
 
   $scope.connectToUnpairedDevice = function ($index) {

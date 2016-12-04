@@ -6,7 +6,11 @@
     <div class="list">
       <label class="item item-input item-stacked-label">
         <span class="input-label">Stepmotor number</span>
-        <select ng-model="settings.stepMotorNum" class="align-right margins">
+        <select
+          ng-model="settings.stepMotorNum"
+          class="align-right margins"
+          ng-change="settingsHaveChanged()"
+        >
           <option value="1" selected>1</option>
           <option value="2">2</option>
           <option value="3">3</option>
@@ -17,40 +21,105 @@
           <option value="8">8</option>
         </select>
       </label>
+
       <label class="item item-input item-stacked-label">
         <span class="input-label">Maximum frequency (steps/sec)</span>
-        <input type="number" placeholder="Maximum value 80 000" ng-model="settings.maxFreq" ng-class="{redText: settings.maxFreq > 80000}">
+        <input
+          type="number"
+          placeholder="Maximum value 20 000"
+          ng-model="settings.maxFreq"
+          ng-change="settingsHaveChanged()"
+          ng-class="{redText: settings.maxFreq > 80000}">
       </label>
+
       <label class="item item-input item-stacked-label">
         <span class="input-label">Step motor dipswitch setting (steps/revolution)</span>
-        <input type="number" placeholder="Determines how many pulses are needed per revolution" ng-model="settings.dipswitch">
+        <input
+          type="number"
+          placeholder="Determines how many pulses are needed per revolution"
+          ng-model="settings.dipswitch"
+          ng-change="settingsHaveChanged()"
+        >
       </label>
+
       <label class="item item-input item-stacked-label">
         <span class="input-label">Spindle advancement (mm/revolution)</span>
-        <input type="number" placeholder="Example: 5" ng-model="settings.spindleAdvancement">
+        <input
+          type="number"
+          placeholder="Example: 5"
+          ng-model="settings.spindleAdvancement"
+          ng-change="settingsHaveChanged()"
+        >
       </label>
+
       <label class="item item-input item-stacked-label">
         <span class="input-label">Time to reach maximum frequency (seconds)</span>
-        <input type="number" placeholder="Example: 0.5" ng-model="settings.time">
+        <input
+          type="number"
+          placeholder="Example: 0.5"
+          ng-model="settings.time"
+          ng-change="settingsHaveChanged()"
+        >
       </label>
-      <ion-toggle toggle-class="toggle-balanced" ng-model="settings.homingStopswitch"><span class="input-label">Change homing stopswitch</span></ion-toggle>
-      <ion-toggle toggle-class="toggle-energized" ng-model="settings.direction"><span class="input-label">Reverse direction</span></ion-toggle>
-      <ion-toggle toggle-class="toggle-balanced" ng-model="settings.encoder.enable"><span class="input-label">Enable/disable step motor encoder </span></ion-toggle>
+
+      <ion-toggle
+        toggle-class="toggle-balanced"
+        ng-model="settings.homingStopswitch"
+        ng-change="settingsHaveChanged()"
+      >
+        <span class="input-label">Change homing stopswitch</span>
+      </ion-toggle>
+
+      <ion-toggle
+        toggle-class="toggle-energized"
+        ng-model="settings.direction"
+        ng-change="settingsHaveChanged()"
+      >
+        <span class="input-label">Reverse direction</span>
+      </ion-toggle>
+
+      <ion-toggle
+        toggle-class="toggle-balanced"
+        ng-model="settings.encoder.enable"
+        ng-change="settingsHaveChanged()"
+      >
+        <span class="input-label">Enable/disable step motor encoder </span>
+      </ion-toggle>
+
       <label ng-show='settings.encoder.enable' class="item item-input item-stacked-label">
         <span class="input-label">Encoder steps per RPM</span>
-        <input type="number" placeholder="Example: 50" ng-model="settings.encoder.stepsPerRPM">
+        <input
+          type="number"
+          placeholder="Example: 50"
+          ng-model="settings.encoder.stepsPerRPM"
+          ng-change="settingsHaveChanged()"
+        >
       </label>
+
       <label ng-show='settings.encoder.enable' class="item item-input item-stacked-label">
         <span class="input-label">Maximum allowable steps to miss</span>
-        <input type="number" placeholder="Example: 12" ng-model="settings.encoder.stepsToMiss">
+        <input
+          type="number"
+          placeholder="Example: 12"
+          ng-model="settings.encoder.stepsToMiss"
+          ng-change="settingsHaveChanged()"
+        >
       </label>
-      <ion-toggle ng-show="settings.encoder.enable" toggle-class="toggle-energized" ng-model="settings.encoder.direction"><span class="input-label">Reverse encoder direction</span></ion-toggle>
+
+      <ion-toggle
+        ng-show="settings.encoder.enable"
+        toggle-class="toggle-energized"
+        ng-model="settings.encoder.direction"
+        ng-change="settingsHaveChanged()"
+      >
+        <span class="input-label">Reverse encoder direction</span>
+      </ion-toggle>
     </div>
 
 
     <div class="settings-buttons">
-
       <button class="button button-balanced" on-tap="saveSettings()">Save settings</button>
     </div>
+
   </ion-content>
 </ion-view>

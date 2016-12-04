@@ -41,6 +41,7 @@ function bluetoothConnectedToDeviceService(isConnectedService, logService, check
   connect.getDeviceName = getDeviceName;
   connect.setDeviceName = setDeviceName;
   connect.connectToLastDevice = connectToLastDevice;
+  connect.connectWithRetry = connectWithRetry;
 
   let retry = 1;
   let deviceName = '';

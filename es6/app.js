@@ -60,7 +60,7 @@ angular.module('Toothmaster', ['ionic', 'starter.controllers', 'ngCordova', 'ngT
   .service('crcService', [crcService])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-    bugout.bugout.log('version 0.9.9.21');
+    bugout.bugout.log('version 0.9.9.38');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){
