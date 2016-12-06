@@ -327,7 +327,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
             //On last command, start check if settings have been sent correctly
             if (i === commands.length-1) {
-              settingsSentCorrectlyCheck(res);
+              checkWydone();
             }
           }
         }
@@ -337,44 +337,61 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       }
     }
     catch (err) {
-      console.log('ERR: '+err);
+      addToLog('Error: '+err);
+      addToLog('Cancelling current tasks');
+      emergencyService.on(function () {
+        emergencyService.off();
+      });
     }
   });
 
-  function settingsSentCorrectlyCheck(res) {
-    //Settings have been sent correctly, start pinging for update
-    if (res.search('rdy') > -1) {
-      console.log('last command of sendSettings is OK');
-      addToLog('Moving to start position');
-    }
-    //  Setting have been sent incorrectly
-    else if (res.search('kFAULT') !== -1){
-      addToLog('Settings have been sent incorrectly, please try again');
-      emergencyService.on(function () {
-        emergencyService.off()
-      });
-    }
-  }
+  // function settingsSentCorrectlyCheck() {
+  //   console.log('settings send correctly func');
+  //   const settingsCorrectListener = $rootScope.$on('bluetoothResponse', (event, res) => {
+  //     console.log('res in settings sent correctly: '+res);
+  //     //Settings have been sent correctly, start pinging for update
+  //     if (res.search('rdy') > -1) {
+  //       console.log('last command of sendSettings is OK');
+  //       addToLog('Moving to start position');
+  //       checkWydone();
+  //     }
+  //     //  Setting have been sent incorrectly
+  //     else if (res.search('kFAULT') !== -1){
+  //       addToLog('Settings have been sent incorrectly, please try again');
+  //       emergencyService.on(function () {
+  //         emergencyService.off()
+  //       });
+  //     }
+  //     settingsCorrectListener();
+  //   })
+  //
+  // }
 
-  
+
 
   function checkWydone() {
     console.log('checkWydone');
-    const timer = $interval(() => {
-      sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+    let timer = $interval(() => {
+      sendAndReceiveService.write('<w'+stepMotorNum+'>');
+    }, 250);
+
+    let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
+      console.log('bluetoothResponseListener: '+res);
     });
-    
-    $rootScope.$on('wydone', (event, res) => {
-      timer();
+
+    let wydoneListener = $rootScope.$on('wydone', (event, res) => {
+      $interval.cancel(timer);
       movedToStartPosition();
+      bluetoothResponseListener();
+      wydoneListener();
     });
-    
+
     // var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
     //   lastSendSettingsCommand(res);
     //   rdy();
     // })
   }
-  
+
   function movedToStartPosition() {
     setButtons({
       'readyForData':false,
@@ -406,7 +423,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //   //Movement is complete
   //   if (res.search('wydone') > -1) {
   //     //showMoving button becomes available, which allows user to call startMoving()
-  //    
+  //
   //   }
   //
   //   //  Keep connection alive

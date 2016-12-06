@@ -405,11 +405,6 @@ module.exports = sendAndReceiveService;
       }
     }
 
-    function wydoneListener() {
-
-
-    }
-
   }
 
 

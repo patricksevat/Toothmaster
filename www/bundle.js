@@ -8265,7 +8265,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('checkBluetoothEnabledService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothEnabledService]).service('isConnectedService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothConnectedService]).service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout', _bluetoothService.bluetoothConnectedToDeviceService]).service('turnOnBluetoothService', ['$cordovaBluetoothSerial', 'checkBluetoothEnabledService', 'logService', _bluetoothService.turnOnBluetoothService]).service('disconnectService', ['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout', _bluetoothService.disconnectService]).service('logService', ['bugout', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-	  bugout.bugout.log('version 0.9.9.42');
+	  bugout.bugout.log('version 0.9.9.47');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -9424,7 +9424,7 @@
 	
 	            //On last command, start check if settings have been sent correctly
 	            if (_i2 === commands.length - 1) {
-	              settingsSentCorrectlyCheck(res);
+	              checkWydone();
 	            }
 	
 	          case 14:
@@ -9440,16 +9440,20 @@
 	            addToLog('Emergency on, will not continue sending settings data');
 	
 	          case 20:
-	            _context3.next = 25;
+	            _context3.next = 27;
 	            break;
 	
 	          case 22:
 	            _context3.prev = 22;
 	            _context3.t0 = _context3['catch'](0);
 	
-	            console.log('ERR: ' + _context3.t0);
+	            addToLog('Error: ' + _context3.t0);
+	            addToLog('Cancelling current tasks');
+	            emergencyService.on(function () {
+	              emergencyService.off();
+	            });
 	
-	          case 25:
+	          case 27:
 	          case 'end':
 	            return _context3.stop();
 	        }
@@ -9457,30 +9461,44 @@
 	    }, _callee3, this, [[0, 22]]);
 	  }));
 	
-	  function settingsSentCorrectlyCheck(res) {
-	    //Settings have been sent correctly, start pinging for update
-	    if (res.search('rdy') > -1) {
-	      console.log('last command of sendSettings is OK');
-	      addToLog('Moving to start position');
-	    }
-	    //  Setting have been sent incorrectly
-	    else if (res.search('kFAULT') !== -1) {
-	        addToLog('Settings have been sent incorrectly, please try again');
-	        emergencyService.on(function () {
-	          emergencyService.off();
-	        });
-	      }
-	  }
+	  // function settingsSentCorrectlyCheck() {
+	  //   console.log('settings send correctly func');
+	  //   const settingsCorrectListener = $rootScope.$on('bluetoothResponse', (event, res) => {
+	  //     console.log('res in settings sent correctly: '+res);
+	  //     //Settings have been sent correctly, start pinging for update
+	  //     if (res.search('rdy') > -1) {
+	  //       console.log('last command of sendSettings is OK');
+	  //       addToLog('Moving to start position');
+	  //       checkWydone();
+	  //     }
+	  //     //  Setting have been sent incorrectly
+	  //     else if (res.search('kFAULT') !== -1){
+	  //       addToLog('Settings have been sent incorrectly, please try again');
+	  //       emergencyService.on(function () {
+	  //         emergencyService.off()
+	  //       });
+	  //     }
+	  //     settingsCorrectListener();
+	  //   })
+	  //
+	  // }
+	
 	
 	  function checkWydone() {
 	    console.log('checkWydone');
 	    var timer = $interval(function () {
-	      sendAndReceiveService.write('<w' + stepMotorNum + '>', checkWydone());
+	      sendAndReceiveService.write('<w' + stepMotorNum + '>');
+	    }, 250);
+	
+	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
+	      console.log('bluetoothResponseListener: ' + res);
 	    });
 	
-	    $rootScope.$on('wydone', function (event, res) {
-	      timer();
+	    var wydoneListener = $rootScope.$on('wydone', function (event, res) {
+	      $interval.cancel(timer);
 	      movedToStartPosition();
+	      bluetoothResponseListener();
+	      wydoneListener();
 	    });
 	
 	    // var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
@@ -9519,7 +9537,7 @@
 	  //   //Movement is complete
 	  //   if (res.search('wydone') > -1) {
 	  //     //showMoving button becomes available, which allows user to call startMoving()
-	  //    
+	  //
 	  //   }
 	  //
 	  //   //  Keep connection alive
@@ -11125,8 +11143,6 @@
 	      delete commandObj[commandID1];
 	    }
 	  }
-	
-	  function wydoneListener() {}
 	}
 
 /***/ },
