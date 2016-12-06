@@ -1,9 +1,12 @@
-<!--TODO add scrollbar hide-->
 <ion-view >
   <ion-nav-title>
     Program {{ currentProgram.title}} <img src="./img/icon.png" class="logo">
   </ion-nav-title>
   <ion-content>
+    <error-header
+      ng-controller="errorController"
+      ng-show="showErrorHeader === true"
+    ></error-header>
     <div class="list">
       <label class="item item-input item-stacked-label" on-tap="focus()">
         <span class="input-label">Saw width (mm)</span>

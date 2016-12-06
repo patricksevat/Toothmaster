@@ -8,6 +8,7 @@ import runBluetoothCtrl from './controllers/runBluetoothCtrl'
 import homingCtrl from './controllers/homingCtrl'
 import bluetoothTestCtrl from './controllers/bluetoothTestCtrl'
 import bluetoothConnectionCtrl from './controllers/bluetoothConnectionCtrl'
+import errorController from './controllers/errorController'
 
 module.exports =
 angular.module('toothmasterControllers', [ngAsync.name])
@@ -32,5 +33,7 @@ angular.module('toothmasterControllers', [ngAsync.name])
 
 .controller('testCtrl', bluetoothTestCtrl)
 
-.controller('bluetoothConnectionCtrl', bluetoothConnectionCtrl);
+.controller('bluetoothConnectionCtrl', bluetoothConnectionCtrl)
+
+.controller('errorController', errorController);
 

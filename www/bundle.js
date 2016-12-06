@@ -8238,6 +8238,10 @@
 	
 	var _crcService2 = _interopRequireDefault(_crcService);
 	
+	var _errorDirective = __webpack_require__(324);
+	
+	var _errorDirective2 = _interopRequireDefault(_errorDirective);
+	
 	var _ngAsync = __webpack_require__(300);
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
@@ -8248,9 +8252,16 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	//controllers
 	if (window.localStorage['Safety'] === undefined) {
 	  window.localStorage.setItem('Safety', '');
 	}
+	
+	//directives
+	
+	
+	// services
+	
 	if (window.localStorage['settings'] === undefined) {
 	  window.localStorage['settings'] = '{"stepMotorNum": 1, "maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
 	}
@@ -8264,8 +8275,8 @@
 	angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', 'ngTouch', _ngAsync2.default.name]).service('bugout', function () {
 	  var bugout = new debugout();
 	  this.bugout = bugout;
-	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('checkBluetoothEnabledService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothEnabledService]).service('isConnectedService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothConnectedService]).service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout', _bluetoothService.bluetoothConnectedToDeviceService]).service('turnOnBluetoothService', ['$cordovaBluetoothSerial', 'checkBluetoothEnabledService', 'logService', _bluetoothService.turnOnBluetoothService]).service('disconnectService', ['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout', _bluetoothService.disconnectService]).service('logService', ['bugout', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-	  bugout.bugout.log('version 0.9.9.47');
+	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('checkBluetoothEnabledService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothEnabledService]).service('isConnectedService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothConnectedService]).service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout', _bluetoothService.bluetoothConnectedToDeviceService]).service('turnOnBluetoothService', ['$cordovaBluetoothSerial', 'checkBluetoothEnabledService', 'logService', _bluetoothService.turnOnBluetoothService]).service('disconnectService', ['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout', _bluetoothService.disconnectService]).service('logService', ['bugout', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
+	  bugout.bugout.log('version 0.9.9.54');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8351,8 +8362,13 @@
 	
 	var _bluetoothConnectionCtrl2 = _interopRequireDefault(_bluetoothConnectionCtrl);
 	
+	var _errorController = __webpack_require__(325);
+	
+	var _errorController2 = _interopRequireDefault(_errorController);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	//controllers
 	module.exports = angular.module('toothmasterControllers', [_ngAsync2.default.name])
 	/*
 	* $rootScope emits:
@@ -8363,9 +8379,7 @@
 	* $rootScope.$on('bluetoothResponse', response)
 	* */
 	
-	.controller('SafetySlides', _safetySlides2.default).controller('ProgramController', _programCtrl2.default).controller('SettingsCtrl', _settingsCtrl2.default).controller('runBluetoothCtrl', _runBluetoothCtrl2.default).controller('homingCtrl', _homingCtrl2.default).controller('testCtrl', _bluetoothTestCtrl2.default).controller('bluetoothConnectionCtrl', _bluetoothConnectionCtrl2.default);
-	
-	//controllers
+	.controller('SafetySlides', _safetySlides2.default).controller('ProgramController', _programCtrl2.default).controller('SettingsCtrl', _settingsCtrl2.default).controller('runBluetoothCtrl', _runBluetoothCtrl2.default).controller('homingCtrl', _homingCtrl2.default).controller('testCtrl', _bluetoothTestCtrl2.default).controller('bluetoothConnectionCtrl', _bluetoothConnectionCtrl2.default).controller('errorController', _errorController2.default);
 
 /***/ },
 /* 300 */
@@ -9461,29 +9475,6 @@
 	    }, _callee3, this, [[0, 22]]);
 	  }));
 	
-	  // function settingsSentCorrectlyCheck() {
-	  //   console.log('settings send correctly func');
-	  //   const settingsCorrectListener = $rootScope.$on('bluetoothResponse', (event, res) => {
-	  //     console.log('res in settings sent correctly: '+res);
-	  //     //Settings have been sent correctly, start pinging for update
-	  //     if (res.search('rdy') > -1) {
-	  //       console.log('last command of sendSettings is OK');
-	  //       addToLog('Moving to start position');
-	  //       checkWydone();
-	  //     }
-	  //     //  Setting have been sent incorrectly
-	  //     else if (res.search('kFAULT') !== -1){
-	  //       addToLog('Settings have been sent incorrectly, please try again');
-	  //       emergencyService.on(function () {
-	  //         emergencyService.off()
-	  //       });
-	  //     }
-	  //     settingsCorrectListener();
-	  //   })
-	  //
-	  // }
-	
-	
 	  function checkWydone() {
 	    console.log('checkWydone');
 	    var timer = $interval(function () {
@@ -9500,11 +9491,6 @@
 	      bluetoothResponseListener();
 	      wydoneListener();
 	    });
-	
-	    // var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-	    //   lastSendSettingsCommand(res);
-	    //   rdy();
-	    // })
 	  }
 	
 	  function movedToStartPosition() {
@@ -9531,23 +9517,6 @@
 	      });
 	    }
 	  }
-	
-	  // function lastSendSettingsCommand(res) {
-	  //
-	  //   //Movement is complete
-	  //   if (res.search('wydone') > -1) {
-	  //     //showMoving button becomes available, which allows user to call startMoving()
-	  //
-	  //   }
-	  //
-	  //   //  Keep connection alive
-	  //   else {
-	  //     $timeout(function () {
-	  //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
-	  //     }, 100)
-	  //
-	  //   }
-	  // }
 	
 	  //
 	  //SECTION: startMoving \ take steps logic
@@ -12024,6 +11993,39 @@
 	}
 	
 	exports.default = router;
+
+/***/ },
+/* 324 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($rootScope) {
+	  console.log('error directive');
+	  return {
+	    restrict: 'E',
+	    replace: 'true',
+	    templateUrl: './templates/errorHeader.html'
+	  };
+	};
+
+/***/ },
+/* 325 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($scope, $rootScope) {
+	  $scope.showErrorHeader = true;
+	};
 
 /***/ }
 /******/ ]);

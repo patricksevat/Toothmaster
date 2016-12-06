@@ -345,30 +345,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     }
   });
 
-  // function settingsSentCorrectlyCheck() {
-  //   console.log('settings send correctly func');
-  //   const settingsCorrectListener = $rootScope.$on('bluetoothResponse', (event, res) => {
-  //     console.log('res in settings sent correctly: '+res);
-  //     //Settings have been sent correctly, start pinging for update
-  //     if (res.search('rdy') > -1) {
-  //       console.log('last command of sendSettings is OK');
-  //       addToLog('Moving to start position');
-  //       checkWydone();
-  //     }
-  //     //  Setting have been sent incorrectly
-  //     else if (res.search('kFAULT') !== -1){
-  //       addToLog('Settings have been sent incorrectly, please try again');
-  //       emergencyService.on(function () {
-  //         emergencyService.off()
-  //       });
-  //     }
-  //     settingsCorrectListener();
-  //   })
-  //
-  // }
-
-
-
   function checkWydone() {
     console.log('checkWydone');
     let timer = $interval(() => {
@@ -385,11 +361,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       bluetoothResponseListener();
       wydoneListener();
     });
-
-    // var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-    //   lastSendSettingsCommand(res);
-    //   rdy();
-    // })
   }
 
   function movedToStartPosition() {
@@ -417,24 +388,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       });
     }
   }
-
-  // function lastSendSettingsCommand(res) {
-  //
-  //   //Movement is complete
-  //   if (res.search('wydone') > -1) {
-  //     //showMoving button becomes available, which allows user to call startMoving()
-  //
-  //   }
-  //
-  //   //  Keep connection alive
-  //   else {
-  //     $timeout(function () {
-  //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
-  //     }, 100)
-  //
-  //   }
-  // }
-
+  
   //
   //SECTION: startMoving \ take steps logic
   //
