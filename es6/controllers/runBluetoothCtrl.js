@@ -40,7 +40,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //
   //SECTION: changing & entering views
   //
-  
+
   $scope.$on('$ionicView.enter',function () {
     logService.consoleLog('enterView in runBluetoothCtrl fired');
     isConnectedService.getValue(function (value) {
@@ -286,20 +286,27 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //
 
   self.sendWithRetry = $async(function* (str) {
-    let res;
-    for (let i = 0; i < 5; i++) {
-      console.log('try: '+i+', command: '+str);
-      res = yield sendAndReceiveService.writeAsync(str);
-      console.log('res in sendWithretry: '+res);
-      if (i === 4)
-        return new Promise((resolve, reject) => {
-          reject('exceeded num of tries');
-        });
-      else if (res === 'OK')
-        return new Promise((resolve, reject) => {
-          console.log('resolve value: '+res);
-          resolve('resolve value: '+res);
-        });
+    try {
+      let res;
+      for (let i = 0; i < 5; i++) {
+        console.log('try: '+i+', command: '+str);
+        res = yield sendAndReceiveService.writeAsync(str);
+        console.log('res in sendWithretry: '+res);
+        if (i === 4)
+          return new Promise((resolve, reject) => {
+            reject('exceeded num of tries');
+          });
+        else if (res === 'OK')
+          return new Promise((resolve, reject) => {
+            console.log('resolve value: '+res);
+            resolve('resolve value: '+res);
+          });
+      }
+    }
+    catch (err) {
+      return new Promise((resolve, reject) => {
+        reject(err);
+      })
     }
   });
 
@@ -318,13 +325,9 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
             let res = yield self.sendWithRetry(commands[i]);
             console.log('awaited reply for command: '+commands[i]+', i='+i+', response: '+res );
 
+            //On last command, start check if settings have been sent correctly
             if (i === commands.length-1) {
-              console.log('commands');
-              console.log(commands);
-              console.log('commands.length');
-              console.log(commands.length);
-              console.log('last command of sendSettings is OK');
-              lastSendSettingsCommand(res);
+              settingsSentCorrectlyCheck(res);
             }
           }
         }
@@ -338,46 +341,11 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     }
   });
 
-  function checkWydone() {
-    console.log('checkWydone');
-    var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-      lastSendSettingsCommand(res);
-      rdy();
-    })
-  }
-
-  function lastSendSettingsCommand(res) {
+  function settingsSentCorrectlyCheck(res) {
     //Settings have been sent correctly, start pinging for update
     if (res.search('rdy') > -1) {
+      console.log('last command of sendSettings is OK');
       addToLog('Moving to start position');
-      sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
-    }
-    //Movement is complete
-    else if (res.search('wydone') > -1) {
-      //showMoving button becomes available, which allows user to call startMoving()
-      setButtons({
-        'readyForData':false,
-        'showMovingButton':true,
-        'showCalcButton':false,
-        'showHoming':false,
-        'showSpinner': false
-      });
-      statusService.setSending(false);
-      addToLog('Moved to start position');
-      var subCuts = program.cutWidth / program.sawWidth;
-      var cutsRoundedUp = Math.ceil(subCuts);
-      //On popup user is able to indicate that cut is complete
-      //Button on popup triggers startMoving()
-      if (program.cutWidth !== program.sawWidth) {
-        $ionicPopup.alert({
-          title: 'Make the subcut 1/'+cutsRoundedUp
-        });
-      }
-      else {
-        $ionicPopup.alert({
-          title: 'Make the cut'
-        });
-      }
     }
     //  Setting have been sent incorrectly
     else if (res.search('kFAULT') !== -1){
@@ -386,14 +354,69 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
         emergencyService.off()
       });
     }
-    //  Keep connection alive
-    else {
-      $timeout(function () {
-        sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
-      }, 100)
+  }
 
+  
+
+  function checkWydone() {
+    console.log('checkWydone');
+    const timer = $interval(() => {
+      sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+    });
+    
+    $rootScope.$on('wydone', (event, res) => {
+      timer();
+      movedToStartPosition();
+    });
+    
+    // var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+    //   lastSendSettingsCommand(res);
+    //   rdy();
+    // })
+  }
+  
+  function movedToStartPosition() {
+    setButtons({
+      'readyForData':false,
+      'showMovingButton':true,
+      'showCalcButton':false,
+      'showHoming':false,
+      'showSpinner': false
+    });
+    statusService.setSending(false);
+    addToLog('Moved to start position');
+    var subCuts = program.cutWidth / program.sawWidth;
+    var cutsRoundedUp = Math.ceil(subCuts);
+    //On popup user is able to indicate that cut is complete
+    //Button on popup triggers startMoving()
+    if (program.cutWidth !== program.sawWidth) {
+      $ionicPopup.alert({
+        title: 'Make the subcut 1/'+cutsRoundedUp
+      });
+    }
+    else {
+      $ionicPopup.alert({
+        title: 'Make the cut'
+      });
     }
   }
+
+  // function lastSendSettingsCommand(res) {
+  //
+  //   //Movement is complete
+  //   if (res.search('wydone') > -1) {
+  //     //showMoving button becomes available, which allows user to call startMoving()
+  //    
+  //   }
+  //
+  //   //  Keep connection alive
+  //   else {
+  //     $timeout(function () {
+  //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+  //     }, 100)
+  //
+  //   }
+  // }
 
   //
   //SECTION: startMoving \ take steps logic

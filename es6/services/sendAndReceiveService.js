@@ -46,16 +46,19 @@ module.exports = sendAndReceiveService;
     function subscribe() {
       logService.consoleLog('subscribed');
       statusService.setSubscribed(true);
-      let temp = '';
-      $window.bluetoothSerial.subscribe('#', function (data) {
+
+      //The responses from are based on delimiter '#',
+      // however the full response can contain multiple '#'s
+      // so temp holds command till they are complete
+      let tempStr = '';
+      $window.bluetoothSerial.subscribe('#', function (receivedStr) {
         lastReceivedTime = Date.now();
-        temp += data;
-        // if (((temp.match(/#/g) || []).length >= 2 ) || (temp.search('rdy>') > -1)) {
-        if (temp.search(';') > -1 && temp.search('#') > -1) {
-          bugout.bugout.log('\ntemp in subscribe: \n'+temp);
-          $rootScope.$emit('response', temp);
-          sendAndReceive.emitResponse(temp);
-          temp = '';
+        tempStr += receivedStr;
+        if (tempStr.search(';') > -1 && tempStr.search('#') > -1) {
+          bugout.bugout.log('\ntemp in subscribe: \n'+tempStr);
+          $rootScope.$emit('response', tempStr);
+          sendAndReceive.emitResponse(tempStr);
+          tempStr = '';
         }
       });
     }
@@ -64,7 +67,7 @@ module.exports = sendAndReceiveService;
       logService.consoleLog('subscribed emergency');
       $window.bluetoothSerial.subscribe('>', function (data) {
         lastReceivedTime = Date.now();
-        if (data === '<8:y>') {
+        if (data.search('<8:y>') > -1) {
           $rootScope.$emit('emergencyReset', data);
         }
       });
@@ -88,9 +91,18 @@ module.exports = sendAndReceiveService;
 
     function responseListener(searchStr) {
       return new Promise((resolve, reject) => {
+        let resReceived = false;
         let responseCount = 0;
 
+        //If no reply within 3s, reject
+        $timeout(() => {
+          if (!resReceived)
+            reject('Response not in time');
+        }, 3000);
+
+        //response received
         let listener = $rootScope.$on('response', function (event, res) {
+          resReceived = true;
           responseCount += 1;
           let searchBool = checkResponse(res, searchStr);
           if (searchBool) {
@@ -122,8 +134,6 @@ module.exports = sendAndReceiveService;
           if (res.search(value) > -1) {
             returnBool = true;
           }
-
-
         });
         bugout.bugout.log('returnBool: '+returnBool);
       }
@@ -150,22 +160,23 @@ module.exports = sendAndReceiveService;
       }
     });
 
-    function write(str, cb) {
+    function write(str) {
       return new Promise((resolve, reject) => {
         if (statusService.getEmergency() === false) {
+
+          //append string with cyclic redundancy check
           const commandWithCRC = crcService.appendCRC(str);
+
           $window.bluetoothSerial.write(commandWithCRC, function () {
             bugout.bugout.log('sent: '+commandWithCRC);
             lastCommandTime = Date.now();
-            if (cb) cb();
             resolve();
           }, function () {
             bugout.bugout.log('ERROR: could not send command '+str);
-            reject();
+            reject('Could not send command');
           })
         }
       })
-
     }
 
     function writeBuffered() {
@@ -189,6 +200,7 @@ module.exports = sendAndReceiveService;
       }
     }
 
+    //TODO remove this?
     function checkInterpretedResponse(commandID) {
       var interpreted = false;
       var checkInterpreted = $rootScope.$on('bluetoothResponse', function (event, res) {
@@ -289,7 +301,7 @@ module.exports = sendAndReceiveService;
     }
 
     function emitResponse(res) {
-      console.log('res in emiteResponse: '+res);
+      console.log('res in emitResponse: '+res);
 
       const settings = shareSettings.getObj();
       //handle stopswitch hit
@@ -309,12 +321,9 @@ module.exports = sendAndReceiveService;
       else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
         faultyResponse(res);
       }
-      // else if (res.search('&') > -1 && res.search('wydone')> -1) {
-      //   bugout.bugout.log('bufferedCommand done: \n'+res);
-      //   const numStr = res.slice(res.indexOf('>')+1, res.indexOf('&'));
-      //   const commandID = Number(numStr);
-      //   $rootScope.$emit('bufferedCommandDone', res, commandID);
-      // }
+      else if (res.search('wydone:') > -1) {
+        $rootScope.$emit('wydone', res);
+      }  
       else {
         $rootScope.$emit('bluetoothResponse', res);
       }
@@ -352,8 +361,10 @@ module.exports = sendAndReceiveService;
         logService.consoleLog('Error: could not clear receive buffer');
       })
     }
-
+  //
   //  Helper functions
+  //
+
     function stopSwitchHit(res) {
       const posStopswitch = res.lastIndexOf('@')-3;
       $ionicPopup.alert({
@@ -392,6 +403,11 @@ module.exports = sendAndReceiveService;
         $rootScope.$emit('faultyResponse', res);
         delete commandObj[commandID1];
       }
+    }
+
+    function wydoneListener() {
+
+
     }
 
   }

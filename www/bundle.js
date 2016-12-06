@@ -8184,57 +8184,57 @@
 	
 	var _controllers2 = _interopRequireDefault(_controllers);
 	
-	var _sendAndReceiveService = __webpack_require__(301);
+	var _sendAndReceiveService = __webpack_require__(308);
 	
 	var _sendAndReceiveService2 = _interopRequireDefault(_sendAndReceiveService);
 	
-	var _shareSettingsService = __webpack_require__(302);
+	var _shareSettingsService = __webpack_require__(309);
 	
 	var _shareSettingsService2 = _interopRequireDefault(_shareSettingsService);
 	
-	var _shareProgramService = __webpack_require__(303);
+	var _shareProgramService = __webpack_require__(310);
 	
 	var _shareProgramService2 = _interopRequireDefault(_shareProgramService);
 	
-	var _skipService = __webpack_require__(304);
+	var _skipService = __webpack_require__(311);
 	
 	var _skipService2 = _interopRequireDefault(_skipService);
 	
-	var _buttonService = __webpack_require__(305);
+	var _buttonService = __webpack_require__(312);
 	
 	var _buttonService2 = _interopRequireDefault(_buttonService);
 	
-	var _emergencyService = __webpack_require__(306);
+	var _emergencyService = __webpack_require__(313);
 	
 	var _emergencyService2 = _interopRequireDefault(_emergencyService);
 	
-	var _bluetoothService = __webpack_require__(307);
+	var _bluetoothService = __webpack_require__(314);
 	
-	var _logService = __webpack_require__(308);
+	var _logService = __webpack_require__(315);
 	
 	var _logService2 = _interopRequireDefault(_logService);
 	
-	var _calculateVarsService = __webpack_require__(309);
+	var _calculateVarsService = __webpack_require__(316);
 	
 	var _calculateVarsService2 = _interopRequireDefault(_calculateVarsService);
 	
-	var _logModalService = __webpack_require__(310);
+	var _logModalService = __webpack_require__(317);
 	
 	var _logModalService2 = _interopRequireDefault(_logModalService);
 	
-	var _modalService = __webpack_require__(311);
+	var _modalService = __webpack_require__(318);
 	
 	var _modalService2 = _interopRequireDefault(_modalService);
 	
-	var _statusService = __webpack_require__(312);
+	var _statusService = __webpack_require__(319);
 	
 	var _statusService2 = _interopRequireDefault(_statusService);
 	
-	var _pauseService = __webpack_require__(313);
+	var _pauseService = __webpack_require__(320);
 	
 	var _pauseService2 = _interopRequireDefault(_pauseService);
 	
-	var _crcService = __webpack_require__(314);
+	var _crcService = __webpack_require__(321);
 	
 	var _crcService2 = _interopRequireDefault(_crcService);
 	
@@ -8242,7 +8242,7 @@
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _router = __webpack_require__(316);
+	var _router = __webpack_require__(323);
 	
 	var _router2 = _interopRequireDefault(_router);
 	
@@ -8265,7 +8265,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('checkBluetoothEnabledService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothEnabledService]).service('isConnectedService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothConnectedService]).service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout', _bluetoothService.bluetoothConnectedToDeviceService]).service('turnOnBluetoothService', ['$cordovaBluetoothSerial', 'checkBluetoothEnabledService', 'logService', _bluetoothService.turnOnBluetoothService]).service('disconnectService', ['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout', _bluetoothService.disconnectService]).service('logService', ['bugout', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-	  bugout.bugout.log('version 0.9.9.41');
+	  bugout.bugout.log('version 0.9.9.42');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8323,31 +8323,31 @@
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _safetySlides = __webpack_require__(317);
+	var _safetySlides = __webpack_require__(301);
 	
 	var _safetySlides2 = _interopRequireDefault(_safetySlides);
 	
-	var _programCtrl = __webpack_require__(318);
+	var _programCtrl = __webpack_require__(302);
 	
 	var _programCtrl2 = _interopRequireDefault(_programCtrl);
 	
-	var _settingsCtrl = __webpack_require__(319);
+	var _settingsCtrl = __webpack_require__(303);
 	
 	var _settingsCtrl2 = _interopRequireDefault(_settingsCtrl);
 	
-	var _runBluetoothCtrl = __webpack_require__(320);
+	var _runBluetoothCtrl = __webpack_require__(304);
 	
 	var _runBluetoothCtrl2 = _interopRequireDefault(_runBluetoothCtrl);
 	
-	var _homingCtrl = __webpack_require__(321);
+	var _homingCtrl = __webpack_require__(305);
 	
 	var _homingCtrl2 = _interopRequireDefault(_homingCtrl);
 	
-	var _bluetoothTestCtrl = __webpack_require__(322);
+	var _bluetoothTestCtrl = __webpack_require__(306);
 	
 	var _bluetoothTestCtrl2 = _interopRequireDefault(_bluetoothTestCtrl);
 	
-	var _bluetoothConnectionCtrl = __webpack_require__(323);
+	var _bluetoothConnectionCtrl = __webpack_require__(307);
 	
 	var _bluetoothConnectionCtrl2 = _interopRequireDefault(_bluetoothConnectionCtrl);
 	
@@ -8472,1340 +8472,6 @@
 
 	'use strict';
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-	
-	/**
-	 * Created by Patrick on 22/11/2016.
-	 */
-	module.exports = sendAndReceiveService;
-	
-	function sendAndReceiveService(statusService, emergencyService, $window, logService, $rootScope, buttonService, crcService, $ionicPopup, shareSettings, $interval, $timeout, $q, $async, bugout) {
-	  var sendAndReceive = this;
-	  //Available methods
-	  sendAndReceive.subscribe = subscribe;
-	  sendAndReceive.subscribeRawData = subscribeRawData;
-	  sendAndReceive.unsubscribe = unsubscribe;
-	  sendAndReceive.write = write;
-	  // sendAndReceive.writeAsync = writeAsync;
-	  sendAndReceive.writeBuffered = writeBuffered;
-	  sendAndReceive.checkInterpretedResponse = checkInterpretedResponse;
-	  sendAndReceive.getNewCommandID = getNewCommandID;
-	  sendAndReceive.setCommandID = setCommandID;
-	  sendAndReceive.resetCommandObj = resetCommandObj;
-	  sendAndReceive.expectedResponse = expectedResponse;
-	  sendAndReceive.addToCommandObj = addToCommandObj;
-	  sendAndReceive.emitResponse = emitResponse;
-	  sendAndReceive.sendEmergency = sendEmergency;
-	  sendAndReceive.createResetListener = createResetListener;
-	  sendAndReceive.subscribeEmergency = subscribeEmergency;
-	  sendAndReceive.clearBuffer = clearBuffer;
-	
-	  //emergency listener
-	  $rootScope.$on('emergencyOn', function () {
-	    bugout.bugout.log('emergencyOn received in sendAndReceiveService');
-	    sendAndReceive.sendEmergency();
-	    sendAndReceive.resetCommandObj();
-	  });
-	
-	  //service-scoped variables
-	  var stepMotorNum = shareSettings.getObj().stepMotorNum;
-	  var command;
-	  var response;
-	  var lastCommandTime;
-	  var lastReceivedTime;
-	  var subscribed = statusService.getSubscribed();
-	  var commandIdStr = $window.localStorage['commandIdNum'];
-	  var commandObj = {};
-	
-	  //method functions
-	  function subscribe() {
-	    logService.consoleLog('subscribed');
-	    statusService.setSubscribed(true);
-	    var temp = '';
-	    $window.bluetoothSerial.subscribe('#', function (data) {
-	      lastReceivedTime = Date.now();
-	      temp += data;
-	      // if (((temp.match(/#/g) || []).length >= 2 ) || (temp.search('rdy>') > -1)) {
-	      if (temp.search(';') > -1 && temp.search('#') > -1) {
-	        bugout.bugout.log('\ntemp in subscribe: \n' + temp);
-	        $rootScope.$emit('response', temp);
-	        sendAndReceive.emitResponse(temp);
-	        temp = '';
-	      }
-	    });
-	  }
-	
-	  function subscribeEmergency() {
-	    logService.consoleLog('subscribed emergency');
-	    $window.bluetoothSerial.subscribe('>', function (data) {
-	      lastReceivedTime = Date.now();
-	      if (data === '<8:y>') {
-	        $rootScope.$emit('emergencyReset', data);
-	      }
-	    });
-	  }
-	
-	  function subscribeRawData() {
-	    $window.bluetoothSerial.subscribeRawData(function (data) {
-	      var bytes = String.fromCharCode.apply(null, new Uint8Array(data));
-	      bugout.bugout.log('Rawdata: ' + bytes);
-	    });
-	  }
-	
-	  function unsubscribe() {
-	    $window.bluetoothSerial.unsubscribe(function () {
-	      logService.consoleLog('Succesfully unsubscribed');
-	      statusService.setSubscribed(false);
-	    }, function () {
-	      logService.consoleLog('ERROR: could not unsubscribe');
-	    });
-	  }
-	
-	  function responseListener(searchStr) {
-	    return new Promise(function (resolve, reject) {
-	      var responseCount = 0;
-	
-	      var listener = $rootScope.$on('response', function (event, res) {
-	        responseCount += 1;
-	        var searchBool = checkResponse(res, searchStr);
-	        if (searchBool) {
-	          bugout.bugout.log('resolving OK');
-	          responseCount = 0;
-	          resolve('OK');
-	          listener();
-	        } else if (res.indexOf('667:') > -1) {
-	          resolve('RETRY');
-	        } else if (responseCount >= 3) reject('Too many wrong responses');
-	      });
-	    });
-	  }
-	
-	  function checkResponse(res, searchValues) {
-	    var returnBool = false;
-	    if (typeof searchValues === 'string') {
-	      bugout.bugout.log('res: ' + res + ', searchValueStr: ' + searchValues);
-	      returnBool = res.search(searchValues) > -1;
-	      bugout.bugout.log('returnBool: ' + returnBool);
-	    } else if (Array.isArray(searchValues)) {
-	      bugout.bugout.log('res: ' + res + 'searchValuesArr');
-	      bugout.bugout.log(searchValues);
-	      searchValues.map(function (value) {
-	        if (res.search(value) > -1) {
-	          returnBool = true;
-	        }
-	      });
-	      bugout.bugout.log('returnBool: ' + returnBool);
-	    }
-	    return returnBool;
-	  }
-	
-	  sendAndReceive.writeAsync = $async(regeneratorRuntime.mark(function _callee2(str) {
-	    var _this = this;
-	
-	    var _ret;
-	
-	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-	      while (1) {
-	        switch (_context2.prev = _context2.next) {
-	          case 0:
-	            _context2.prev = 0;
-	            return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
-	              var expectedResponseShouldContain, resolveValue;
-	              return regeneratorRuntime.wrap(function _callee$(_context) {
-	                while (1) {
-	                  switch (_context.prev = _context.next) {
-	                    case 0:
-	                      _context.next = 2;
-	                      return sendAndReceive.write(str);
-	
-	                    case 2:
-	                      expectedResponseShouldContain = sendAndReceive.expectedResponse(str[1]);
-	
-	                      bugout.bugout.log('expectedResponseShouldContain: ');
-	                      bugout.bugout.log(expectedResponseShouldContain);
-	                      _context.next = 7;
-	                      return responseListener(expectedResponseShouldContain);
-	
-	                    case 7:
-	                      resolveValue = _context.sent;
-	
-	                      expectedResponseShouldContain = null;
-	
-	                      return _context.abrupt('return', {
-	                        v: new Promise(function (resolve, reject) {
-	                          bugout.bugout.log('resolve with resolveValue: ' + resolveValue);
-	                          resolve(resolveValue);
-	                        })
-	                      });
-	
-	                    case 10:
-	                    case 'end':
-	                      return _context.stop();
-	                  }
-	                }
-	              }, _callee, _this);
-	            })(), 't0', 2);
-	
-	          case 2:
-	            _ret = _context2.t0;
-	
-	            if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-	              _context2.next = 5;
-	              break;
-	            }
-	
-	            return _context2.abrupt('return', _ret.v);
-	
-	          case 5:
-	            _context2.next = 11;
-	            break;
-	
-	          case 7:
-	            _context2.prev = 7;
-	            _context2.t1 = _context2['catch'](0);
-	
-	            bugout.bugout.log('ERR: ' + _context2.t1);
-	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
-	              return reject(_context2.t1);
-	            }));
-	
-	          case 11:
-	          case 'end':
-	            return _context2.stop();
-	        }
-	      }
-	    }, _callee2, this, [[0, 7]]);
-	  }));
-	
-	  function write(str, cb) {
-	    return new Promise(function (resolve, reject) {
-	      if (statusService.getEmergency() === false) {
-	        (function () {
-	          var commandWithCRC = crcService.appendCRC(str);
-	          $window.bluetoothSerial.write(commandWithCRC, function () {
-	            bugout.bugout.log('sent: ' + commandWithCRC);
-	            lastCommandTime = Date.now();
-	            if (cb) cb();
-	            resolve();
-	          }, function () {
-	            bugout.bugout.log('ERROR: could not send command ' + str);
-	            reject();
-	          });
-	        })();
-	      }
-	    });
-	  }
-	
-	  function writeBuffered() {
-	    var commandIDObj = sendAndReceive.addToCommandObj(str);
-	    if (statusService.getEmergency() === false) {
-	      var command;
-	      //Used for buffered commands. Command with brackets: "<r34001>", without brackets: "r34001
-	      var commandWithoutBrackets = str.slice(1, str.length - 1);
-	      command = '<c' + commandWithoutBrackets + '$' + commandIDObj.ID + '>';
-	
-	      $window.bluetoothSerial.write(command, function () {
-	        logService.consoleLog('sent: ' + command);
-	        lastCommandTime = Date.now();
-	      }, function () {
-	        logService.consoleLog('ERROR: could not send command ' + str + ' , callingFunction: ' + callingFunction);
-	      });
-	      sendAndReceive.checkInterpretedResponse(commandIDObj.ID);
-	    } else {
-	      logService.addOne('Emergency pressed, will not send command');
-	    }
-	  }
-	
-	  function checkInterpretedResponse(commandID) {
-	    var interpreted = false;
-	    var checkInterpreted = $rootScope.$on('bluetoothResponse', function (event, res) {
-	      if (res.search('10:<c') > -1 && res.search(commandID) > -1) {
-	        interpreted = true;
-	        checkInterpreted();
-	      }
-	    });
-	    $timeout(function () {
-	      if (!interpreted) {
-	        logService.consoleLog('incorrect interpretation, ID: ' + commandID);
-	        $rootScope.$emit('faultyResponse');
-	        checkInterpreted();
-	      }
-	    }, 2500);
-	  }
-	
-	  function getNewCommandID() {
-	    commandIdStr = window.localStorage['commandIdNum'];
-	    var commandIdNum = Number(commandIdStr);
-	    commandIdNum += 1;
-	    sendAndReceive.setCommandID(commandIdNum);
-	    return commandIdNum;
-	  }
-	
-	  function setCommandID(num) {
-	    window.localStorage['commandIdNum'] = num;
-	  }
-	
-	  function resetCommandObj() {
-	    commandObj = {};
-	  }
-	
-	  function expectedResponse(str) {
-	    stepMotorNum = shareSettings.getObj().stepMotorNum;
-	    switch (str) {
-	      case 'y':
-	        return '8:y';
-	        break;
-	      case 'd':
-	        return '12:';
-	        break;
-	      case 'b':
-	        return '13:';
-	        break;
-	      case 'x':
-	        return '14:';
-	        break;
-	      case 'v':
-	        return '9:';
-	        break;
-	      case 's':
-	        return '6:';
-	        break;
-	      case 'p':
-	        return '5:';
-	        break;
-	      case 'r':
-	        return '3:';
-	        break;
-	      case 'o':
-	        return '2:';
-	        break;
-	      case 'f':
-	        return '11:';
-	        break;
-	      case 'k':
-	        return ['0:rdy', 'FAULT'];
-	        break;
-	      case 'q':
-	        buttonService.setValues({ 'showSpinner': true });
-	        return ['rdy', 'wydone', 'q'];
-	        break;
-	      case 'h':
-	        return '6:';
-	        break;
-	      case 'z':
-	        return '14:';
-	        break;
-	      case 'w':
-	        return ['wydone', 'w' + stepMotorNum];
-	        break;
-	    }
-	  }
-	
-	  function addToCommandObj(str) {
-	    var id = sendAndReceive.getNewCommandID();
-	    var expectedResponse = sendAndReceive.expectedResponse(str);
-	    var obj = {
-	      'ID': id,
-	      'command': str, //ex: <q2456>
-	      'expectedResponse': expectedResponse,
-	      'interpreted': false,
-	      'response': ''
-	    };
-	    commandObj[id] = obj;
-	    return obj;
-	  }
-	
-	  function emitResponse(res) {
-	    console.log('res in emiteResponse: ' + res);
-	
-	    var settings = shareSettings.getObj();
-	    //handle stopswitch hit
-	    if (res.search('wydone:') > -1 && res.search('wydone:0') === -1) {
-	      stopSwitchHit(res);
-	    }
-	
-	    //handle encoder missed steps
-	    //splice result from '@' till end
-	    // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
-	    else if (res.search('wydone:') > -1 && res.search('@5') > -1 && settings.encoder.enable === true) {
-	        exceededMaximumNumberOfStepsToMiss(res);
-	      } else if (res.search('2:') > -1) {
-	        $rootScope.$emit('sendKfault', res);
-	      } else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
-	        faultyResponse(res);
-	      }
-	      // else if (res.search('&') > -1 && res.search('wydone')> -1) {
-	      //   bugout.bugout.log('bufferedCommand done: \n'+res);
-	      //   const numStr = res.slice(res.indexOf('>')+1, res.indexOf('&'));
-	      //   const commandID = Number(numStr);
-	      //   $rootScope.$emit('bufferedCommandDone', res, commandID);
-	      // }
-	      else {
-	          $rootScope.$emit('bluetoothResponse', res);
-	        }
-	  }
-	
-	  function sendEmergency() {
-	    logService.consoleLog('sendAndReceiveService.sendEmergency called');
-	    sendAndReceive.subscribeEmergency();
-	    createResetListener();
-	    stepMotorNum = shareSettings.getObj().stepMotorNum;
-	    var resetCommand = crcService.appendCRC('<y8:y' + stepMotorNum + '>');
-	    $window.bluetoothSerial.write(resetCommand, function () {
-	      logService.addOne('Program reset command sent: ' + resetCommand);
-	    }, function (err) {
-	      logService.addOne('Error: Program reset command could not be sent. ' + err);
-	    });
-	  }
-	
-	  function createResetListener() {
-	    var emergencyResponse = $rootScope.$on('emergencyReset', function (event, res) {
-	      console.log('res in emergencyListener: ' + res);
-	      if (res.search('8:y') > -1) {
-	        logService.addOne('Program succesfully reset');
-	        sendAndReceive.unsubscribe();
-	        emergencyResponse();
-	      }
-	    });
-	    console.log('resetListener created');
-	  }
-	
-	  function clearBuffer() {
-	    $window.bluetoothSerial.clear(function () {
-	      logService.consoleLog('Received buffer cleared');
-	    }, function () {
-	      logService.consoleLog('Error: could not clear receive buffer');
-	    });
-	  }
-	
-	  //  Helper functions
-	  function stopSwitchHit(res) {
-	    var posStopswitch = res.lastIndexOf('@') - 3;
-	    $ionicPopup.alert({
-	      title: 'Error: hit stopswitch ' + res.charAt(posStopswitch),
-	      template: 'Unexpected stopswitch has been hit. Aborting task and resetting program.'
-	    });
-	    logService.consoleLog('Error: hit stopswitch ' + res.charAt(posStopswitch));
-	    logService.addOne('Error: hit stopswitch ' + res.charAt(posStopswitch));
-	    //emergencyService.on sets correct buttons and sends resetcommand
-	    emergencyService.on();
-	    $rootScope.$emit('stopswitchHit', res, res.charAt(posStopswitch));
-	  }
-	
-	  function exceededMaximumNumberOfStepsToMiss(res) {
-	    var splicedStr = res.slice(res.lastIndexOf('@'));
-	    var missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
-	    var maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : 'unknown';
-	    $ionicPopup.alert({
-	      title: 'You have missed the maximum number of allowed steps',
-	      template: 'The program has been stopped.<p>Maximum steps to miss: ' + maxAllowedMiss + '</p><p>Number of steps actually missed ' + missedSteps + '</p>'
-	    });
-	    logService.consoleLog('ERROR: hit max number of allowed steps');
-	    logService.addOne('ERROR: exceeded maximum number of steps to miss (encoder setting)');
-	    emergencyService.on();
-	    $rootScope.$emit('maxSteps', res, missedSteps);
-	  }
-	
-	  function faultyResponse(res) {
-	    logService.consoleLog('\nERROR:\nPotential faulty response: ' + res);
-	    var numStr1 = res.slice(res.indexOf('$') + 1, res.indexOf('>'));
-	    var commandID1 = Number(numStr1);
-	    var commandIDObj = commandObj[commandID1];
-	    logService.consoleLog('commandIDObj.command: ' + commandIDObj.command);
-	    if (res.search(commandIDObj.command) === -1) {
-	      logService.consoleLog('confirmed faulty response');
-	      $rootScope.$emit('faultyResponse', res);
-	      delete commandObj[commandID1];
-	    }
-	  }
-	}
-
-/***/ },
-/* 302 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = shareSettings;
-	/**
-	 * Created by Patrick on 26/11/2016.
-	 */
-	function shareSettings() {
-	  var shareSettings = this;
-	  shareSettings.getObj = getObj;
-	  shareSettings.setObj = setObj;
-	
-	  shareSettings.obj = {};
-	
-	  if (window.localStorage['settings'] !== '' && window.localStorage['settings'] !== undefined) {
-	    shareSettings.obj.settings = JSON.parse(window.localStorage['settings']);
-	  }
-	
-	  function setObj(value) {
-	    shareSettings.obj.settings = value;
-	  }
-	
-	  function getObj() {
-	    return shareSettings.obj.settings;
-	  }
-	}
-
-/***/ },
-/* 303 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function (bugout) {
-	  var shareProgram = this;
-	  shareProgram.getObj = getObj;
-	  shareProgram.setObj = setObj;
-	
-	  shareProgram.obj = {
-	    "program": {}
-	  };
-	
-	  function getObj() {
-	    if (shareProgram.obj.program.startPosition === undefined) {
-	      bugout.bugout.log('shareProgram.obj.program is undefined, setting start position to nill');
-	      shareProgram.obj.program.startPosition = 0;
-	    }
-	    return shareProgram.obj.program;
-	  }
-	
-	  function setObj(value) {
-	    shareProgram.obj.program = value;
-	  }
-	};
-
-/***/ },
-/* 304 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function () {
-	  var skip = this;
-	  skip.getSkip = getSkip;
-	  skip.setSkip = setSkip;
-	
-	  skip.value = undefined;
-	
-	  function getSkip() {
-	    return skip.value;
-	  }
-	  function setSkip(boolean) {
-	    skip.value = boolean;
-	  }
-	};
-
-/***/ },
-/* 305 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function (bugout) {
-	  var button = this;
-	  button.getValues = getValues;
-	  button.setValues = setValues;
-	  button.setEmergencyValues = setEmergencyValues;
-	
-	  button.value = {};
-	  button.value.readyForData = false;
-	  button.value.showEmergency = false;
-	  button.value.showMovingButton = false;
-	  button.value.showCalcButton = false;
-	  button.value.showResetButton = false;
-	  button.value.showHoming = true;
-	  button.value.showStressTest = true;
-	  button.value.showVersionButton = true;
-	  button.value.showMoveXMm = true;
-	  button.value.showSpinner = false;
-	
-	  function getValues() {
-	    return button.value;
-	  }
-	
-	  function setValues(obj) {
-	    bugout.bugout.log('buttonService.setValues called');
-	    for (var keyVal in obj) {
-	      if (obj.hasOwnProperty(keyVal)) button.value[keyVal] = obj[keyVal];
-	    }
-	  }
-	
-	  function setEmergencyValues() {
-	    button.setValues({
-	      showEmergency: false,
-	      showMovingButton: false,
-	      showCalcButton: false,
-	      showStressTest: false,
-	      showHoming: false,
-	      showSpinner: false,
-	      showVersionButton: false,
-	      showMoveXMm: false,
-	      readyForData: false,
-	      showResetButton: true
-	    });
-	  }
-	};
-
-/***/ },
-/* 306 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function (buttonService, statusService, $rootScope, bugout) {
-	  var emergency = this;
-	  emergency.on = emergencyOn;
-	  emergency.off = emergencyOff;
-	
-	  function emergencyOn(cb) {
-	    bugout.bugout.log('emergencyService.on called');
-	    statusService.setEmergency(true);
-	    buttonService.setEmergencyValues();
-	    $rootScope.$emit('emergencyOn');
-	    if (cb) cb();
-	  }
-	
-	  function emergencyOff(cb) {
-	    bugout.bugout.log('emergencyService.off called');
-	    statusService.setEmergency(false);
-	    statusService.setSending(false);
-	    $rootScope.$emit('emergencyOff');
-	    emergency.value = false;
-	    buttonService.setValues({
-	      showEmergency: false,
-	      showMovingButton: false,
-	      showResetButton: false,
-	      showCalcButton: true,
-	      showStressTest: true,
-	      showHoming: true,
-	      showSpinner: false,
-	      showVersionButton: true,
-	      showMoveXMm: true,
-	      readyForData: false
-	    });
-	    if (cb) cb();
-	  }
-	};
-
-/***/ },
-/* 307 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	function bluetoothEnabledService(bugout, $cordovaBluetoothSerial) {
-	  var bluetoothEnabled = this;
-	  bluetoothEnabled.getValue = getValue;
-	
-	  function getValue(cb) {
-	    $cordovaBluetoothSerial.isEnabled().then(function () {
-	      bluetoothEnabled.value = true;
-	      bugout.bugout.log('checkBluetoothEnabledService.value =' + bluetoothEnabled.value);
-	      if (cb) cb(bluetoothEnabled.value);else return bluetoothEnabled.value;
-	    }, function () {
-	      bluetoothEnabled.value = false;
-	      bugout.bugout.log('checkBluetoothEnabledService.value =' + bluetoothEnabled.value);
-	      if (cb) cb(bluetoothEnabled.value);else return bluetoothEnabled.value;
-	    });
-	  }
-	}
-	
-	function bluetoothConnectedService(bugout, $cordovaBluetoothSerial) {
-	  var isConnected = this;
-	  isConnected.getValue = getValue;
-	
-	  function getValue(cb) {
-	    $cordovaBluetoothSerial.isConnected().then(function () {
-	      isConnected.value = true;
-	      bugout.bugout.log('isConnectedService.value =' + isConnected.value);
-	      return isConnected.value;
-	    }, function () {
-	      isConnected.value = false;
-	      bugout.bugout.log('isConnectedService.value =' + isConnected.value);
-	      return isConnected.value;
-	    }).then(function () {
-	      if (cb) cb(isConnected.value);
-	    });
-	  }
-	}
-	
-	function bluetoothConnectedToDeviceService(isConnectedService, logService, checkBluetoothEnabledService, buttonService, $rootScope, $timeout, $window, bugout) {
-	  var connect = this;
-	  connect.getDeviceName = getDeviceName;
-	  connect.setDeviceName = setDeviceName;
-	  connect.connectToLastDevice = connectToLastDevice;
-	  connect.connectWithRetry = connectWithRetry;
-	
-	  var retry = 1;
-	  var deviceName = '';
-	
-	  $rootScope.$on('emergencyOff', function () {
-	    retry = 1;
-	  });
-	
-	  function getDeviceName(cb) {
-	    if (cb) cb(deviceName);else return deviceName;
-	  }
-	
-	  function setDeviceName(str) {
-	    deviceName = str;
-	  }
-	
-	  function connectToLastDevice(bluetoothOnVal, cb) {
-	    var bluetoothOn = void 0;
-	    if (bluetoothOnVal === undefined) {
-	      checkBluetoothEnabledService.getValue(function (value) {
-	        bluetoothOn = value;
-	        valueRetrieved(cb);
-	      });
-	    } else {
-	      bluetoothOn = bluetoothOnVal;
-	      valueRetrieved(cb);
-	    }
-	    logService.addOne('Trying to connect with last known device');
-	  }
-	
-	  function connectWithRetry() {
-	    bugout.bugout.log('connectWithRetry called in connectService');
-	    var isConnected = void 0;
-	    var bluetoothOn = void 0;
-	    isConnectedService.getValue(function (value) {
-	      isConnected = value;
-	      checkBluetoothEnabledService.getValue(function (value) {
-	        bluetoothOn = value;
-	        valuesRetrieved(bluetoothOn, isConnected);
-	      });
-	    });
-	  }
-	
-	  function valuesRetrieved(bluetoothOn, isConnected) {
-	    if (bluetoothOn && !isConnected) {
-	      bugout.bugout.log('connectWithRetry bluetoothOn & !isConnected');
-	      connect.connectToLastDevice(bluetoothOn, function () {
-	        isConnectedService.getValue(function (value) {
-	          isConnected = value;
-	        });
-	        if (!isConnected && retry < 6) {
-	          bugout.bugout.log('retry connectToLastDevice');
-	          $timeout(function () {
-	            retry += 1;
-	            bugout.bugout.log('Connect with retry, try: ' + retry);
-	            connect.connectWithRetry();
-	          }, 500);
-	        } else if (isConnected) {
-	          retry = 1;
-	        } else if (!isConnected && retry >= 6) {
-	          logService.addOne('Could not connect with last known device, please make sure that device is turned on. If so, turn off your phone\'s Bluetooth and restart the app');
-	          retry = 1;
-	        }
-	      });
-	    }
-	  }
-	
-	  function valueRetrieved(cb) {
-	    if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '' && window.localStorage['lastConnectedDevice'] !== undefined) {
-	      bugout.bugout.log('actually connecting to lastConnected device');
-	      var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
-	      $window.bluetoothSerial.connectInsecure(obj.id, function () {
-	        connect.setDeviceName(obj.name);
-	        logService.addOne('Succesfully connected to last connected device');
-	        if (cb) cb();
-	      }, function () {
-	        bugout.bugout.log('could not connect to last connected device');
-	        if (cb) cb();
-	      });
-	    }
-	  }
-	}
-	
-	function turnOnBluetoothService($cordovaBluetoothSerial, checkBluetoothEnabledService, logService) {
-	  var turnOnBluetooth = this;
-	  turnOnBluetooth.turnOn = turnOn;
-	
-	  function turnOn(cb) {
-	    $cordovaBluetoothSerial.enable().then(function () {
-	      logService.addOne('Bluetooth has been turned on by Toothmaster app');
-	      if (cb) cb();
-	    }, function () {
-	      $cordovaBluetoothSerial.showBluetoothSettings();
-	      logService.addOne('Bluetooth should be turned on manually, redirected to Bluetooth settings');
-	    });
-	  }
-	}
-	
-	function disconnectService($cordovaBluetoothSerial, logService, buttonService, isConnectedService, $window, connectToDeviceService, shareSettings, bugout) {
-	  var disconnect = this;
-	  var stepMotorNum = shareSettings.getObj().stepMotorNum;
-	  disconnect.disconnect = function () {
-	    stepMotorNum = shareSettings.getObj().stepMotorNum;
-	    $cordovaBluetoothSerial.write('<<y8:y' + stepMotorNum + '>').then(function () {
-	      $window.bluetoothSerial.disconnect(function () {
-	        logService.addOne('User disconnected');
-	        connectToDeviceService.setDeviceName('');
-	        buttonService.setValues({ 'showCalcButton': false });
-	        isConnectedService.getValue();
-	      }, function () {
-	        bugout.bugout.log('User could not disconnect');
-	        logService.addOne('Could not disconnect from device');
-	      });
-	    });
-	  };
-	}
-	
-	exports.bluetoothEnabledService = bluetoothEnabledService;
-	exports.bluetoothConnectedService = bluetoothConnectedService;
-	exports.bluetoothConnectedToDeviceService = bluetoothConnectedToDeviceService;
-	exports.turnOnBluetoothService = turnOnBluetoothService;
-	exports.disconnectService = disconnectService;
-
-/***/ },
-/* 308 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	function logService(bugout) {
-	  var logService = this;
-	  //Available methods
-	  logService.setBulk = setBulk;
-	  logService.addOne = addOne;
-	  logService.getLog = getLog;
-	  logService.consoleLog = consoleLog;
-	
-	  //Service-scoped variables
-	  logService.UILog = [];
-	
-	  //method functions
-	  function setBulk(arr) {
-	    logService.UILog = arr;
-	  }
-	
-	  function addOne(str) {
-	    bugout.bugout.log('adding to UI log: ' + str);
-	    if (logService.UILog.length === 0) {
-	      logService.UILog.unshift(str);
-	    } else if (logService.UILog[0].indexOf(String.fromCharCode(40)) !== -1 && logService.UILog[0].indexOf(String.fromCharCode(41)) !== -1) {
-	      var numStr = logService.UILog[0].slice(logService.UILog[0].indexOf('(') + 1, logService.UILog[0].indexOf(')'));
-	      var num = Number(numStr);
-	      //indexOf(')')+2 because of the extra space
-	      var cleanStr = logService.UILog[0].slice(logService.UILog[0].indexOf(')') + 2);
-	      if (str === cleanStr) {
-	        num += 1;
-	        logService.UILog[0] = '(' + num + ') ' + cleanStr;
-	      } else {
-	        logService.UILog.unshift(str);
-	      }
-	    } else if (logService.UILog[0] === str) {
-	      logService.UILog[0] = '(2) ' + str;
-	    } else {
-	      if (logService.UILog.length >= 200) {
-	        logService.UILog.pop();
-	        logService.UILog.unshift(str);
-	      } else {
-	        logService.UILog.unshift(str);
-	      }
-	    }
-	  }
-	
-	  function getLog(cb) {
-	    if (cb) cb(logService.UILog);
-	    return logService.UILog;
-	  }
-	
-	  function consoleLog(str) {
-	    bugout.bugout.log(str);
-	  }
-	}
-	
-	exports.default = logService;
-
-/***/ },
-/* 309 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = calculateVarsService;
-	//TODO check why cb is used, again there's no async here
-	function calculateVarsService(shareProgram, shareSettings) {
-	  var vars = this;
-	  //Available methods
-	  vars.getVars = getVars;
-	
-	  //Scoped variables
-	  var stepMotorNum = shareSettings.getObj().stepMotorNum;
-	
-	  function getVars(type, cb) {
-	    stepMotorNum = shareSettings.getObj().stepMotorNum;
-	    var program = shareProgram.getObj();
-	    var settings = shareSettings.getObj();
-	
-	    //this will be the return obj
-	    vars.return = {
-	      commands: [],
-	      vars: {}
-	    };
-	
-	    //these variables are always needed
-	    vars.return.vars.direction = settings.direction ? 1 : 0;
-	    vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch);
-	    vars.return.vars.stepsPerRPM = settings.dipswitch;
-	    vars.return.vars.maxRPM = (settings.maxFreq * 60 / settings.dipswitch).toFixed(3);
-	    vars.return.vars.time = settings.time.toFixed(3);
-	    vars.return.vars.stepMotorOnOff = '1';
-	    vars.return.vars.disableEncoder = '<x0' + stepMotorNum + '>';
-	    vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder = settings.encoder.stepsPerRPM !== 0 ? settings.dipswitch / settings.encoder.stepsPerRPM.toFixed(3) : '';
-	    vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder = settings.encoder.direction ? vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder * -1 : vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder;
-	    vars.return.vars.maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : '';
-	
-	    //depends if encoder is enabled, will be added later
-	    var disableEncoder = ['<y8:y' + stepMotorNum + '>', '<x0' + stepMotorNum + '>'];
-	    var enableEncoder = ['<y8:y' + stepMotorNum + '>', '<x1' + stepMotorNum + '>', '<d' + vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder + stepMotorNum + '>', '<b' + vars.return.vars.maxAllowedMiss + stepMotorNum + '>'];
-	
-	    //depends on type of movement
-	    //type can be: homing, test or runBluetooth
-	    if (type === 'homing') {
-	      vars.return.vars.homingStopswitchInt = settings.homingStopswitch ? 0 : 1;
-	      vars.return.commands = ['<v' + settings.direction + stepMotorNum + '>', '<p' + vars.return.vars.stepsPerRPM + stepMotorNum + '>', '<r' + vars.return.vars.maxRPM + stepMotorNum + '>', '<o' + vars.return.vars.time + stepMotorNum + '>', '<h' + vars.return.vars.homingStopswitchInt + stepMotorNum + '>', '<kFAULT' + stepMotorNum + '>'];
-	      //add encoder commands
-	      if (settings.encoder.enable) {
-	        vars.return.commands = enableEncoder.concat(vars.return.commands);
-	      } else {
-	        vars.return.commands = disableEncoder.concat(vars.return.commands);
-	      }
-	    } else if (type === 'runBluetooth') {
-	      vars.return.commands = ['<v' + (vars.return.vars.direction + stepMotorNum || 1) + '>', '<s' + vars.return.vars.startPositionSteps + stepMotorNum + '>', '<p' + vars.return.vars.stepsPerRPM + stepMotorNum + '>', '<r' + vars.return.vars.maxRPM + stepMotorNum + '>', '<f' + vars.return.vars.stepMotorOnOff + stepMotorNum + '>', '<o' + vars.return.vars.time + stepMotorNum + '>', '<kFAULT' + stepMotorNum + '>'];
-	      //add encoder commands
-	      if (settings.encoder.enable) {
-	        vars.return.commands = enableEncoder.concat(vars.return.commands);
-	      } else {
-	        vars.return.commands = disableEncoder.concat(vars.return.commands);
-	      }
-	    } else if (type === 'test') {
-	      vars.return.commands = ['<v' + vars.return.vars.direction + stepMotorNum + '>', '<s0' + stepMotorNum + '>', '<p' + vars.return.vars.stepsPerRPM + stepMotorNum + '>', '<r' + vars.return.vars.maxRPM + stepMotorNum + '>', '<f' + vars.return.vars.stepMotorOnOff + stepMotorNum + '>', '<o' + vars.return.vars.time + stepMotorNum + '>', '<kFAULT' + stepMotorNum + '>'];
-	      //add encoder commands
-	      if (settings.encoder.enable) {
-	        vars.return.commands = enableEncoder.concat(vars.return.commands);
-	      } else {
-	        vars.return.commands = disableEncoder.concat(vars.return.commands);
-	      }
-	    }
-	    if (cb) cb(vars.return);else return vars.return;
-	  }
-	}
-
-/***/ },
-/* 310 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = logModalService;
-	function logModalService(bugout) {
-	  var logModal = this;
-	
-	  logModal.emailFullLog = function () {
-	    var now = Date.now();
-	    cordova.plugins.email.isAvailable(function (isAvailable) {
-	      bugout.bugout.log('email available:' + isAvailable);
-	      if (isAvailable === true) {
-	        (function () {
-	          var logFile = bugout.bugout.getLog();
-	          // save the file locally, so it can be retrieved from emailComposer
-	          window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function (fileSystem) {
-	            bugout.bugout.log('file system open: ' + fileSystem.name);
-	            // create the file if it doesn't exist
-	            fileSystem.getFile('log' + now + '.txt', { create: true, exclusive: false }, function (file) {
-	              bugout.bugout.log("file is file?" + file.isFile.toString());
-	              // create writer
-	              file.createWriter(function (writer) {
-	                // write
-	                writer.write(logFile);
-	                // when done writing, call up email composer
-	                writer.onwriteend = function () {
-	                  bugout.bugout.log('done writing');
-	                  cordova.plugins.email.open({
-	                    to: ['p.m.c.sevat@gmail.com', 'info@goodlife.nu'],
-	                    subject: 'Toothmaster bug report',
-	                    body: 'I have encountered an error. Could you please look into this problem? \nMy logfile is attached.\n\nKind regards,\nA Toothmaster user',
-	                    attachments: [cordova.file.externalCacheDirectory + '/' + 'log' + now + '.txt']
-	                  });
-	                };
-	              }, fileSystemError);
-	            }, fileSystemError);
-	          }, fileSystemError);
-	        })();
-	      } else {
-	        // not available
-	        $ionicPopup.alert({
-	          title: 'No email composer available',
-	          template: 'There is no email app available through which the email can be sent'
-	        });
-	      }
-	    });
-	
-	    function fileSystemError(error) {
-	      bugout.bugout.log('Error getting file system: ' + error.code);
-	    }
-	  };
-	}
-
-/***/ },
-/* 311 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = modalService;
-	function modalService($ionicModal, $rootScope) {
-	  var init = function init(template, $scope) {
-	
-	    var promise = void 0;
-	    $scope = $scope || $rootScope.$new();
-	    promise = $ionicModal.fromTemplateUrl(template, {
-	      scope: $scope,
-	      animation: 'slide-in-up'
-	    }).then(function (modal) {
-	      $scope.modal = modal;
-	      return modal;
-	    });
-	
-	    $scope.openModal = function () {
-	      $scope.modal.show();
-	    };
-	    $scope.closeModal = function () {
-	      $scope.modal.hide();
-	    };
-	    $scope.$on('$destroy', function () {
-	      $scope.modal.remove();
-	    });
-	
-	    return promise;
-	  };
-	  return {
-	    init: init
-	  };
-	}
-
-/***/ },
-/* 312 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = statusService;
-	function statusService(bugout) {
-	  var statusService = this;
-	  //Available methods
-	  statusService.getSending = getSending;
-	  statusService.setSending = setSending;
-	  statusService.getEmergency = getEmergency;
-	  statusService.setEmergency = setEmergency;
-	  statusService.getSubscribed = getSubscribed;
-	  statusService.setSubscribed = setSubscribed;
-	
-	  //Scoped variables
-	  statusService.sending = false;
-	  statusService.emergency = false;
-	  statusService.subscribed = false;
-	
-	  function getSending() {
-	    return statusService.sending;
-	  }
-	
-	  function setSending(value) {
-	    statusService.sending = value;
-	  }
-	
-	  function getEmergency() {
-	    return statusService.emergency;
-	  }
-	
-	  function setEmergency(value) {
-	    statusService.emergency = value;
-	  }
-	
-	  function getSubscribed() {
-	    bugout.bugout.log('getSubscribed called');
-	    return statusService.subscribed;
-	  }
-	
-	  function setSubscribed(boolean) {
-	    statusService.subscribed = boolean;
-	  }
-	}
-
-/***/ },
-/* 313 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function (statusService, isConnectedService, logService, disconnectService, buttonService, connectToDeviceService, bugout) {
-	  var pause = this;
-	  pause.pause = pauseFunc;
-	  pause.resume = resume;
-	
-	  function pauseFunc() {
-	    //var sending = statusService.getSending();
-	    var sending = statusService.getSending();
-	    bugout.bugout.log('sending in pause:' + statusService.getSending());
-	    var connected = isConnectedService.getValue();
-	    bugout.bugout.log('pause.pause called, sending: ' + sending + ', connected' + connected);
-	    if (!sending && connected) {
-	      logService.addOne('Disconnected after pausing application');
-	      disconnectService.disconnect();
-	      buttonService.setValues({ 'showCalcButton': false, 'readyForData': false });
-	    } else {
-	      logService.addOne('User has paused application, continuing task in background');
-	    }
-	  }
-	
-	  function resume() {
-	    var sending = statusService.getSending();
-	    if (window.localStorage['lastConnectedDevice'] !== '' && !sending) {
-	      connectToDeviceService.connectWithRetry();
-	    } else if (sending) {
-	      bugout.bugout.log('skipped reconnect, because sending is ' + sending);
-	    }
-	  }
-	};
-
-/***/ },
-/* 314 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = crcService;
-	
-	var _crc = __webpack_require__(315);
-	
-	var _crc2 = _interopRequireDefault(_crc);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function crcService() {
-	  var crcService = this;
-	
-	  crcService.appendCRC = function (str) {
-	    var crc = (0, _crc2.default)(str);
-	    str += String.fromCharCode(crc.Uint8High) + String.fromCharCode(crc.Uint8Low);
-	    return str;
-	  };
-	}
-
-/***/ },
-/* 315 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	var crcTableStr = '0 4129 8258 12387 16516 20645 24774 28903 33032 37161 41290 45419 49548 53677 57806 61935 4657 528 12915 8786 21173 17044 29431 25302 37689 33560 45947 41818 54205 50076 62463 58334 9314 13379 1056 5121 25830 29895 17572 21637 42346 46411 34088 38153 58862 62927 50604 54669 13907 9842 5649 1584 30423 26358 22165 18100 46939 42874 38681 34616 63455 59390 55197 51132 18628 22757 26758 30887 2112 6241 10242 14371 51660 55789 59790 63919 35144 39273 43274 47403 23285 19156 31415 27286 6769 2640 14899 10770 56317 52188 64447 60318 39801 35672 47931 43802 27814 31879 19684 23749 11298 15363 3168 7233 60846 64911 52716 56781 44330 48395 36200 40265 32407 28342 24277 20212 15891 11826 7761 3696 65439 61374 57309 53244 48923 44858 40793 36728 37256 33193 45514 41451 53516 49453 61774 57711 4224 161 12482 8419 20484 16421 28742 24679 33721 37784 41979 46042 49981 54044 58239 62302 689 4752 8947 13010 16949 21012 25207 29270 46570 42443 38312 34185 62830 58703 54572 50445 13538 9411 5280 1153 29798 25671 21540 17413 42971 47098 34713 38840 59231 63358 50973 55100 9939 14066 1681 5808 26199 30326 17941 22068 55628 51565 63758 59695 39368 35305 47498 43435 22596 18533 30726 26663 6336 2273 14466 10403 52093 56156 60223 64286 35833 39896 43963 48026 19061 23124 27191 31254 2801 6864 10931 14994 64814 60687 56684 52557 48554 44427 40424 36297 31782 27655 23652 19525 15522 11395 7392 3265 61215 65342 53085 57212 44955 49082 36825 40952 28183 32310 20053 24180 11923 16050 3793 7920';
-	var crcTable = crcTableStr.split(' ');
-	
-	var crcTableHex = [];
-	
-	crcTable.map(function (str, i) {
-	  crcTableHex.push(parseInt(str, 10));
-	});
-	
-	function crc16(s) {
-	  var returnObj = {};
-	  var crc = 0xFFFF;
-	  var j, i;
-	
-	  for (i = 0; i < s.length; i++) {
-	
-	    var c = s.charCodeAt(i);
-	    if (c > 255) {
-	      throw new RangeError();
-	    }
-	    j = (c ^ crc >> 8) & 0xFF;
-	    crc = crcTable[j] ^ crc << 8;
-	  }
-	
-	  returnObj.Uint16 = (crc ^ 0) & 0xFFFF;
-	
-	  returnObj.Uint8High = returnObj.Uint16 >> 8 & 0xff;
-	  returnObj.Uint8Low = returnObj.Uint16 & 0xff;
-	
-	  return returnObj;
-	}
-	
-	module.exports = crc16;
-
-/***/ },
-/* 316 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	function router($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
-	  $ionicConfigProvider.views.maxCache(1);
-	
-	  /**
-	   * Important, for app, every path is relative to index.html
-	   * */
-	
-	  $stateProvider.state('app', {
-	    name: 'app',
-	    url: '/app',
-	    abstract: true,
-	    templateUrl: './templates/menu.html'
-	  }).state('app.settings', {
-	    name: 'settings',
-	    url: '/settings',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/settings.html',
-	        controller: 'SettingsCtrl'
-	      }
-	    }
-	  }).state('app.home', {
-	    name: 'home',
-	    url: '/home',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/home.html'
-	      }
-	    }
-	  }).state('app.safety-slide', {
-	    url: '/safety-slide',
-	    name: 'safety-slide',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/safety-slide.html',
-	        controller: 'SafetySlides'
-	      }
-	    }
-	  }).state('app.program', {
-	    name: 'program',
-	    url: '/program',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/program.html',
-	        controller: 'ProgramController'
-	      }
-	    }
-	  }).state('app.homing', {
-	    name: 'homing',
-	    url: '/homing',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/homing.html',
-	        controller: 'homingCtrl'
-	      }
-	    }
-	  }).state('app.runBluetooth', {
-	    name: 'runBluetooth',
-	    url: '/runBluetooth',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/runBluetooth.html',
-	        controller: 'runBluetoothCtrl'
-	      }
-	    }
-	  }).state('app.test', {
-	    name: 'test',
-	    url: '/test',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/test.html',
-	        controller: 'testCtrl'
-	      }
-	    }
-	  }).state('app.website', {
-	    name: 'website',
-	    url: '/website',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/website.html'
-	      }
-	    }
-	  }).state('app.bluetoothConnection', {
-	    name: 'bluetoothConnection',
-	    url: '/bluetoothConnection',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/bluetoothConnection.html',
-	        controller: 'bluetoothConnectionCtrl'
-	      }
-	    }
-	  }).state('app.asyncTest', {
-	    name: 'asyncTest',
-	    url: '/asyncTest',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/asyncTest.html',
-	        controller: 'asyncCtrl',
-	        controllerAs: 'async'
-	      }
-	    }
-	  });
-	  // if none of the above states are matched, use this as the fallback
-	  $urlRouterProvider.otherwise('/app/program');
-	}
-	
-	exports.default = router;
-
-/***/ },
-/* 317 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
@@ -9889,7 +8555,7 @@
 	};
 
 /***/ },
-/* 318 */
+/* 302 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10190,7 +8856,7 @@
 	};
 
 /***/ },
-/* 319 */
+/* 303 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10327,7 +8993,7 @@
 	};
 
 /***/ },
-/* 320 */
+/* 304 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10335,6 +9001,8 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService, statusService, connectToDeviceService, logModalService, modalService, $async) {
 	  //TODO interval check on bluetoothConnected
@@ -10612,81 +9280,124 @@
 	  //SECTION: send settings before homing, test and makeMovement logic
 	  //
 	
-	  self.sendWithRetry = $async(regeneratorRuntime.mark(function _callee(str) {
-	    var res, _i;
+	  self.sendWithRetry = $async(regeneratorRuntime.mark(function _callee2(str) {
+	    var _this = this;
 	
-	    return regeneratorRuntime.wrap(function _callee$(_context) {
-	      while (1) {
-	        switch (_context.prev = _context.next) {
-	          case 0:
-	            res = void 0;
-	            _i = 0;
-	
-	          case 2:
-	            if (!(_i < 5)) {
-	              _context.next = 17;
-	              break;
-	            }
-	
-	            console.log('try: ' + _i + ', command: ' + str);
-	            _context.next = 6;
-	            return sendAndReceiveService.writeAsync(str);
-	
-	          case 6:
-	            res = _context.sent;
-	
-	            console.log('res in sendWithretry: ' + res);
-	
-	            if (!(_i === 4)) {
-	              _context.next = 12;
-	              break;
-	            }
-	
-	            return _context.abrupt('return', new Promise(function (resolve, reject) {
-	              reject('exceeded num of tries');
-	            }));
-	
-	          case 12:
-	            if (!(res === 'OK')) {
-	              _context.next = 14;
-	              break;
-	            }
-	
-	            return _context.abrupt('return', new Promise(function (resolve, reject) {
-	              console.log('resolve value: ' + res);
-	              resolve('resolve value: ' + res);
-	            }));
-	
-	          case 14:
-	            _i++;
-	            _context.next = 2;
-	            break;
-	
-	          case 17:
-	          case 'end':
-	            return _context.stop();
-	        }
-	      }
-	    }, _callee, this);
-	  }));
-	
-	  //user clicks button front end, sendSettingsData() called
-	  $scope.sendSettingsData = $async(regeneratorRuntime.mark(function _callee2() {
-	    var _i2, res;
+	    var _ret;
 	
 	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
 	      while (1) {
 	        switch (_context2.prev = _context2.next) {
 	          case 0:
 	            _context2.prev = 0;
+	            return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
+	              var res, _i;
+	
+	              return regeneratorRuntime.wrap(function _callee$(_context) {
+	                while (1) {
+	                  switch (_context.prev = _context.next) {
+	                    case 0:
+	                      res = void 0;
+	                      _i = 0;
+	
+	                    case 2:
+	                      if (!(_i < 5)) {
+	                        _context.next = 17;
+	                        break;
+	                      }
+	
+	                      console.log('try: ' + _i + ', command: ' + str);
+	                      _context.next = 6;
+	                      return sendAndReceiveService.writeAsync(str);
+	
+	                    case 6:
+	                      res = _context.sent;
+	
+	                      console.log('res in sendWithretry: ' + res);
+	
+	                      if (!(_i === 4)) {
+	                        _context.next = 12;
+	                        break;
+	                      }
+	
+	                      return _context.abrupt('return', {
+	                        v: new Promise(function (resolve, reject) {
+	                          reject('exceeded num of tries');
+	                        })
+	                      });
+	
+	                    case 12:
+	                      if (!(res === 'OK')) {
+	                        _context.next = 14;
+	                        break;
+	                      }
+	
+	                      return _context.abrupt('return', {
+	                        v: new Promise(function (resolve, reject) {
+	                          console.log('resolve value: ' + res);
+	                          resolve('resolve value: ' + res);
+	                        })
+	                      });
+	
+	                    case 14:
+	                      _i++;
+	                      _context.next = 2;
+	                      break;
+	
+	                    case 17:
+	                    case 'end':
+	                      return _context.stop();
+	                  }
+	                }
+	              }, _callee, _this);
+	            })(), 't0', 2);
+	
+	          case 2:
+	            _ret = _context2.t0;
+	
+	            if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
+	              _context2.next = 5;
+	              break;
+	            }
+	
+	            return _context2.abrupt('return', _ret.v);
+	
+	          case 5:
+	            _context2.next = 10;
+	            break;
+	
+	          case 7:
+	            _context2.prev = 7;
+	            _context2.t1 = _context2['catch'](0);
+	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
+	              reject(_context2.t1);
+	            }));
+	
+	          case 10:
+	          case 'end':
+	            return _context2.stop();
+	        }
+	      }
+	    }, _callee2, this, [[0, 7]]);
+	  }));
+	
+	  //user clicks button front end, sendSettingsData() called
+	  $scope.sendSettingsData = $async(regeneratorRuntime.mark(function _callee3() {
+	    var _i2, res;
+	
+	    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+	      while (1) {
+	        switch (_context3.prev = _context3.next) {
+	          case 0:
+	            _context3.prev = 0;
 	
 	            if (!(statusService.getEmergency() === false)) {
-	              _context2.next = 19;
+	              _context3.next = 19;
 	              break;
 	            }
 	
 	            if (!(statusService.getSending() === false)) {
-	              _context2.next = 17;
+	              _context3.next = 17;
 	              break;
 	            }
 	
@@ -10698,112 +9409,127 @@
 	
 	          case 7:
 	            if (!(_i2 < commands.length)) {
-	              _context2.next = 17;
+	              _context3.next = 17;
 	              break;
 	            }
 	
 	            console.log('going to await for command reply to command: ' + commands[_i2]);
-	            _context2.next = 11;
+	            _context3.next = 11;
 	            return self.sendWithRetry(commands[_i2]);
 	
 	          case 11:
-	            res = _context2.sent;
+	            res = _context3.sent;
 	
 	            console.log('awaited reply for command: ' + commands[_i2] + ', i=' + _i2 + ', response: ' + res);
 	
+	            //On last command, start check if settings have been sent correctly
 	            if (_i2 === commands.length - 1) {
-	              console.log('commands');
-	              console.log(commands);
-	              console.log('commands.length');
-	              console.log(commands.length);
-	              console.log('last command of sendSettings is OK');
-	              lastSendSettingsCommand(res);
+	              settingsSentCorrectlyCheck(res);
 	            }
 	
 	          case 14:
 	            _i2++;
-	            _context2.next = 7;
+	            _context3.next = 7;
 	            break;
 	
 	          case 17:
-	            _context2.next = 20;
+	            _context3.next = 20;
 	            break;
 	
 	          case 19:
 	            addToLog('Emergency on, will not continue sending settings data');
 	
 	          case 20:
-	            _context2.next = 25;
+	            _context3.next = 25;
 	            break;
 	
 	          case 22:
-	            _context2.prev = 22;
-	            _context2.t0 = _context2['catch'](0);
+	            _context3.prev = 22;
+	            _context3.t0 = _context3['catch'](0);
 	
-	            console.log('ERR: ' + _context2.t0);
+	            console.log('ERR: ' + _context3.t0);
 	
 	          case 25:
 	          case 'end':
-	            return _context2.stop();
+	            return _context3.stop();
 	        }
 	      }
-	    }, _callee2, this, [[0, 22]]);
+	    }, _callee3, this, [[0, 22]]);
 	  }));
+	
+	  function settingsSentCorrectlyCheck(res) {
+	    //Settings have been sent correctly, start pinging for update
+	    if (res.search('rdy') > -1) {
+	      console.log('last command of sendSettings is OK');
+	      addToLog('Moving to start position');
+	    }
+	    //  Setting have been sent incorrectly
+	    else if (res.search('kFAULT') !== -1) {
+	        addToLog('Settings have been sent incorrectly, please try again');
+	        emergencyService.on(function () {
+	          emergencyService.off();
+	        });
+	      }
+	  }
 	
 	  function checkWydone() {
 	    console.log('checkWydone');
-	    var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-	      lastSendSettingsCommand(res);
-	      rdy();
+	    var timer = $interval(function () {
+	      sendAndReceiveService.write('<w' + stepMotorNum + '>', checkWydone());
 	    });
+	
+	    $rootScope.$on('wydone', function (event, res) {
+	      timer();
+	      movedToStartPosition();
+	    });
+	
+	    // var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
+	    //   lastSendSettingsCommand(res);
+	    //   rdy();
+	    // })
 	  }
 	
-	  function lastSendSettingsCommand(res) {
-	    //Settings have been sent correctly, start pinging for update
-	    if (res.search('rdy') > -1) {
-	      addToLog('Moving to start position');
-	      sendAndReceiveService.write('<w' + stepMotorNum + '>', checkWydone());
+	  function movedToStartPosition() {
+	    setButtons({
+	      'readyForData': false,
+	      'showMovingButton': true,
+	      'showCalcButton': false,
+	      'showHoming': false,
+	      'showSpinner': false
+	    });
+	    statusService.setSending(false);
+	    addToLog('Moved to start position');
+	    var subCuts = program.cutWidth / program.sawWidth;
+	    var cutsRoundedUp = Math.ceil(subCuts);
+	    //On popup user is able to indicate that cut is complete
+	    //Button on popup triggers startMoving()
+	    if (program.cutWidth !== program.sawWidth) {
+	      $ionicPopup.alert({
+	        title: 'Make the subcut 1/' + cutsRoundedUp
+	      });
+	    } else {
+	      $ionicPopup.alert({
+	        title: 'Make the cut'
+	      });
 	    }
-	    //Movement is complete
-	    else if (res.search('wydone') > -1) {
-	        //showMoving button becomes available, which allows user to call startMoving()
-	        setButtons({
-	          'readyForData': false,
-	          'showMovingButton': true,
-	          'showCalcButton': false,
-	          'showHoming': false,
-	          'showSpinner': false
-	        });
-	        statusService.setSending(false);
-	        addToLog('Moved to start position');
-	        var subCuts = program.cutWidth / program.sawWidth;
-	        var cutsRoundedUp = Math.ceil(subCuts);
-	        //On popup user is able to indicate that cut is complete
-	        //Button on popup triggers startMoving()
-	        if (program.cutWidth !== program.sawWidth) {
-	          $ionicPopup.alert({
-	            title: 'Make the subcut 1/' + cutsRoundedUp
-	          });
-	        } else {
-	          $ionicPopup.alert({
-	            title: 'Make the cut'
-	          });
-	        }
-	      }
-	      //  Setting have been sent incorrectly
-	      else if (res.search('kFAULT') !== -1) {
-	          addToLog('Settings have been sent incorrectly, please try again');
-	          emergencyService.on(function () {
-	            emergencyService.off();
-	          });
-	        }
-	        //  Keep connection alive
-	        else {
-	            $timeout(function () {
-	              sendAndReceiveService.write('<w' + stepMotorNum + '>', checkWydone());
-	            }, 100);
-	          }
 	  }
+	
+	  // function lastSendSettingsCommand(res) {
+	  //
+	  //   //Movement is complete
+	  //   if (res.search('wydone') > -1) {
+	  //     //showMoving button becomes available, which allows user to call startMoving()
+	  //    
+	  //   }
+	  //
+	  //   //  Keep connection alive
+	  //   else {
+	  //     $timeout(function () {
+	  //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+	  //     }, 100)
+	  //
+	  //   }
+	  // }
 	
 	  //
 	  //SECTION: startMoving \ take steps logic
@@ -10976,7 +9702,7 @@
 	};
 
 /***/ },
-/* 321 */
+/* 305 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11306,7 +10032,7 @@
 	};
 
 /***/ },
-/* 322 */
+/* 306 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11669,7 +10395,7 @@
 	};
 
 /***/ },
-/* 323 */
+/* 307 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11935,6 +10661,1353 @@
 	    $scope.fullLogPage += 1;
 	  };
 	};
+
+/***/ },
+/* 308 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
+	/**
+	 * Created by Patrick on 22/11/2016.
+	 */
+	module.exports = sendAndReceiveService;
+	
+	function sendAndReceiveService(statusService, emergencyService, $window, logService, $rootScope, buttonService, crcService, $ionicPopup, shareSettings, $interval, $timeout, $q, $async, bugout) {
+	  var sendAndReceive = this;
+	  //Available methods
+	  sendAndReceive.subscribe = subscribe;
+	  sendAndReceive.subscribeRawData = subscribeRawData;
+	  sendAndReceive.unsubscribe = unsubscribe;
+	  sendAndReceive.write = write;
+	  // sendAndReceive.writeAsync = writeAsync;
+	  sendAndReceive.writeBuffered = writeBuffered;
+	  sendAndReceive.checkInterpretedResponse = checkInterpretedResponse;
+	  sendAndReceive.getNewCommandID = getNewCommandID;
+	  sendAndReceive.setCommandID = setCommandID;
+	  sendAndReceive.resetCommandObj = resetCommandObj;
+	  sendAndReceive.expectedResponse = expectedResponse;
+	  sendAndReceive.addToCommandObj = addToCommandObj;
+	  sendAndReceive.emitResponse = emitResponse;
+	  sendAndReceive.sendEmergency = sendEmergency;
+	  sendAndReceive.createResetListener = createResetListener;
+	  sendAndReceive.subscribeEmergency = subscribeEmergency;
+	  sendAndReceive.clearBuffer = clearBuffer;
+	
+	  //emergency listener
+	  $rootScope.$on('emergencyOn', function () {
+	    bugout.bugout.log('emergencyOn received in sendAndReceiveService');
+	    sendAndReceive.sendEmergency();
+	    sendAndReceive.resetCommandObj();
+	  });
+	
+	  //service-scoped variables
+	  var stepMotorNum = shareSettings.getObj().stepMotorNum;
+	  var command;
+	  var response;
+	  var lastCommandTime;
+	  var lastReceivedTime;
+	  var subscribed = statusService.getSubscribed();
+	  var commandIdStr = $window.localStorage['commandIdNum'];
+	  var commandObj = {};
+	
+	  //method functions
+	  function subscribe() {
+	    logService.consoleLog('subscribed');
+	    statusService.setSubscribed(true);
+	
+	    //The responses from are based on delimiter '#',
+	    // however the full response can contain multiple '#'s
+	    // so temp holds command till they are complete
+	    var tempStr = '';
+	    $window.bluetoothSerial.subscribe('#', function (receivedStr) {
+	      lastReceivedTime = Date.now();
+	      tempStr += receivedStr;
+	      if (tempStr.search(';') > -1 && tempStr.search('#') > -1) {
+	        bugout.bugout.log('\ntemp in subscribe: \n' + tempStr);
+	        $rootScope.$emit('response', tempStr);
+	        sendAndReceive.emitResponse(tempStr);
+	        tempStr = '';
+	      }
+	    });
+	  }
+	
+	  function subscribeEmergency() {
+	    logService.consoleLog('subscribed emergency');
+	    $window.bluetoothSerial.subscribe('>', function (data) {
+	      lastReceivedTime = Date.now();
+	      if (data.search('<8:y>') > -1) {
+	        $rootScope.$emit('emergencyReset', data);
+	      }
+	    });
+	  }
+	
+	  function subscribeRawData() {
+	    $window.bluetoothSerial.subscribeRawData(function (data) {
+	      var bytes = String.fromCharCode.apply(null, new Uint8Array(data));
+	      bugout.bugout.log('Rawdata: ' + bytes);
+	    });
+	  }
+	
+	  function unsubscribe() {
+	    $window.bluetoothSerial.unsubscribe(function () {
+	      logService.consoleLog('Succesfully unsubscribed');
+	      statusService.setSubscribed(false);
+	    }, function () {
+	      logService.consoleLog('ERROR: could not unsubscribe');
+	    });
+	  }
+	
+	  function responseListener(searchStr) {
+	    return new Promise(function (resolve, reject) {
+	      var resReceived = false;
+	      var responseCount = 0;
+	
+	      //If no reply within 3s, reject
+	      $timeout(function () {
+	        if (!resReceived) reject('Response not in time');
+	      }, 3000);
+	
+	      //response received
+	      var listener = $rootScope.$on('response', function (event, res) {
+	        resReceived = true;
+	        responseCount += 1;
+	        var searchBool = checkResponse(res, searchStr);
+	        if (searchBool) {
+	          bugout.bugout.log('resolving OK');
+	          responseCount = 0;
+	          resolve('OK');
+	          listener();
+	        } else if (res.indexOf('667:') > -1) {
+	          resolve('RETRY');
+	        } else if (responseCount >= 3) reject('Too many wrong responses');
+	      });
+	    });
+	  }
+	
+	  function checkResponse(res, searchValues) {
+	    var returnBool = false;
+	    if (typeof searchValues === 'string') {
+	      bugout.bugout.log('res: ' + res + ', searchValueStr: ' + searchValues);
+	      returnBool = res.search(searchValues) > -1;
+	      bugout.bugout.log('returnBool: ' + returnBool);
+	    } else if (Array.isArray(searchValues)) {
+	      bugout.bugout.log('res: ' + res + 'searchValuesArr');
+	      bugout.bugout.log(searchValues);
+	      searchValues.map(function (value) {
+	        if (res.search(value) > -1) {
+	          returnBool = true;
+	        }
+	      });
+	      bugout.bugout.log('returnBool: ' + returnBool);
+	    }
+	    return returnBool;
+	  }
+	
+	  sendAndReceive.writeAsync = $async(regeneratorRuntime.mark(function _callee2(str) {
+	    var _this = this;
+	
+	    var _ret;
+	
+	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+	      while (1) {
+	        switch (_context2.prev = _context2.next) {
+	          case 0:
+	            _context2.prev = 0;
+	            return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
+	              var expectedResponseShouldContain, resolveValue;
+	              return regeneratorRuntime.wrap(function _callee$(_context) {
+	                while (1) {
+	                  switch (_context.prev = _context.next) {
+	                    case 0:
+	                      _context.next = 2;
+	                      return sendAndReceive.write(str);
+	
+	                    case 2:
+	                      expectedResponseShouldContain = sendAndReceive.expectedResponse(str[1]);
+	
+	                      bugout.bugout.log('expectedResponseShouldContain: ');
+	                      bugout.bugout.log(expectedResponseShouldContain);
+	                      _context.next = 7;
+	                      return responseListener(expectedResponseShouldContain);
+	
+	                    case 7:
+	                      resolveValue = _context.sent;
+	
+	                      expectedResponseShouldContain = null;
+	
+	                      return _context.abrupt('return', {
+	                        v: new Promise(function (resolve, reject) {
+	                          bugout.bugout.log('resolve with resolveValue: ' + resolveValue);
+	                          resolve(resolveValue);
+	                        })
+	                      });
+	
+	                    case 10:
+	                    case 'end':
+	                      return _context.stop();
+	                  }
+	                }
+	              }, _callee, _this);
+	            })(), 't0', 2);
+	
+	          case 2:
+	            _ret = _context2.t0;
+	
+	            if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
+	              _context2.next = 5;
+	              break;
+	            }
+	
+	            return _context2.abrupt('return', _ret.v);
+	
+	          case 5:
+	            _context2.next = 11;
+	            break;
+	
+	          case 7:
+	            _context2.prev = 7;
+	            _context2.t1 = _context2['catch'](0);
+	
+	            bugout.bugout.log('ERR: ' + _context2.t1);
+	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
+	              return reject(_context2.t1);
+	            }));
+	
+	          case 11:
+	          case 'end':
+	            return _context2.stop();
+	        }
+	      }
+	    }, _callee2, this, [[0, 7]]);
+	  }));
+	
+	  function write(str) {
+	    return new Promise(function (resolve, reject) {
+	      if (statusService.getEmergency() === false) {
+	        (function () {
+	
+	          //append string with cyclic redundancy check
+	          var commandWithCRC = crcService.appendCRC(str);
+	
+	          $window.bluetoothSerial.write(commandWithCRC, function () {
+	            bugout.bugout.log('sent: ' + commandWithCRC);
+	            lastCommandTime = Date.now();
+	            resolve();
+	          }, function () {
+	            bugout.bugout.log('ERROR: could not send command ' + str);
+	            reject('Could not send command');
+	          });
+	        })();
+	      }
+	    });
+	  }
+	
+	  function writeBuffered() {
+	    var commandIDObj = sendAndReceive.addToCommandObj(str);
+	    if (statusService.getEmergency() === false) {
+	      var command;
+	      //Used for buffered commands. Command with brackets: "<r34001>", without brackets: "r34001
+	      var commandWithoutBrackets = str.slice(1, str.length - 1);
+	      command = '<c' + commandWithoutBrackets + '$' + commandIDObj.ID + '>';
+	
+	      $window.bluetoothSerial.write(command, function () {
+	        logService.consoleLog('sent: ' + command);
+	        lastCommandTime = Date.now();
+	      }, function () {
+	        logService.consoleLog('ERROR: could not send command ' + str + ' , callingFunction: ' + callingFunction);
+	      });
+	      sendAndReceive.checkInterpretedResponse(commandIDObj.ID);
+	    } else {
+	      logService.addOne('Emergency pressed, will not send command');
+	    }
+	  }
+	
+	  //TODO remove this?
+	  function checkInterpretedResponse(commandID) {
+	    var interpreted = false;
+	    var checkInterpreted = $rootScope.$on('bluetoothResponse', function (event, res) {
+	      if (res.search('10:<c') > -1 && res.search(commandID) > -1) {
+	        interpreted = true;
+	        checkInterpreted();
+	      }
+	    });
+	    $timeout(function () {
+	      if (!interpreted) {
+	        logService.consoleLog('incorrect interpretation, ID: ' + commandID);
+	        $rootScope.$emit('faultyResponse');
+	        checkInterpreted();
+	      }
+	    }, 2500);
+	  }
+	
+	  function getNewCommandID() {
+	    commandIdStr = window.localStorage['commandIdNum'];
+	    var commandIdNum = Number(commandIdStr);
+	    commandIdNum += 1;
+	    sendAndReceive.setCommandID(commandIdNum);
+	    return commandIdNum;
+	  }
+	
+	  function setCommandID(num) {
+	    window.localStorage['commandIdNum'] = num;
+	  }
+	
+	  function resetCommandObj() {
+	    commandObj = {};
+	  }
+	
+	  function expectedResponse(str) {
+	    stepMotorNum = shareSettings.getObj().stepMotorNum;
+	    switch (str) {
+	      case 'y':
+	        return '8:y';
+	        break;
+	      case 'd':
+	        return '12:';
+	        break;
+	      case 'b':
+	        return '13:';
+	        break;
+	      case 'x':
+	        return '14:';
+	        break;
+	      case 'v':
+	        return '9:';
+	        break;
+	      case 's':
+	        return '6:';
+	        break;
+	      case 'p':
+	        return '5:';
+	        break;
+	      case 'r':
+	        return '3:';
+	        break;
+	      case 'o':
+	        return '2:';
+	        break;
+	      case 'f':
+	        return '11:';
+	        break;
+	      case 'k':
+	        return ['0:rdy', 'FAULT'];
+	        break;
+	      case 'q':
+	        buttonService.setValues({ 'showSpinner': true });
+	        return ['rdy', 'wydone', 'q'];
+	        break;
+	      case 'h':
+	        return '6:';
+	        break;
+	      case 'z':
+	        return '14:';
+	        break;
+	      case 'w':
+	        return ['wydone', 'w' + stepMotorNum];
+	        break;
+	    }
+	  }
+	
+	  function addToCommandObj(str) {
+	    var id = sendAndReceive.getNewCommandID();
+	    var expectedResponse = sendAndReceive.expectedResponse(str);
+	    var obj = {
+	      'ID': id,
+	      'command': str, //ex: <q2456>
+	      'expectedResponse': expectedResponse,
+	      'interpreted': false,
+	      'response': ''
+	    };
+	    commandObj[id] = obj;
+	    return obj;
+	  }
+	
+	  function emitResponse(res) {
+	    console.log('res in emitResponse: ' + res);
+	
+	    var settings = shareSettings.getObj();
+	    //handle stopswitch hit
+	    if (res.search('wydone:') > -1 && res.search('wydone:0') === -1) {
+	      stopSwitchHit(res);
+	    }
+	
+	    //handle encoder missed steps
+	    //splice result from '@' till end
+	    // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
+	    else if (res.search('wydone:') > -1 && res.search('@5') > -1 && settings.encoder.enable === true) {
+	        exceededMaximumNumberOfStepsToMiss(res);
+	      } else if (res.search('2:') > -1) {
+	        $rootScope.$emit('sendKfault', res);
+	      } else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
+	        faultyResponse(res);
+	      } else if (res.search('wydone:') > -1) {
+	        $rootScope.$emit('wydone', res);
+	      } else {
+	        $rootScope.$emit('bluetoothResponse', res);
+	      }
+	  }
+	
+	  function sendEmergency() {
+	    logService.consoleLog('sendAndReceiveService.sendEmergency called');
+	    sendAndReceive.subscribeEmergency();
+	    createResetListener();
+	    stepMotorNum = shareSettings.getObj().stepMotorNum;
+	    var resetCommand = crcService.appendCRC('<y8:y' + stepMotorNum + '>');
+	    $window.bluetoothSerial.write(resetCommand, function () {
+	      logService.addOne('Program reset command sent: ' + resetCommand);
+	    }, function (err) {
+	      logService.addOne('Error: Program reset command could not be sent. ' + err);
+	    });
+	  }
+	
+	  function createResetListener() {
+	    var emergencyResponse = $rootScope.$on('emergencyReset', function (event, res) {
+	      console.log('res in emergencyListener: ' + res);
+	      if (res.search('8:y') > -1) {
+	        logService.addOne('Program succesfully reset');
+	        sendAndReceive.unsubscribe();
+	        emergencyResponse();
+	      }
+	    });
+	    console.log('resetListener created');
+	  }
+	
+	  function clearBuffer() {
+	    $window.bluetoothSerial.clear(function () {
+	      logService.consoleLog('Received buffer cleared');
+	    }, function () {
+	      logService.consoleLog('Error: could not clear receive buffer');
+	    });
+	  }
+	  //
+	  //  Helper functions
+	  //
+	
+	  function stopSwitchHit(res) {
+	    var posStopswitch = res.lastIndexOf('@') - 3;
+	    $ionicPopup.alert({
+	      title: 'Error: hit stopswitch ' + res.charAt(posStopswitch),
+	      template: 'Unexpected stopswitch has been hit. Aborting task and resetting program.'
+	    });
+	    logService.consoleLog('Error: hit stopswitch ' + res.charAt(posStopswitch));
+	    logService.addOne('Error: hit stopswitch ' + res.charAt(posStopswitch));
+	    //emergencyService.on sets correct buttons and sends resetcommand
+	    emergencyService.on();
+	    $rootScope.$emit('stopswitchHit', res, res.charAt(posStopswitch));
+	  }
+	
+	  function exceededMaximumNumberOfStepsToMiss(res) {
+	    var splicedStr = res.slice(res.lastIndexOf('@'));
+	    var missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
+	    var maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : 'unknown';
+	    $ionicPopup.alert({
+	      title: 'You have missed the maximum number of allowed steps',
+	      template: 'The program has been stopped.<p>Maximum steps to miss: ' + maxAllowedMiss + '</p><p>Number of steps actually missed ' + missedSteps + '</p>'
+	    });
+	    logService.consoleLog('ERROR: hit max number of allowed steps');
+	    logService.addOne('ERROR: exceeded maximum number of steps to miss (encoder setting)');
+	    emergencyService.on();
+	    $rootScope.$emit('maxSteps', res, missedSteps);
+	  }
+	
+	  function faultyResponse(res) {
+	    logService.consoleLog('\nERROR:\nPotential faulty response: ' + res);
+	    var numStr1 = res.slice(res.indexOf('$') + 1, res.indexOf('>'));
+	    var commandID1 = Number(numStr1);
+	    var commandIDObj = commandObj[commandID1];
+	    logService.consoleLog('commandIDObj.command: ' + commandIDObj.command);
+	    if (res.search(commandIDObj.command) === -1) {
+	      logService.consoleLog('confirmed faulty response');
+	      $rootScope.$emit('faultyResponse', res);
+	      delete commandObj[commandID1];
+	    }
+	  }
+	
+	  function wydoneListener() {}
+	}
+
+/***/ },
+/* 309 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = shareSettings;
+	/**
+	 * Created by Patrick on 26/11/2016.
+	 */
+	function shareSettings() {
+	  var shareSettings = this;
+	  shareSettings.getObj = getObj;
+	  shareSettings.setObj = setObj;
+	
+	  shareSettings.obj = {};
+	
+	  if (window.localStorage['settings'] !== '' && window.localStorage['settings'] !== undefined) {
+	    shareSettings.obj.settings = JSON.parse(window.localStorage['settings']);
+	  }
+	
+	  function setObj(value) {
+	    shareSettings.obj.settings = value;
+	  }
+	
+	  function getObj() {
+	    return shareSettings.obj.settings;
+	  }
+	}
+
+/***/ },
+/* 310 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function (bugout) {
+	  var shareProgram = this;
+	  shareProgram.getObj = getObj;
+	  shareProgram.setObj = setObj;
+	
+	  shareProgram.obj = {
+	    "program": {}
+	  };
+	
+	  function getObj() {
+	    if (shareProgram.obj.program.startPosition === undefined) {
+	      bugout.bugout.log('shareProgram.obj.program is undefined, setting start position to nill');
+	      shareProgram.obj.program.startPosition = 0;
+	    }
+	    return shareProgram.obj.program;
+	  }
+	
+	  function setObj(value) {
+	    shareProgram.obj.program = value;
+	  }
+	};
+
+/***/ },
+/* 311 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function () {
+	  var skip = this;
+	  skip.getSkip = getSkip;
+	  skip.setSkip = setSkip;
+	
+	  skip.value = undefined;
+	
+	  function getSkip() {
+	    return skip.value;
+	  }
+	  function setSkip(boolean) {
+	    skip.value = boolean;
+	  }
+	};
+
+/***/ },
+/* 312 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function (bugout) {
+	  var button = this;
+	  button.getValues = getValues;
+	  button.setValues = setValues;
+	  button.setEmergencyValues = setEmergencyValues;
+	
+	  button.value = {};
+	  button.value.readyForData = false;
+	  button.value.showEmergency = false;
+	  button.value.showMovingButton = false;
+	  button.value.showCalcButton = false;
+	  button.value.showResetButton = false;
+	  button.value.showHoming = true;
+	  button.value.showStressTest = true;
+	  button.value.showVersionButton = true;
+	  button.value.showMoveXMm = true;
+	  button.value.showSpinner = false;
+	
+	  function getValues() {
+	    return button.value;
+	  }
+	
+	  function setValues(obj) {
+	    bugout.bugout.log('buttonService.setValues called');
+	    for (var keyVal in obj) {
+	      if (obj.hasOwnProperty(keyVal)) button.value[keyVal] = obj[keyVal];
+	    }
+	  }
+	
+	  function setEmergencyValues() {
+	    button.setValues({
+	      showEmergency: false,
+	      showMovingButton: false,
+	      showCalcButton: false,
+	      showStressTest: false,
+	      showHoming: false,
+	      showSpinner: false,
+	      showVersionButton: false,
+	      showMoveXMm: false,
+	      readyForData: false,
+	      showResetButton: true
+	    });
+	  }
+	};
+
+/***/ },
+/* 313 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function (buttonService, statusService, $rootScope, bugout) {
+	  var emergency = this;
+	  emergency.on = emergencyOn;
+	  emergency.off = emergencyOff;
+	
+	  function emergencyOn(cb) {
+	    bugout.bugout.log('emergencyService.on called');
+	    statusService.setEmergency(true);
+	    buttonService.setEmergencyValues();
+	    $rootScope.$emit('emergencyOn');
+	    if (cb) cb();
+	  }
+	
+	  function emergencyOff(cb) {
+	    bugout.bugout.log('emergencyService.off called');
+	    statusService.setEmergency(false);
+	    statusService.setSending(false);
+	    $rootScope.$emit('emergencyOff');
+	    emergency.value = false;
+	    buttonService.setValues({
+	      showEmergency: false,
+	      showMovingButton: false,
+	      showResetButton: false,
+	      showCalcButton: true,
+	      showStressTest: true,
+	      showHoming: true,
+	      showSpinner: false,
+	      showVersionButton: true,
+	      showMoveXMm: true,
+	      readyForData: false
+	    });
+	    if (cb) cb();
+	  }
+	};
+
+/***/ },
+/* 314 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function bluetoothEnabledService(bugout, $cordovaBluetoothSerial) {
+	  var bluetoothEnabled = this;
+	  bluetoothEnabled.getValue = getValue;
+	
+	  function getValue(cb) {
+	    $cordovaBluetoothSerial.isEnabled().then(function () {
+	      bluetoothEnabled.value = true;
+	      bugout.bugout.log('checkBluetoothEnabledService.value =' + bluetoothEnabled.value);
+	      if (cb) cb(bluetoothEnabled.value);else return bluetoothEnabled.value;
+	    }, function () {
+	      bluetoothEnabled.value = false;
+	      bugout.bugout.log('checkBluetoothEnabledService.value =' + bluetoothEnabled.value);
+	      if (cb) cb(bluetoothEnabled.value);else return bluetoothEnabled.value;
+	    });
+	  }
+	}
+	
+	function bluetoothConnectedService(bugout, $cordovaBluetoothSerial) {
+	  var isConnected = this;
+	  isConnected.getValue = getValue;
+	
+	  function getValue(cb) {
+	    $cordovaBluetoothSerial.isConnected().then(function () {
+	      isConnected.value = true;
+	      bugout.bugout.log('isConnectedService.value =' + isConnected.value);
+	      return isConnected.value;
+	    }, function () {
+	      isConnected.value = false;
+	      bugout.bugout.log('isConnectedService.value =' + isConnected.value);
+	      return isConnected.value;
+	    }).then(function () {
+	      if (cb) cb(isConnected.value);
+	    });
+	  }
+	}
+	
+	function bluetoothConnectedToDeviceService(isConnectedService, logService, checkBluetoothEnabledService, buttonService, $rootScope, $timeout, $window, bugout) {
+	  var connect = this;
+	  connect.getDeviceName = getDeviceName;
+	  connect.setDeviceName = setDeviceName;
+	  connect.connectToLastDevice = connectToLastDevice;
+	  connect.connectWithRetry = connectWithRetry;
+	
+	  var retry = 1;
+	  var deviceName = '';
+	
+	  $rootScope.$on('emergencyOff', function () {
+	    retry = 1;
+	  });
+	
+	  function getDeviceName(cb) {
+	    if (cb) cb(deviceName);else return deviceName;
+	  }
+	
+	  function setDeviceName(str) {
+	    deviceName = str;
+	  }
+	
+	  function connectToLastDevice(bluetoothOnVal, cb) {
+	    var bluetoothOn = void 0;
+	    if (bluetoothOnVal === undefined) {
+	      checkBluetoothEnabledService.getValue(function (value) {
+	        bluetoothOn = value;
+	        valueRetrieved(cb);
+	      });
+	    } else {
+	      bluetoothOn = bluetoothOnVal;
+	      valueRetrieved(cb);
+	    }
+	    logService.addOne('Trying to connect with last known device');
+	  }
+	
+	  function connectWithRetry() {
+	    bugout.bugout.log('connectWithRetry called in connectService');
+	    var isConnected = void 0;
+	    var bluetoothOn = void 0;
+	    isConnectedService.getValue(function (value) {
+	      isConnected = value;
+	      checkBluetoothEnabledService.getValue(function (value) {
+	        bluetoothOn = value;
+	        valuesRetrieved(bluetoothOn, isConnected);
+	      });
+	    });
+	  }
+	
+	  function valuesRetrieved(bluetoothOn, isConnected) {
+	    if (bluetoothOn && !isConnected) {
+	      bugout.bugout.log('connectWithRetry bluetoothOn & !isConnected');
+	      connect.connectToLastDevice(bluetoothOn, function () {
+	        isConnectedService.getValue(function (value) {
+	          isConnected = value;
+	        });
+	        if (!isConnected && retry < 6) {
+	          bugout.bugout.log('retry connectToLastDevice');
+	          $timeout(function () {
+	            retry += 1;
+	            bugout.bugout.log('Connect with retry, try: ' + retry);
+	            connect.connectWithRetry();
+	          }, 500);
+	        } else if (isConnected) {
+	          retry = 1;
+	        } else if (!isConnected && retry >= 6) {
+	          logService.addOne('Could not connect with last known device, please make sure that device is turned on. If so, turn off your phone\'s Bluetooth and restart the app');
+	          retry = 1;
+	        }
+	      });
+	    }
+	  }
+	
+	  function valueRetrieved(cb) {
+	    if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '' && window.localStorage['lastConnectedDevice'] !== undefined) {
+	      bugout.bugout.log('actually connecting to lastConnected device');
+	      var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
+	      $window.bluetoothSerial.connectInsecure(obj.id, function () {
+	        connect.setDeviceName(obj.name);
+	        logService.addOne('Succesfully connected to last connected device');
+	        if (cb) cb();
+	      }, function () {
+	        bugout.bugout.log('could not connect to last connected device');
+	        if (cb) cb();
+	      });
+	    }
+	  }
+	}
+	
+	function turnOnBluetoothService($cordovaBluetoothSerial, checkBluetoothEnabledService, logService) {
+	  var turnOnBluetooth = this;
+	  turnOnBluetooth.turnOn = turnOn;
+	
+	  function turnOn(cb) {
+	    $cordovaBluetoothSerial.enable().then(function () {
+	      logService.addOne('Bluetooth has been turned on by Toothmaster app');
+	      if (cb) cb();
+	    }, function () {
+	      $cordovaBluetoothSerial.showBluetoothSettings();
+	      logService.addOne('Bluetooth should be turned on manually, redirected to Bluetooth settings');
+	    });
+	  }
+	}
+	
+	function disconnectService($cordovaBluetoothSerial, logService, buttonService, isConnectedService, $window, connectToDeviceService, shareSettings, bugout) {
+	  var disconnect = this;
+	  var stepMotorNum = shareSettings.getObj().stepMotorNum;
+	  disconnect.disconnect = function () {
+	    stepMotorNum = shareSettings.getObj().stepMotorNum;
+	    $cordovaBluetoothSerial.write('<<y8:y' + stepMotorNum + '>').then(function () {
+	      $window.bluetoothSerial.disconnect(function () {
+	        logService.addOne('User disconnected');
+	        connectToDeviceService.setDeviceName('');
+	        buttonService.setValues({ 'showCalcButton': false });
+	        isConnectedService.getValue();
+	      }, function () {
+	        bugout.bugout.log('User could not disconnect');
+	        logService.addOne('Could not disconnect from device');
+	      });
+	    });
+	  };
+	}
+	
+	exports.bluetoothEnabledService = bluetoothEnabledService;
+	exports.bluetoothConnectedService = bluetoothConnectedService;
+	exports.bluetoothConnectedToDeviceService = bluetoothConnectedToDeviceService;
+	exports.turnOnBluetoothService = turnOnBluetoothService;
+	exports.disconnectService = disconnectService;
+
+/***/ },
+/* 315 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function logService(bugout) {
+	  var logService = this;
+	  //Available methods
+	  logService.setBulk = setBulk;
+	  logService.addOne = addOne;
+	  logService.getLog = getLog;
+	  logService.consoleLog = consoleLog;
+	
+	  //Service-scoped variables
+	  logService.UILog = [];
+	
+	  //method functions
+	  function setBulk(arr) {
+	    logService.UILog = arr;
+	  }
+	
+	  function addOne(str) {
+	    bugout.bugout.log('adding to UI log: ' + str);
+	    if (logService.UILog.length === 0) {
+	      logService.UILog.unshift(str);
+	    } else if (logService.UILog[0].indexOf(String.fromCharCode(40)) !== -1 && logService.UILog[0].indexOf(String.fromCharCode(41)) !== -1) {
+	      var numStr = logService.UILog[0].slice(logService.UILog[0].indexOf('(') + 1, logService.UILog[0].indexOf(')'));
+	      var num = Number(numStr);
+	      //indexOf(')')+2 because of the extra space
+	      var cleanStr = logService.UILog[0].slice(logService.UILog[0].indexOf(')') + 2);
+	      if (str === cleanStr) {
+	        num += 1;
+	        logService.UILog[0] = '(' + num + ') ' + cleanStr;
+	      } else {
+	        logService.UILog.unshift(str);
+	      }
+	    } else if (logService.UILog[0] === str) {
+	      logService.UILog[0] = '(2) ' + str;
+	    } else {
+	      if (logService.UILog.length >= 200) {
+	        logService.UILog.pop();
+	        logService.UILog.unshift(str);
+	      } else {
+	        logService.UILog.unshift(str);
+	      }
+	    }
+	  }
+	
+	  function getLog(cb) {
+	    if (cb) cb(logService.UILog);
+	    return logService.UILog;
+	  }
+	
+	  function consoleLog(str) {
+	    bugout.bugout.log(str);
+	  }
+	}
+	
+	exports.default = logService;
+
+/***/ },
+/* 316 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = calculateVarsService;
+	//TODO check why cb is used, again there's no async here
+	function calculateVarsService(shareProgram, shareSettings) {
+	  var vars = this;
+	  //Available methods
+	  vars.getVars = getVars;
+	
+	  //Scoped variables
+	  var stepMotorNum = shareSettings.getObj().stepMotorNum;
+	
+	  function getVars(type, cb) {
+	    stepMotorNum = shareSettings.getObj().stepMotorNum;
+	    var program = shareProgram.getObj();
+	    var settings = shareSettings.getObj();
+	
+	    //this will be the return obj
+	    vars.return = {
+	      commands: [],
+	      vars: {}
+	    };
+	
+	    //these variables are always needed
+	    vars.return.vars.direction = settings.direction ? 1 : 0;
+	    vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch);
+	    vars.return.vars.stepsPerRPM = settings.dipswitch;
+	    vars.return.vars.maxRPM = (settings.maxFreq * 60 / settings.dipswitch).toFixed(3);
+	    vars.return.vars.time = settings.time.toFixed(3);
+	    vars.return.vars.stepMotorOnOff = '1';
+	    vars.return.vars.disableEncoder = '<x0' + stepMotorNum + '>';
+	    vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder = settings.encoder.stepsPerRPM !== 0 ? settings.dipswitch / settings.encoder.stepsPerRPM.toFixed(3) : '';
+	    vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder = settings.encoder.direction ? vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder * -1 : vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder;
+	    vars.return.vars.maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : '';
+	
+	    //depends if encoder is enabled, will be added later
+	    var disableEncoder = ['<y8:y' + stepMotorNum + '>', '<x0' + stepMotorNum + '>'];
+	    var enableEncoder = ['<y8:y' + stepMotorNum + '>', '<x1' + stepMotorNum + '>', '<d' + vars.return.vars.stepsPerRPMDevidedByStepsPerRPMEncoder + stepMotorNum + '>', '<b' + vars.return.vars.maxAllowedMiss + stepMotorNum + '>'];
+	
+	    //depends on type of movement
+	    //type can be: homing, test or runBluetooth
+	    if (type === 'homing') {
+	      vars.return.vars.homingStopswitchInt = settings.homingStopswitch ? 0 : 1;
+	      vars.return.commands = ['<v' + settings.direction + stepMotorNum + '>', '<p' + vars.return.vars.stepsPerRPM + stepMotorNum + '>', '<r' + vars.return.vars.maxRPM + stepMotorNum + '>', '<o' + vars.return.vars.time + stepMotorNum + '>', '<h' + vars.return.vars.homingStopswitchInt + stepMotorNum + '>', '<kFAULT' + stepMotorNum + '>'];
+	      //add encoder commands
+	      if (settings.encoder.enable) {
+	        vars.return.commands = enableEncoder.concat(vars.return.commands);
+	      } else {
+	        vars.return.commands = disableEncoder.concat(vars.return.commands);
+	      }
+	    } else if (type === 'runBluetooth') {
+	      vars.return.commands = ['<v' + (vars.return.vars.direction + stepMotorNum || 1) + '>', '<s' + vars.return.vars.startPositionSteps + stepMotorNum + '>', '<p' + vars.return.vars.stepsPerRPM + stepMotorNum + '>', '<r' + vars.return.vars.maxRPM + stepMotorNum + '>', '<f' + vars.return.vars.stepMotorOnOff + stepMotorNum + '>', '<o' + vars.return.vars.time + stepMotorNum + '>', '<kFAULT' + stepMotorNum + '>'];
+	      //add encoder commands
+	      if (settings.encoder.enable) {
+	        vars.return.commands = enableEncoder.concat(vars.return.commands);
+	      } else {
+	        vars.return.commands = disableEncoder.concat(vars.return.commands);
+	      }
+	    } else if (type === 'test') {
+	      vars.return.commands = ['<v' + vars.return.vars.direction + stepMotorNum + '>', '<s0' + stepMotorNum + '>', '<p' + vars.return.vars.stepsPerRPM + stepMotorNum + '>', '<r' + vars.return.vars.maxRPM + stepMotorNum + '>', '<f' + vars.return.vars.stepMotorOnOff + stepMotorNum + '>', '<o' + vars.return.vars.time + stepMotorNum + '>', '<kFAULT' + stepMotorNum + '>'];
+	      //add encoder commands
+	      if (settings.encoder.enable) {
+	        vars.return.commands = enableEncoder.concat(vars.return.commands);
+	      } else {
+	        vars.return.commands = disableEncoder.concat(vars.return.commands);
+	      }
+	    }
+	    if (cb) cb(vars.return);else return vars.return;
+	  }
+	}
+
+/***/ },
+/* 317 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = logModalService;
+	function logModalService(bugout) {
+	  var logModal = this;
+	
+	  logModal.emailFullLog = function () {
+	    var now = Date.now();
+	    cordova.plugins.email.isAvailable(function (isAvailable) {
+	      bugout.bugout.log('email available:' + isAvailable);
+	      if (isAvailable === true) {
+	        (function () {
+	          var logFile = bugout.bugout.getLog();
+	          // save the file locally, so it can be retrieved from emailComposer
+	          window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function (fileSystem) {
+	            bugout.bugout.log('file system open: ' + fileSystem.name);
+	            // create the file if it doesn't exist
+	            fileSystem.getFile('log' + now + '.txt', { create: true, exclusive: false }, function (file) {
+	              bugout.bugout.log("file is file?" + file.isFile.toString());
+	              // create writer
+	              file.createWriter(function (writer) {
+	                // write
+	                writer.write(logFile);
+	                // when done writing, call up email composer
+	                writer.onwriteend = function () {
+	                  bugout.bugout.log('done writing');
+	                  cordova.plugins.email.open({
+	                    to: ['p.m.c.sevat@gmail.com', 'info@goodlife.nu'],
+	                    subject: 'Toothmaster bug report',
+	                    body: 'I have encountered an error. Could you please look into this problem? \nMy logfile is attached.\n\nKind regards,\nA Toothmaster user',
+	                    attachments: [cordova.file.externalCacheDirectory + '/' + 'log' + now + '.txt']
+	                  });
+	                };
+	              }, fileSystemError);
+	            }, fileSystemError);
+	          }, fileSystemError);
+	        })();
+	      } else {
+	        // not available
+	        $ionicPopup.alert({
+	          title: 'No email composer available',
+	          template: 'There is no email app available through which the email can be sent'
+	        });
+	      }
+	    });
+	
+	    function fileSystemError(error) {
+	      bugout.bugout.log('Error getting file system: ' + error.code);
+	    }
+	  };
+	}
+
+/***/ },
+/* 318 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = modalService;
+	function modalService($ionicModal, $rootScope) {
+	  var init = function init(template, $scope) {
+	
+	    var promise = void 0;
+	    $scope = $scope || $rootScope.$new();
+	    promise = $ionicModal.fromTemplateUrl(template, {
+	      scope: $scope,
+	      animation: 'slide-in-up'
+	    }).then(function (modal) {
+	      $scope.modal = modal;
+	      return modal;
+	    });
+	
+	    $scope.openModal = function () {
+	      $scope.modal.show();
+	    };
+	    $scope.closeModal = function () {
+	      $scope.modal.hide();
+	    };
+	    $scope.$on('$destroy', function () {
+	      $scope.modal.remove();
+	    });
+	
+	    return promise;
+	  };
+	  return {
+	    init: init
+	  };
+	}
+
+/***/ },
+/* 319 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = statusService;
+	function statusService(bugout) {
+	  var statusService = this;
+	  //Available methods
+	  statusService.getSending = getSending;
+	  statusService.setSending = setSending;
+	  statusService.getEmergency = getEmergency;
+	  statusService.setEmergency = setEmergency;
+	  statusService.getSubscribed = getSubscribed;
+	  statusService.setSubscribed = setSubscribed;
+	
+	  //Scoped variables
+	  statusService.sending = false;
+	  statusService.emergency = false;
+	  statusService.subscribed = false;
+	
+	  function getSending() {
+	    return statusService.sending;
+	  }
+	
+	  function setSending(value) {
+	    statusService.sending = value;
+	  }
+	
+	  function getEmergency() {
+	    return statusService.emergency;
+	  }
+	
+	  function setEmergency(value) {
+	    statusService.emergency = value;
+	  }
+	
+	  function getSubscribed() {
+	    bugout.bugout.log('getSubscribed called');
+	    return statusService.subscribed;
+	  }
+	
+	  function setSubscribed(boolean) {
+	    statusService.subscribed = boolean;
+	  }
+	}
+
+/***/ },
+/* 320 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function (statusService, isConnectedService, logService, disconnectService, buttonService, connectToDeviceService, bugout) {
+	  var pause = this;
+	  pause.pause = pauseFunc;
+	  pause.resume = resume;
+	
+	  function pauseFunc() {
+	    //var sending = statusService.getSending();
+	    var sending = statusService.getSending();
+	    bugout.bugout.log('sending in pause:' + statusService.getSending());
+	    var connected = isConnectedService.getValue();
+	    bugout.bugout.log('pause.pause called, sending: ' + sending + ', connected' + connected);
+	    if (!sending && connected) {
+	      logService.addOne('Disconnected after pausing application');
+	      disconnectService.disconnect();
+	      buttonService.setValues({ 'showCalcButton': false, 'readyForData': false });
+	    } else {
+	      logService.addOne('User has paused application, continuing task in background');
+	    }
+	  }
+	
+	  function resume() {
+	    var sending = statusService.getSending();
+	    if (window.localStorage['lastConnectedDevice'] !== '' && !sending) {
+	      connectToDeviceService.connectWithRetry();
+	    } else if (sending) {
+	      bugout.bugout.log('skipped reconnect, because sending is ' + sending);
+	    }
+	  }
+	};
+
+/***/ },
+/* 321 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = crcService;
+	
+	var _crc = __webpack_require__(322);
+	
+	var _crc2 = _interopRequireDefault(_crc);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function crcService() {
+	  var crcService = this;
+	
+	  crcService.appendCRC = function (str) {
+	    var crc = (0, _crc2.default)(str);
+	    str += String.fromCharCode(crc.Uint8High) + String.fromCharCode(crc.Uint8Low);
+	    return str;
+	  };
+	}
+
+/***/ },
+/* 322 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	var crcTableStr = '0 4129 8258 12387 16516 20645 24774 28903 33032 37161 41290 45419 49548 53677 57806 61935 4657 528 12915 8786 21173 17044 29431 25302 37689 33560 45947 41818 54205 50076 62463 58334 9314 13379 1056 5121 25830 29895 17572 21637 42346 46411 34088 38153 58862 62927 50604 54669 13907 9842 5649 1584 30423 26358 22165 18100 46939 42874 38681 34616 63455 59390 55197 51132 18628 22757 26758 30887 2112 6241 10242 14371 51660 55789 59790 63919 35144 39273 43274 47403 23285 19156 31415 27286 6769 2640 14899 10770 56317 52188 64447 60318 39801 35672 47931 43802 27814 31879 19684 23749 11298 15363 3168 7233 60846 64911 52716 56781 44330 48395 36200 40265 32407 28342 24277 20212 15891 11826 7761 3696 65439 61374 57309 53244 48923 44858 40793 36728 37256 33193 45514 41451 53516 49453 61774 57711 4224 161 12482 8419 20484 16421 28742 24679 33721 37784 41979 46042 49981 54044 58239 62302 689 4752 8947 13010 16949 21012 25207 29270 46570 42443 38312 34185 62830 58703 54572 50445 13538 9411 5280 1153 29798 25671 21540 17413 42971 47098 34713 38840 59231 63358 50973 55100 9939 14066 1681 5808 26199 30326 17941 22068 55628 51565 63758 59695 39368 35305 47498 43435 22596 18533 30726 26663 6336 2273 14466 10403 52093 56156 60223 64286 35833 39896 43963 48026 19061 23124 27191 31254 2801 6864 10931 14994 64814 60687 56684 52557 48554 44427 40424 36297 31782 27655 23652 19525 15522 11395 7392 3265 61215 65342 53085 57212 44955 49082 36825 40952 28183 32310 20053 24180 11923 16050 3793 7920';
+	var crcTable = crcTableStr.split(' ');
+	
+	var crcTableHex = [];
+	
+	crcTable.map(function (str, i) {
+	  crcTableHex.push(parseInt(str, 10));
+	});
+	
+	function crc16(s) {
+	  var returnObj = {};
+	  var crc = 0xFFFF;
+	  var j, i;
+	
+	  for (i = 0; i < s.length; i++) {
+	
+	    var c = s.charCodeAt(i);
+	    if (c > 255) {
+	      throw new RangeError();
+	    }
+	    j = (c ^ crc >> 8) & 0xFF;
+	    crc = crcTable[j] ^ crc << 8;
+	  }
+	
+	  returnObj.Uint16 = (crc ^ 0) & 0xFFFF;
+	
+	  returnObj.Uint8High = returnObj.Uint16 >> 8 & 0xff;
+	  returnObj.Uint8Low = returnObj.Uint16 & 0xff;
+	
+	  return returnObj;
+	}
+	
+	module.exports = crc16;
+
+/***/ },
+/* 323 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function router($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+	  $ionicConfigProvider.views.maxCache(1);
+	
+	  /**
+	   * Important, for app, every path is relative to index.html
+	   * */
+	
+	  $stateProvider.state('app', {
+	    name: 'app',
+	    url: '/app',
+	    abstract: true,
+	    templateUrl: './templates/menu.html'
+	  }).state('app.settings', {
+	    name: 'settings',
+	    url: '/settings',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/settings.html',
+	        controller: 'SettingsCtrl'
+	      }
+	    }
+	  }).state('app.home', {
+	    name: 'home',
+	    url: '/home',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/home.html'
+	      }
+	    }
+	  }).state('app.safety-slide', {
+	    url: '/safety-slide',
+	    name: 'safety-slide',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/safety-slide.html',
+	        controller: 'SafetySlides'
+	      }
+	    }
+	  }).state('app.program', {
+	    name: 'program',
+	    url: '/program',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/program.html',
+	        controller: 'ProgramController'
+	      }
+	    }
+	  }).state('app.homing', {
+	    name: 'homing',
+	    url: '/homing',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/homing.html',
+	        controller: 'homingCtrl'
+	      }
+	    }
+	  }).state('app.runBluetooth', {
+	    name: 'runBluetooth',
+	    url: '/runBluetooth',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/runBluetooth.html',
+	        controller: 'runBluetoothCtrl'
+	      }
+	    }
+	  }).state('app.test', {
+	    name: 'test',
+	    url: '/test',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/test.html',
+	        controller: 'testCtrl'
+	      }
+	    }
+	  }).state('app.website', {
+	    name: 'website',
+	    url: '/website',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/website.html'
+	      }
+	    }
+	  }).state('app.bluetoothConnection', {
+	    name: 'bluetoothConnection',
+	    url: '/bluetoothConnection',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/bluetoothConnection.html',
+	        controller: 'bluetoothConnectionCtrl'
+	      }
+	    }
+	  }).state('app.asyncTest', {
+	    name: 'asyncTest',
+	    url: '/asyncTest',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/asyncTest.html',
+	        controller: 'asyncCtrl',
+	        controllerAs: 'async'
+	      }
+	    }
+	  });
+	  // if none of the above states are matched, use this as the fallback
+	  $urlRouterProvider.otherwise('/app/program');
+	}
+	
+	exports.default = router;
 
 /***/ }
 /******/ ]);
