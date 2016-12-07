@@ -27,5 +27,5 @@ export default function ($scope, $rootScope, errorService, $ionicScrollDelegate)
     console.log('dismiss error');
     errorService.removeFirstError();
     loadErrors();
-  }
+  };
 }

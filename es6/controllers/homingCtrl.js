@@ -1,7 +1,7 @@
 export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                          $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
                          checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-                         statusService, connectToDeviceService, $ionicHistory, logModalService, modalService, $async) {
+                         statusService, connectToDeviceService, $ionicHistory, logModalService, modalService, $async, errorService) {
   $scope.$on('$ionicView.unloaded', function () {
     logService.consoleLog('\nUNLOADED\n');
   });
@@ -169,9 +169,11 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     }
     else if (res.search('kFAULT') !== -1){
       addToLog('Settings have been sent incorrectly, please try again');
-      emergencyService.on(function () {
-        emergencyService.off()
-      });
+      // emergencyService.on(function () {
+      //   emergencyService.off()
+      // });
+      emergencyService.on();
+      emergencyService.off();
     }
     else if (!$scope.homingDone) {
       $timeout(function () {
@@ -201,6 +203,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     $scope.show = $scope.show === obj ? null : obj;
   };
 
+  //TODO write Q&A's
   $scope.QAList = [];
   for (var i=1; i<11; i++) {
     $scope.QAList.push({

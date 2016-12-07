@@ -9020,7 +9020,7 @@
 	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
-	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService, statusService, connectToDeviceService, logModalService, modalService, $async) {
+	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService, statusService, connectToDeviceService, logModalService, modalService, $async, errorService) {
 	  //TODO interval check on bluetoothConnected
 	  var self = this;
 	
@@ -9150,11 +9150,14 @@
 	  //SECTION: UI log function
 	  //
 	
-	  function addToLog(str) {
+	  function addToLog(str, isError, errorType) {
 	    logService.addOne(str);
 	    logService.getLog(function (arr) {
 	      $scope.bluetoothLog = arr;
 	    });
+	    if (isError === true) {
+	      errorService.addError({ level: errorType ? errorType : 'critical', message: str });
+	    }
 	  }
 	
 	  //
@@ -9163,6 +9166,7 @@
 	
 	  $rootScope.$on('emergencyOn', function () {
 	    emergency = true;
+	    addToLog('Emergency is on');
 	  });
 	
 	  $rootScope.$on('emergencyOff', function () {
@@ -9456,20 +9460,22 @@
 	            addToLog('Emergency on, will not continue sending settings data');
 	
 	          case 20:
-	            _context3.next = 27;
+	            _context3.next = 28;
 	            break;
 	
 	          case 22:
 	            _context3.prev = 22;
 	            _context3.t0 = _context3['catch'](0);
 	
-	            addToLog('Error: ' + _context3.t0);
+	            addToLog('Error: ' + _context3.t0, true);
 	            addToLog('Cancelling current tasks');
-	            emergencyService.on(function () {
-	              emergencyService.off();
-	            });
+	            // emergencyService.on(function () {
+	            //   emergencyService.off();
+	            // });
+	            emergencyService.on();
+	            emergencyService.off();
 	
-	          case 27:
+	          case 28:
 	          case 'end':
 	            return _context3.stop();
 	        }
@@ -9505,8 +9511,8 @@
 	    });
 	    statusService.setSending(false);
 	    addToLog('Moved to start position');
-	    var subCuts = program.cutWidth / program.sawWidth;
-	    var cutsRoundedUp = Math.ceil(subCuts);
+	    var cutsRoundedUp = Math.ceil(program.cutWidth / program.sawWidth);
+	
 	    //On popup user is able to indicate that cut is complete
 	    //Button on popup triggers startMoving()
 	    if (program.cutWidth !== program.sawWidth) {
@@ -9536,10 +9542,10 @@
 	        setButtons({ 'showSpinner': true });
 	        sendAndReceiveService.write('<q' + $scope.movements[$scope.movementsNum].steps + stepMotorNum + '>', checkDone);
 	      } else {
-	        addToLog('Please wait untill this step is finished');
+	        addToLog('Please wait untill this step is finished', true, 'warning');
 	      }
 	    } else {
-	      addToLog('Emergency on, will not continue with movement');
+	      addToLog('Emergency on, will not continue with movement', true);
 	    }
 	
 	    //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
@@ -9700,7 +9706,7 @@
 	  value: true
 	});
 	
-	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService, statusService, connectToDeviceService, $ionicHistory, logModalService, modalService, $async) {
+	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService, statusService, connectToDeviceService, $ionicHistory, logModalService, modalService, $async, errorService) {
 	  $scope.$on('$ionicView.unloaded', function () {
 	    logService.consoleLog('\nUNLOADED\n');
 	  });
@@ -9950,9 +9956,11 @@
 	      statusService.setSending(false);
 	    } else if (res.search('kFAULT') !== -1) {
 	      addToLog('Settings have been sent incorrectly, please try again');
-	      emergencyService.on(function () {
-	        emergencyService.off();
-	      });
+	      // emergencyService.on(function () {
+	      //   emergencyService.off()
+	      // });
+	      emergencyService.on();
+	      emergencyService.off();
 	    } else if (!$scope.homingDone) {
 	      $timeout(function () {
 	        sendAndReceiveService.write('<w' + stepMotorNum + '>', checkWydone());
@@ -9979,6 +9987,7 @@
 	    $scope.show = $scope.show === obj ? null : obj;
 	  };
 	
+	  //TODO write Q&A's
 	  $scope.QAList = [];
 	  for (var i = 1; i < 11; i++) {
 	    $scope.QAList.push({
@@ -10393,7 +10402,7 @@
 	  value: true
 	});
 	
-	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, turnOnBluetoothService, statusService, isConnectedService, logService, buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService, $timeout, logModalService, modalService) {
+	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, turnOnBluetoothService, statusService, isConnectedService, logService, buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService, $timeout, logModalService, modalService, errorService) {
 	
 	  $scope.availableDevices = [];
 	  $scope.pairedDevices = [];
@@ -10415,12 +10424,15 @@
 	  $scope.buttons = buttonService.getValues();
 	  $scope.isConnected = isConnectedService.getValue();
 	
-	  function addToLog(str) {
+	  function addToLog(str, isError) {
 	    logService.consoleLog(str);
 	    logService.addOne(str);
 	    logService.getLog(function (arr) {
 	      $scope.bluetoothLog = arr;
 	    });
+	    if (isError === true) {
+	      errorService.addError({ level: 'critical', message: str });
+	    }
 	  }
 	
 	  function setButtons(obj) {
@@ -10489,7 +10501,7 @@
 	                addToLog('Unpaired Bluetooth device found');
 	              });
 	            }, function () {
-	              addToLog('Cannot find unpaired Bluetooth devices');
+	              addToLog('Cannot find unpaired Bluetooth devices', true);
 	            });
 	            //discover paired
 	            $cordovaBluetoothSerial.list().then(function (devices) {
@@ -10499,7 +10511,7 @@
 	                addToLog('Paired Bluetooth device found');
 	              });
 	            }, function () {
-	              addToLog('Cannot find paired Bluetooth devices');
+	              addToLog('Cannot find paired Bluetooth devices', true);
 	            });
 	          } else if (ionic.Platform.isIOS) {
 	            $cordovaBluetoothSerial.list().then(function (devices) {
@@ -10509,7 +10521,7 @@
 	                $scope.availableDevices.push(device);
 	              });
 	            }, function () {
-	              addToLog('No devices found');
+	              addToLog('No devices found', true);
 	            });
 	          }
 	        });
@@ -10534,7 +10546,7 @@
 	        });
 	      }, function (error) {
 	        //failure callback
-	        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
+	        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device', true);
 	        addToLog('error: ' + error);
 	        $scope.isConnected = isConnectedService.getValue();
 	      });
@@ -10557,7 +10569,7 @@
 	          }, 500);
 	        });
 	      }, function (error) {
-	        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
+	        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device', true);
 	        addToLog('error: ' + error);
 	      });
 	    });
@@ -10569,13 +10581,6 @@
 	    window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
 	    logService.consoleLog('Local storage last connected device set to: ' + window.localStorage['lastConnectedDevice']);
 	    showSavedDeviceAlert();
-	  }
-	
-	  function addToLog(str) {
-	    logService.addOne(str);
-	    logService.getLog(function (arr) {
-	      $scope.bluetoothLog = arr;
-	    });
 	  }
 	
 	  function showSavedDeviceAlert() {
@@ -12066,20 +12071,38 @@
 	});
 	
 	exports.default = function () {
-	  var errors = [{ level: 'critical', message: 'something very went wrong' }, { level: 'warning', message: 'something might\'ve went wrong' }];
+	  var errors = [];
+	  //example error: {level: 'critical', message: 'something went wrong'}
+	
+	  var self = this;
 	
 	  this.getErrors = function () {
 	    return errors;
 	  };
 	
 	  this.addError = function (errorObj) {
-	    errors.push(errorObj);
+	    errors.unshift(errorObj);
 	  };
 	
 	  this.removeFirstError = function () {
 	    console.log('removeFirstError');
 	    errors = errors.slice(1);
 	  };
+	
+	  this.removeEmergencyError = function () {
+	    errors.filter(function (error) {
+	      if (error.message != 'Emergency is on') return error;
+	    });
+	  };
+	
+	  //  emergency listeners
+	  $rootScope.$on('emergencyOn', function () {
+	    self.addError({ level: 'critical', message: 'Emergency is on' });
+	  });
+	
+	  $rootScope.$on('emergencyOff', function () {
+	    self.removeEmergencyError();
+	  });
 	};
 
 /***/ }

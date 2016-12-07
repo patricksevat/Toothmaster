@@ -1,7 +1,7 @@
 export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                         $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
                         checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-                        statusService, connectToDeviceService, logModalService, modalService, $async){
+                        statusService, connectToDeviceService, logModalService, modalService, $async, errorService){
   //TODO interval check on bluetoothConnected
   const self = this;
 
@@ -134,11 +134,14 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //SECTION: UI log function
   //
 
-  function addToLog(str) {
+  function addToLog(str, isError, errorType) {
     logService.addOne(str);
     logService.getLog(function (arr) {
       $scope.bluetoothLog = arr;
     });
+    if (isError === true) {
+      errorService.addError({level: errorType ? errorType : 'critical', message: str});
+    }
   }
 
   //
@@ -147,6 +150,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   $rootScope.$on('emergencyOn', function () {
     emergency = true;
+    addToLog('Emergency is on');
   });
 
   $rootScope.$on('emergencyOff', function () {
@@ -337,11 +341,13 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       }
     }
     catch (err) {
-      addToLog('Error: '+err);
+      addToLog('Error: '+err, true);
       addToLog('Cancelling current tasks');
-      emergencyService.on(function () {
-        emergencyService.off();
-      });
+      // emergencyService.on(function () {
+      //   emergencyService.off();
+      // });
+      emergencyService.on();
+      emergencyService.off();
     }
   });
 
@@ -373,8 +379,8 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     });
     statusService.setSending(false);
     addToLog('Moved to start position');
-    var subCuts = program.cutWidth / program.sawWidth;
-    var cutsRoundedUp = Math.ceil(subCuts);
+    const cutsRoundedUp = Math.ceil(program.cutWidth / program.sawWidth);
+    
     //On popup user is able to indicate that cut is complete
     //Button on popup triggers startMoving()
     if (program.cutWidth !== program.sawWidth) {
@@ -388,7 +394,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       });
     }
   }
-  
+
   //
   //SECTION: startMoving \ take steps logic
   //
@@ -406,11 +412,11 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
         sendAndReceiveService.write('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
       }
       else {
-        addToLog('Please wait untill this step is finished');
+        addToLog('Please wait untill this step is finished', true, 'warning');
       }
     }
     else {
-      addToLog('Emergency on, will not continue with movement');
+      addToLog('Emergency on, will not continue with movement', true);
     }
 
     //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand

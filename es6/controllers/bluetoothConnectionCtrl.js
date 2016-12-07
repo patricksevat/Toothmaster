@@ -1,6 +1,7 @@
 export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                          $state, $ionicPlatform, $window, turnOnBluetoothService, statusService, isConnectedService, logService,
-                         buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService, $timeout, logModalService, modalService) {
+                         buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService, $timeout,
+                         logModalService, modalService, errorService) {
 
   $scope.availableDevices = [];
   $scope.pairedDevices = [];
@@ -22,12 +23,15 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   $scope.buttons = buttonService.getValues();
   $scope.isConnected = isConnectedService.getValue();
 
-  function addToLog(str) {
+  function addToLog(str, isError) {
     logService.consoleLog(str);
     logService.addOne(str);
     logService.getLog(function (arr) {
       $scope.bluetoothLog = arr;
-    })
+    });
+    if (isError === true) {
+      errorService.addError({level: 'critical', message: str});
+    }
   }
 
   function setButtons(obj) {
@@ -97,7 +101,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
                   addToLog('Unpaired Bluetooth device found');
                 }
               )}, function () {
-              addToLog('Cannot find unpaired Bluetooth devices');
+              addToLog('Cannot find unpaired Bluetooth devices', true);
             });
             //discover paired
             $cordovaBluetoothSerial.list().then(function (devices) {
@@ -107,7 +111,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
                 addToLog('Paired Bluetooth device found');
               })
             },function () {
-              addToLog('Cannot find paired Bluetooth devices');
+              addToLog('Cannot find paired Bluetooth devices', true);
             })
           }
           else if (ionic.Platform.isIOS) {
@@ -118,7 +122,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
                 $scope.availableDevices.push(device);
               })
             }, function () {
-              addToLog('No devices found');
+              addToLog('No devices found', true);
             })
           }
         })
@@ -140,12 +144,10 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
               $scope.isConnected = val;
             })
           }, 500);
-
         });
-
       }, function (error) {
         //failure callback
-        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
+        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device', true);
         addToLog('error: '+error);
         $scope.isConnected = isConnectedService.getValue();
       })
@@ -169,7 +171,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
 
         });
       }, function (error) {
-        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device');
+        addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device', true);
         addToLog('error: '+error);
       })
     })
@@ -181,13 +183,6 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
     logService.consoleLog('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice']);
     showSavedDeviceAlert();
-  }
-
-  function addToLog(str) {
-    logService.addOne(str);
-    logService.getLog(function (arr) {
-      $scope.bluetoothLog = arr;
-    });
   }
 
   function showSavedDeviceAlert() {
@@ -210,7 +205,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
 
   $scope.openBluetoothSettings = function() {
     $cordovaBluetoothSerial.showBluetoothSettings();
-  }
+  };
 
   $scope.openHelpModal = function () {
     modalService
