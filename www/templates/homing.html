@@ -3,6 +3,12 @@
     Homing <img src="./img/icon.png" class="logo">
   </ion-nav-title>
   <ion-content>
+
+    <error-header
+      ng-controller="errorController"
+      ng-show="showErrorHeader === true"
+    ></error-header>
+
     <div class="row bluetooth-row">
       <div class="col col-center" >
         <div class="item item-divider">

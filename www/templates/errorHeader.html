@@ -1,5 +1,20 @@
 <div
   id="error-header-wrapper"
+  class="bar bar-header"
+  ng-class="{
+    'bar-energized': errors[0].level === 'warning',
+    'bar-assertive': errors[0].level === 'critical'
+    }"
 >
-  ERROR
+  <h3
+    id="error-message"
+    class="title"
+  >
+    {{errors[0].message}}
+    <i
+      class="glyphicon glyphicon-remove-sign padding"
+      on-tap="dismissError()"></i>
+  </h3>
+
+
 </div>

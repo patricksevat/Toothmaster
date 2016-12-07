@@ -8238,6 +8238,10 @@
 	
 	var _crcService2 = _interopRequireDefault(_crcService);
 	
+	var _errorService = __webpack_require__(326);
+	
+	var _errorService2 = _interopRequireDefault(_errorService);
+	
 	var _errorDirective = __webpack_require__(324);
 	
 	var _errorDirective2 = _interopRequireDefault(_errorDirective);
@@ -8252,15 +8256,13 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	//controllers
+	// services
 	if (window.localStorage['Safety'] === undefined) {
 	  window.localStorage.setItem('Safety', '');
 	}
 	
 	//directives
-	
-	
-	// services
+	//controllers
 	
 	if (window.localStorage['settings'] === undefined) {
 	  window.localStorage['settings'] = '{"stepMotorNum": 1, "maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
@@ -8275,8 +8277,8 @@
 	angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', 'ngTouch', _ngAsync2.default.name]).service('bugout', function () {
 	  var bugout = new debugout();
 	  this.bugout = bugout;
-	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('checkBluetoothEnabledService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothEnabledService]).service('isConnectedService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothConnectedService]).service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout', _bluetoothService.bluetoothConnectedToDeviceService]).service('turnOnBluetoothService', ['$cordovaBluetoothSerial', 'checkBluetoothEnabledService', 'logService', _bluetoothService.turnOnBluetoothService]).service('disconnectService', ['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout', _bluetoothService.disconnectService]).service('logService', ['bugout', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-	  bugout.bugout.log('version 0.9.9.54');
+	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('checkBluetoothEnabledService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothEnabledService]).service('isConnectedService', ['bugout', '$cordovaBluetoothSerial', _bluetoothService.bluetoothConnectedService]).service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout', _bluetoothService.bluetoothConnectedToDeviceService]).service('turnOnBluetoothService', ['$cordovaBluetoothSerial', 'checkBluetoothEnabledService', 'logService', _bluetoothService.turnOnBluetoothService]).service('disconnectService', ['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout', _bluetoothService.disconnectService]).service('logService', ['bugout', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', [_errorService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
+	  bugout.bugout.log('version 0.9.9.65');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -12017,14 +12019,67 @@
 /* 325 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 	
-	exports.default = function ($scope, $rootScope) {
-	  $scope.showErrorHeader = true;
+	exports.default = function ($scope, $rootScope, errorService, $ionicScrollDelegate) {
+	  $scope.showErrorHeader = false;
+	  $scope.errors = [];
+	  //example error: {level: 'critical', message: 'something went wrong'}
+	
+	  $scope.$on('ionicView.enter', function () {
+	    loadErrors();
+	  });
+	
+	  $rootScope.$on('errorAdded', function () {
+	    loadErrors();
+	  });
+	
+	  function loadErrors() {
+	    $scope.errors = errorService.getErrors();
+	    if ($scope.errors.length > 0) {
+	      $scope.showErrorHeader = true;
+	      $ionicScrollDelegate.scrollTop();
+	    } else $scope.showErrorHeader = false;
+	  }
+	
+	  loadErrors();
+	
+	  $scope.dismissError = function () {
+	    console.log('dismiss error');
+	    errorService.removeFirstError();
+	    loadErrors();
+	  };
+	};
+
+/***/ },
+/* 326 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function () {
+	  var errors = [{ level: 'critical', message: 'something very went wrong' }, { level: 'warning', message: 'something might\'ve went wrong' }];
+	
+	  this.getErrors = function () {
+	    return errors;
+	  };
+	
+	  this.addError = function (errorObj) {
+	    errors.push(errorObj);
+	  };
+	
+	  this.removeFirstError = function () {
+	    console.log('removeFirstError');
+	    errors = errors.slice(1);
+	  };
 	};
 
 /***/ }

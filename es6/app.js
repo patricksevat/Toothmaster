@@ -17,6 +17,7 @@ import modalService from './services/modalService'
 import statusService from './services/statusService'
 import pauseService from './services/pauseService'
 import crcService from './services/crcService'
+import errorService from './services/errorService'
 
 //directives
 import errorDirective from './directives/errorDirective'
@@ -65,10 +66,11 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
     'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout',
     sendAndReceiveService])
   .service('crcService', [crcService])
+  .service('errorService', [errorService])
   .directive('errorHeader', ['$rootScope', errorDirective])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-    bugout.bugout.log('version 0.9.9.54');
+    bugout.bugout.log('version 0.9.9.65');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){

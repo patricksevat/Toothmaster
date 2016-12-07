@@ -221,4 +221,46 @@ iframe {
   float: right
 }
 
+/*errorHeader.html*/
+#error-header-wrapper {
+  position: relative !important;
+  -moz-animation-name: dropHeader;
+  -moz-animation-iteration-count: 1;
+  -moz-animation-timing-function: ease-in;
+  -moz-animation-duration: 0.5s;
 
+  -webkit-animation-name: dropHeader;
+  -webkit-animation-iteration-count: 1;
+  -webkit-animation-timing-function: ease-in;
+  -webkit-animation-duration: 0.5s;
+
+  animation-name: dropHeader;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-duration: 0.5s;
+}
+
+@-moz-keyframes dropHeader {
+  0% {
+    -moz-transform: translateY(-40px);
+  }
+  100% {
+    -moz-transform: translateY(0);
+  }
+}
+@-webkit-keyframes dropHeader {
+  0% {
+    -webkit-transform: translateY(-40px);
+  }
+  100% {
+    -webkit-transform: translateY(0);
+  }
+}
+@keyframes dropHeader {
+  0% {
+    transform: translateY(-40px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
