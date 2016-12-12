@@ -8277,8 +8277,8 @@
 	angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', 'ngTouch', _ngAsync2.default.name]).service('bugout', function () {
 	  var bugout = new debugout();
 	  this.bugout = bugout;
-	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.9.85');
+	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
+	  bugout.bugout.log('version 0.9.9.99');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -9324,6 +9324,7 @@
 	                      }
 	
 	                      console.log('try: ' + _i + ', command: ' + str);
+	                      //TODO remove this test
 	                      _context.next = 6;
 	                      return sendAndReceiveService.writeAsync(str);
 	
@@ -9466,9 +9467,6 @@
 	
 	            addToLog('Error: ' + _context3.t0, true);
 	            addToLog('Cancelling current tasks');
-	            // emergencyService.on(function () {
-	            //   emergencyService.off();
-	            // });
 	            emergencyService.on();
 	            emergencyService.off();
 	
@@ -9559,7 +9557,6 @@
 	
 	          case 12:
 	            checkDone();
-	            // sendAndReceiveService.writeAsync('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
 	            _context4.next = 16;
 	            break;
 	
@@ -9583,9 +9580,6 @@
 	
 	            addToLog('Error: ' + _context4.t0, true);
 	            addToLog('Cancelling current tasks');
-	            // emergencyService.on(function () {
-	            //   emergencyService.off();
-	            // });
 	            emergencyService.on();
 	            emergencyService.off();
 	
@@ -9614,20 +9608,6 @@
 	      bluetoothResponseListener();
 	      wydoneListener();
 	    });
-	
-	    // var check = $rootScope.$on('bluetoothResponse', function (event, res) {
-	    //   logService.consoleLog('on bluetoothResponse in checkDone called');
-	    //   if (res.search('wydone') > -1) {
-	    //     checkDoneReceivedWydone()
-	    //   }
-	    //   else {
-	    //     $timeout(function () {
-	    //       logService.consoleLog('no wydone, sending <w>');
-	    //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkDone);
-	    //     }, 250);
-	    //   }
-	    //   check();
-	    // });
 	  }
 	
 	  function checkDoneReceivedWydone() {
@@ -10837,10 +10817,11 @@
 	          bugout.bugout.log('resolving OK');
 	          responseCount = 0;
 	          resolve('OK');
-	          listener();
 	        } else if (res.indexOf('667:') > -1) {
 	          resolve('RETRY');
 	        } else if (responseCount >= 3) reject('Too many wrong responses');
+	
+	        listener();
 	      });
 	    });
 	  }
@@ -10949,7 +10930,6 @@
 	
 	          //append string with cyclic redundancy check
 	          var commandWithCRC = crcService.appendCRC(str);
-	
 	          $window.bluetoothSerial.write(commandWithCRC, function () {
 	            bugout.bugout.log('sent: ' + commandWithCRC);
 	            lastCommandTime = Date.now();
@@ -11296,20 +11276,24 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, shareSettings, buttonService, $rootScope, $interval) {
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
+	function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, shareSettings, buttonService, $rootScope, $interval, $async) {
 	  var self = this;
 	
 	  //
 	  //service public methods
 	  //
 	
+	  this.getEnabledPromise = getEnabledPromise;
+	  this.getConnectedPromise = getConnectedPromise;
 	  this.getBluetoothEnabledValue = getBluetoothEnabledValue;
 	  this.getConnectedValue = getConnectedValue;
 	  this.getDeviceName = getDeviceName;
 	  this.setDeviceName = setDeviceName;
-	  this.connectToLastDevice = connectToLastDevice;
+	  // this.connectToLastDevice = connectToLastDevice;
 	  this.connectToSelectedDevice = connectToSelectedDevice;
-	  this.connectWithRetry = connectWithRetry;
 	  this.turnOnBluetooth = turnOn;
 	  this.disconnect = disconnect;
 	  this.checkConnectionAliveInterval = checkConnectionAliveInterval;
@@ -11322,6 +11306,22 @@
 	      isConnected = void 0;
 	  var retry = 1;
 	  var deviceName = '';
+	
+	  function getEnabledPromise() {
+	    return new Promise(function (resolve, reject) {
+	      getBluetoothEnabledValue(function (value) {
+	        resolve(value);
+	      });
+	    });
+	  }
+	
+	  function getConnectedPromise() {
+	    return new Promise(function (resolve, reject) {
+	      getConnectedValue(function (value) {
+	        resolve(value);
+	      });
+	    });
+	  }
 	
 	  function getBluetoothEnabledValue(cb) {
 	    $cordovaBluetoothSerial.isEnabled().then(function () {
@@ -11370,31 +11370,162 @@
 	    });
 	  }
 	
-	  function connectToLastDevice(bluetoothOnVal, cb) {
-	    var bluetoothOn = void 0;
-	    if (bluetoothOnVal === undefined) {
-	      self.getBluetoothEnabledValue(function (value) {
-	        bluetoothOn = value;
-	        valueRetrieved(cb);
-	      });
-	    } else {
-	      bluetoothOn = bluetoothOnVal;
-	      valueRetrieved(cb);
-	    }
-	    logService.addOne('Trying to connect with last known device');
-	  }
+	  // function connectToLastDevice(bluetoothOnVal, cb) {
+	  //   let bluetoothOn;
+	  //   if (bluetoothOnVal === undefined) {
+	  //     self.getBluetoothEnabledValue(function (value) {
+	  //       bluetoothOn = value;
+	  //       valueRetrieved(cb);
+	  //     });
+	  //   }
+	  //   else {
+	  //     bluetoothOn = bluetoothOnVal;
+	  //     valueRetrieved(cb);
+	  //   }
+	  //   logService.addOne('Trying to connect with last known device');
+	  // }
 	
 	  //TODO refactor connect process into something more logical
-	  function connectWithRetry() {
-	    bugout.bugout.log('connectWithRetry called in connectService');
-	    getConnectedValue(function (value) {
-	      isConnected = value;
-	      getBluetoothEnabledValue(function (value) {
-	        bluetoothEnabled = value;
-	        valuesRetrieved(bluetoothEnabled, isConnected);
-	      });
-	    });
-	  }
+	  self.connectWithRetry = $async(regeneratorRuntime.mark(function _callee2() {
+	    var _this = this;
+	
+	    var lastConnectedDevice, _loop, i, _ret;
+	
+	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+	      while (1) {
+	        switch (_context2.prev = _context2.next) {
+	          case 0:
+	            _context2.prev = 0;
+	            lastConnectedDevice = JSON.parse(getLastConnectedDevice());
+	            _context2.next = 4;
+	            return getConnectedPromise();
+	
+	          case 4:
+	            isConnected = _context2.sent;
+	            _context2.next = 7;
+	            return getEnabledPromise();
+	
+	          case 7:
+	            bluetoothEnabled = _context2.sent;
+	
+	            console.log('lastConnectedDevice: ');
+	            console.log(lastConnectedDevice);
+	            console.log('bluetoothEnabled: ' + bluetoothEnabled);
+	            console.log('isConnected: ' + isConnected);
+	
+	            _loop = regeneratorRuntime.mark(function _callee(i) {
+	              return regeneratorRuntime.wrap(function _callee$(_context) {
+	                while (1) {
+	                  switch (_context.prev = _context.next) {
+	                    case 0:
+	                      console.log('connect with retry i: ' + i);
+	
+	                      if (!(i === 4)) {
+	                        _context.next = 5;
+	                        break;
+	                      }
+	
+	                      return _context.abrupt('return', {
+	                        v: new Promise(function (resolve, reject) {
+	                          reject();
+	                        })
+	                      });
+	
+	                    case 5:
+	                      if (!(lastConnectedDevice && bluetoothEnabled && !isConnected)) {
+	                        _context.next = 9;
+	                        break;
+	                      }
+	
+	                      _context.next = 8;
+	                      return connectToSelectedDevice(lastConnectedDevice.id, lastConnectedDevice.name).then(function () {
+	                        console.log('resolving connect with retry number: ' + i);
+	                        isConnected = true;
+	                      }, function (err) {
+	                        console.log('continuing connect with retry after fail to connect, err: ' + err);
+	                        isConnected = false;
+	                      });
+	
+	                    case 8:
+	                      console.log('yielded connect with retry number: ' + i);
+	
+	                    case 9:
+	                      if (!isConnected) {
+	                        _context.next = 11;
+	                        break;
+	                      }
+	
+	                      return _context.abrupt('return', 'break');
+	
+	                    case 11:
+	                    case 'end':
+	                      return _context.stop();
+	                  }
+	                }
+	              }, _callee, _this);
+	            });
+	            i = 0;
+	
+	          case 14:
+	            if (!(i < 5)) {
+	              _context2.next = 26;
+	              break;
+	            }
+	
+	            return _context2.delegateYield(_loop(i), 't0', 16);
+	
+	          case 16:
+	            _ret = _context2.t0;
+	            _context2.t1 = _ret;
+	            _context2.next = _context2.t1 === 'break' ? 20 : 21;
+	            break;
+	
+	          case 20:
+	            return _context2.abrupt('break', 26);
+	
+	          case 21:
+	            if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
+	              _context2.next = 23;
+	              break;
+	            }
+	
+	            return _context2.abrupt('return', _ret.v);
+	
+	          case 23:
+	            i++;
+	            _context2.next = 14;
+	            break;
+	
+	          case 26:
+	            _context2.next = 31;
+	            break;
+	
+	          case 28:
+	            _context2.prev = 28;
+	            _context2.t2 = _context2['catch'](0);
+	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
+	              reject(_context2.t2);
+	            }));
+	
+	          case 31:
+	          case 'end':
+	            return _context2.stop();
+	        }
+	      }
+	    }, _callee2, this, [[0, 28]]);
+	  }));
+	
+	  // function connectWithRetry() {
+	  //   bugout.bugout.log('connectWithRetry called in bluetoothService');
+	  //
+	  //   getConnectedValue(function (value) {
+	  //     isConnected = value;
+	  //     getBluetoothEnabledValue(function (value) {
+	  //       bluetoothEnabled = value;
+	  //       valuesRetrieved(bluetoothEnabled, isConnected);
+	  //     });
+	  //   });
+	  // }
 	
 	  function turnOn(cb) {
 	    $cordovaBluetoothSerial.enable().then(function () {
@@ -11408,9 +11539,9 @@
 	
 	  function disconnect() {
 	    var stepMotorNum = shareSettings.getObj().stepMotorNum;
+	    cancelConnectionAliveInterval();
 	    $cordovaBluetoothSerial.write('<y8:y' + stepMotorNum + '>').then(function () {
-	      $window.bluetoothSerial.disconnect(function () {
-	        cancelConnectionAliveInterval();
+	      $cordovaBluetoothSerial.disconnect(function () {
 	        logService.addOne('User disconnected');
 	        setDeviceName('');
 	        buttonService.setValues({ 'showCalcButton': false });
@@ -11452,7 +11583,10 @@
 	  }
 	
 	  function cancelConnectionAliveInterval() {
-	    if (connectionAlive) $interval.cancel(connectionAlive);
+	    if (connectionAlive) {
+	      $interval.cancel(connectionAlive);
+	      console.log('canceled interval');
+	    }
 	  }
 	
 	  //
@@ -11461,51 +11595,12 @@
 	
 	  function saveLastConnectedDevice(id, name) {
 	    var obj = { 'id': id, 'name': name };
-	    // $scope.deviceName = name;
 	    window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
 	    logService.consoleLog('Local storage last connected device set to: ' + window.localStorage['lastConnectedDevice']);
-	    // showSavedDeviceAlert();
 	  }
 	
-	  function valuesRetrieved(bluetoothOn, isConnected) {
-	    if (bluetoothOn && !isConnected) {
-	      bugout.bugout.log('connectWithRetry bluetoothOn & !isConnected');
-	      connectToLastDevice(bluetoothOn, function () {
-	        getConnectedValue(function (value) {
-	          isConnected = value;
-	        });
-	        if (!isConnected && retry < 6) {
-	          bugout.bugout.log('retry connectToLastDevice');
-	          $timeout(function () {
-	            retry += 1;
-	            bugout.bugout.log('Connect with retry, try: ' + retry);
-	            connectWithRetry();
-	          }, 500);
-	        } else if (isConnected) {
-	          retry = 1;
-	        } else if (!isConnected && retry >= 6) {
-	          logService.addOne('Could not connect with last known device, please make sure that device is turned on. If so, turn off your phone\'s Bluetooth and restart the app', true);
-	          retry = 1;
-	        }
-	      });
-	    }
-	  }
-	
-	  function valueRetrieved(cb) {
-	    if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '' && window.localStorage['lastConnectedDevice'] !== undefined) {
-	      bugout.bugout.log('actually connecting to lastConnected device');
-	      var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
-	      $window.bluetoothSerial.connectInsecure(obj.id, function () {
-	        setDeviceName(obj.name);
-	        logService.addOne('Succesfully connected to last connected device');
-	        checkConnectionAliveInterval();
-	        if (cb) cb();
-	      }, function () {
-	        bugout.bugout.log('could not connect to last connected device');
-	        console.log('could not connect to device or connection to device lost');
-	        if (cb) cb();
-	      });
-	    }
+	  function getLastConnectedDevice() {
+	    if (window.localStorage['lastConnectedDevice'] !== '' && window.localStorage['lastConnectedDevice'] !== undefined) return window.localStorage['lastConnectedDevice'];else return null;
 	  }
 	}
 	
@@ -11834,25 +11929,42 @@
 	  value: true
 	});
 	
-	exports.default = function (statusService, bluetoothService, logService, buttonService, bugout) {
+	exports.default = function (statusService, bluetoothService, logService, buttonService, bugout, $async) {
 	  var pause = this;
-	  pause.pause = pauseFunc;
+	  // pause.pause = pauseFunc;
 	  pause.resume = resume;
 	
-	  function pauseFunc() {
-	    //var sending = statusService.getSending();
-	    var sending = statusService.getSending();
-	    bugout.bugout.log('sending in pause:' + statusService.getSending());
-	    var connected = bluetoothService.getConnectedValue();
-	    bugout.bugout.log('pause.pause called, sending: ' + sending + ', connected' + connected);
-	    if (!sending && connected) {
-	      logService.addOne('Disconnected after pausing application');
-	      bluetoothService.disconnect();
-	      buttonService.setValues({ 'showCalcButton': false, 'readyForData': false });
-	    } else {
-	      logService.addOne('User has paused application, continuing task in background');
-	    }
-	  }
+	  pause.pause = $async(regeneratorRuntime.mark(function _callee() {
+	    var sending, connected;
+	    return regeneratorRuntime.wrap(function _callee$(_context) {
+	      while (1) {
+	        switch (_context.prev = _context.next) {
+	          case 0:
+	            sending = statusService.getSending();
+	
+	            bugout.bugout.log('sending in pause:' + statusService.getSending());
+	            _context.next = 4;
+	            return bluetoothService.getConnectedPromise();
+	
+	          case 4:
+	            connected = _context.sent;
+	
+	            bugout.bugout.log('pause.pause called, sending: ' + sending + ', connected' + connected);
+	            if (!sending && connected) {
+	              logService.addOne('Disconnected after pausing application');
+	              bluetoothService.disconnect();
+	              buttonService.setValues({ 'showCalcButton': false, 'readyForData': false });
+	            } else {
+	              logService.addOne('User has paused application, continuing task in background');
+	            }
+	
+	          case 7:
+	          case 'end':
+	            return _context.stop();
+	        }
+	      }
+	    }, _callee, this);
+	  }));
 	
 	  function resume() {
 	    var sending = statusService.getSending();

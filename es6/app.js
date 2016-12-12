@@ -48,13 +48,13 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .service('buttonService', ['bugout', buttonService])
   .service('emergencyService',['buttonService', 'statusService', '$rootScope', 'bugout', emergencyService])
   .service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings',
-    'buttonService', '$rootScope', '$interval', bluetoothService])
+    'buttonService', '$rootScope', '$interval', '$async', bluetoothService])
   .service('logService', ['bugout', 'errorService', logService])
   .service('calculateVarsService',['shareProgram', 'shareSettings', calculateVarsService])
   .service('logModalService', ['bugout', logModalService])
   .service('modalService', ['$ionicModal', '$rootScope', modalService])
   .service('statusService', ['bugout', statusService])
-  .service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout',
+  .service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async',
     pauseService])
   .service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope',
     'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout',
@@ -64,7 +64,7 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .directive('errorHeader', ['$rootScope', errorDirective])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-    bugout.bugout.log('version 0.9.9.85');
+    bugout.bugout.log('version 0.9.9.99');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){

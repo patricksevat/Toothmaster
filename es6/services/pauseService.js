@@ -1,13 +1,12 @@
-export default function (statusService, bluetoothService, logService, buttonService, bugout) {
+export default function (statusService, bluetoothService, logService, buttonService, bugout, $async) {
   const pause = this;
-  pause.pause = pauseFunc;
+  // pause.pause = pauseFunc;
   pause.resume = resume;
 
-  function pauseFunc() {
-    //var sending = statusService.getSending();
+  pause.pause = $async(function* () {
     const sending = statusService.getSending();
     bugout.bugout.log('sending in pause:'+statusService.getSending());
-    const connected = bluetoothService.getConnectedValue();
+    const connected = yield bluetoothService.getConnectedPromise();
     bugout.bugout.log('pause.pause called, sending: '+sending+', connected'+connected);
     if (!sending && connected) {
       logService.addOne('Disconnected after pausing application');
@@ -17,7 +16,7 @@ export default function (statusService, bluetoothService, logService, buttonServ
     else {
       logService.addOne('User has paused application, continuing task in background')
     }
-  }
+  });
 
   function resume() {
     const sending = statusService.getSending();

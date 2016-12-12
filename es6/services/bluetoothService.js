@@ -1,18 +1,19 @@
 function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, shareSettings, buttonService,
-                          $rootScope, $interval) {
+                          $rootScope, $interval, $async) {
   const self = this;
 
   //
   //service public methods
   //
 
+  this.getEnabledPromise = getEnabledPromise;
+  this.getConnectedPromise = getConnectedPromise;
   this.getBluetoothEnabledValue = getBluetoothEnabledValue;
   this.getConnectedValue = getConnectedValue;
   this.getDeviceName = getDeviceName;
   this.setDeviceName = setDeviceName;
-  this.connectToLastDevice = connectToLastDevice;
+  // this.connectToLastDevice = connectToLastDevice;
   this.connectToSelectedDevice = connectToSelectedDevice;
-  this.connectWithRetry = connectWithRetry;
   this.turnOnBluetooth = turnOn;
   this.disconnect = disconnect;
   this.checkConnectionAliveInterval = checkConnectionAliveInterval;
@@ -25,6 +26,21 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   let retry = 1;
   let deviceName = '';
 
+  function getEnabledPromise() {
+    return new Promise((resolve, reject) => {
+      getBluetoothEnabledValue(function (value) {
+        resolve(value);
+      })
+    })
+  }
+
+  function getConnectedPromise() {
+    return new Promise((resolve, reject) => {
+      getConnectedValue(function (value) {
+        resolve(value);
+      })
+    })
+  }
 
   function getBluetoothEnabledValue(cb) {
     $cordovaBluetoothSerial.isEnabled().then(function () {
@@ -75,32 +91,72 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
     })
   }
 
-  function connectToLastDevice(bluetoothOnVal, cb) {
-    let bluetoothOn;
-    if (bluetoothOnVal === undefined) {
-      self.getBluetoothEnabledValue(function (value) {
-        bluetoothOn = value;
-        valueRetrieved(cb);
-      });
-    }
-    else {
-      bluetoothOn = bluetoothOnVal;
-      valueRetrieved(cb);
-    }
-    logService.addOne('Trying to connect with last known device');
-  }
+  // function connectToLastDevice(bluetoothOnVal, cb) {
+  //   let bluetoothOn;
+  //   if (bluetoothOnVal === undefined) {
+  //     self.getBluetoothEnabledValue(function (value) {
+  //       bluetoothOn = value;
+  //       valueRetrieved(cb);
+  //     });
+  //   }
+  //   else {
+  //     bluetoothOn = bluetoothOnVal;
+  //     valueRetrieved(cb);
+  //   }
+  //   logService.addOne('Trying to connect with last known device');
+  // }
 
   //TODO refactor connect process into something more logical
-  function connectWithRetry() {
-    bugout.bugout.log('connectWithRetry called in connectService');
-    getConnectedValue(function (value) {
-      isConnected = value;
-      getBluetoothEnabledValue(function (value) {
-        bluetoothEnabled = value;
-        valuesRetrieved(bluetoothEnabled, isConnected);
-      });
-    });
-  }
+  self.connectWithRetry = $async(function* () {
+    try {
+      let lastConnectedDevice = JSON.parse(getLastConnectedDevice());
+      isConnected = yield getConnectedPromise();
+      bluetoothEnabled = yield getEnabledPromise();
+      console.log('lastConnectedDevice: ');
+      console.log(lastConnectedDevice);
+      console.log('bluetoothEnabled: '+bluetoothEnabled);
+      console.log('isConnected: '+isConnected);
+
+      for (let i = 0; i < 5; i++) {
+        console.log('connect with retry i: '+i);
+        if (i === 4) {
+          return new Promise((resolve, reject) => {
+            reject();
+          });
+        }
+        else if (lastConnectedDevice && bluetoothEnabled && !isConnected) {
+          yield connectToSelectedDevice(lastConnectedDevice.id, lastConnectedDevice.name).then(() => {
+            console.log('resolving connect with retry number: '+i);
+            isConnected = true;
+          }, (err) => {
+            console.log('continuing connect with retry after fail to connect, err: '+err);
+            isConnected = false;
+          });
+          console.log('yielded connect with retry number: '+i);
+        }
+
+        if (isConnected)
+          break;
+      }
+    }
+    catch (err) {
+      return new Promise((resolve, reject) => {
+        reject(err);
+      })
+    }
+  });
+
+  // function connectWithRetry() {
+  //   bugout.bugout.log('connectWithRetry called in bluetoothService');
+  //
+  //   getConnectedValue(function (value) {
+  //     isConnected = value;
+  //     getBluetoothEnabledValue(function (value) {
+  //       bluetoothEnabled = value;
+  //       valuesRetrieved(bluetoothEnabled, isConnected);
+  //     });
+  //   });
+  // }
 
   function turnOn(cb) {
     $cordovaBluetoothSerial.enable().then(function () {
@@ -114,9 +170,9 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
 
   function disconnect() {
     const stepMotorNum = shareSettings.getObj().stepMotorNum;
+    cancelConnectionAliveInterval();
     $cordovaBluetoothSerial.write('<y8:y'+stepMotorNum+'>').then(function () {
-      $window.bluetoothSerial.disconnect(function () {
-        cancelConnectionAliveInterval();
+      $cordovaBluetoothSerial.disconnect(function () {
         logService.addOne('User disconnected');
         setDeviceName('');
         buttonService.setValues({'showCalcButton':false});
@@ -139,7 +195,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   //
   //Emitters
   //
-  
+
   let connectionAlive = null;
 
   function checkConnectionAliveInterval() {
@@ -158,8 +214,11 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   }
 
   function cancelConnectionAliveInterval() {
-    if (connectionAlive)
-      $interval.cancel(connectionAlive)
+    if (connectionAlive) {
+      $interval.cancel(connectionAlive);
+      console.log('canceled interval')
+    }
+
   }
 
   //
@@ -167,54 +226,16 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   //
 
   function saveLastConnectedDevice(id, name) {
-    var obj = {'id':id,'name':name};
-    // $scope.deviceName = name;
+    const obj = {'id':id,'name':name};
     window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
     logService.consoleLog('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice']);
-    // showSavedDeviceAlert();
   }
 
-  function valuesRetrieved(bluetoothOn, isConnected) {
-    if (bluetoothOn && !isConnected) {
-      bugout.bugout.log('connectWithRetry bluetoothOn & !isConnected');
-      connectToLastDevice(bluetoothOn, function () {
-        getConnectedValue(function (value) {
-          isConnected = value;
-        });
-        if (!isConnected && retry < 6) {
-          bugout.bugout.log('retry connectToLastDevice');
-          $timeout(function () {
-            retry += 1;
-            bugout.bugout.log('Connect with retry, try: '+retry);
-            connectWithRetry();
-          }, 500)
-        }
-        else if (isConnected) {
-          retry = 1;
-        }
-        else if (!isConnected && retry >= 6) {
-          logService.addOne('Could not connect with last known device, please make sure that device is turned on. If so, turn off your phone\'s Bluetooth and restart the app', true );
-          retry = 1;
-        }
-      })
-    }
-  }
-
-    function valueRetrieved(cb) {
-    if (bluetoothOn && window.localStorage['lastConnectedDevice'] !== '' && window.localStorage['lastConnectedDevice'] !== undefined) {
-      bugout.bugout.log('actually connecting to lastConnected device');
-      var obj = JSON.parse(window.localStorage['lastConnectedDevice']);
-      $window.bluetoothSerial.connectInsecure(obj.id, function () {
-        setDeviceName(obj.name);
-        logService.addOne('Succesfully connected to last connected device');
-        checkConnectionAliveInterval();
-        if (cb) cb();
-      }, function () {
-        bugout.bugout.log('could not connect to last connected device');
-        console.log('could not connect to device or connection to device lost');
-        if (cb) cb();
-      })
-    }
+  function getLastConnectedDevice() {
+    if (window.localStorage['lastConnectedDevice'] !== '' && window.localStorage['lastConnectedDevice'] !== undefined)
+      return window.localStorage['lastConnectedDevice'];
+    else
+      return null;
   }
 
 }

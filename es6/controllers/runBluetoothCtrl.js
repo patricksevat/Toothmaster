@@ -291,6 +291,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       let res;
       for (let i = 0; i < 5; i++) {
         console.log('try: '+i+', command: '+str);
+        //TODO remove this test
         res = yield sendAndReceiveService.writeAsync(str);
         console.log('res in sendWithretry: '+res);
         if (i === 4)
@@ -340,9 +341,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     catch (err) {
       addToLog('Error: '+err, true);
       addToLog('Cancelling current tasks');
-      // emergencyService.on(function () {
-      //   emergencyService.off();
-      // });
       emergencyService.on();
       emergencyService.off();
     }
@@ -411,7 +409,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
           setButtons({'showSpinner':true});
           yield self.sendWithRetry('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>');
           checkDone();
-          // sendAndReceiveService.writeAsync('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
         }
         else {
           addToLog('Please wait untill this step is finished', true, 'warning');
@@ -424,9 +421,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     catch (err) {
       addToLog('Error: '+err, true);
       addToLog('Cancelling current tasks');
-      // emergencyService.on(function () {
-      //   emergencyService.off();
-      // });
       emergencyService.on();
       emergencyService.off();
     }
@@ -449,20 +443,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       bluetoothResponseListener();
       wydoneListener();
     });
-
-    // var check = $rootScope.$on('bluetoothResponse', function (event, res) {
-    //   logService.consoleLog('on bluetoothResponse in checkDone called');
-    //   if (res.search('wydone') > -1) {
-    //     checkDoneReceivedWydone()
-    //   }
-    //   else {
-    //     $timeout(function () {
-    //       logService.consoleLog('no wydone, sending <w>');
-    //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkDone);
-    //     }, 250);
-    //   }
-    //   check();
-    // });
   }
 
   function checkDoneReceivedWydone() {

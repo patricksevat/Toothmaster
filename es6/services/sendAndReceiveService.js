@@ -90,6 +90,7 @@ module.exports = sendAndReceiveService;
             reject('Response not in time');
         }, 3000);
 
+
         //response received
         let listener = $rootScope.$on('response', function (event, res) {
           resReceived = true;
@@ -99,13 +100,14 @@ module.exports = sendAndReceiveService;
             bugout.bugout.log('resolving OK');
             responseCount = 0;
             resolve('OK');
-            listener();
           }
           else if (res.indexOf('667:') > -1) {
             resolve('RETRY');
           }
           else if (responseCount >= 3)
             reject('Too many wrong responses');
+
+          listener();
         })
       })
     }
@@ -156,7 +158,6 @@ module.exports = sendAndReceiveService;
 
           //append string with cyclic redundancy check
           const commandWithCRC = crcService.appendCRC(str);
-
           $window.bluetoothSerial.write(commandWithCRC, function () {
             bugout.bugout.log('sent: '+commandWithCRC);
             lastCommandTime = Date.now();
