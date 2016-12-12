@@ -1,6 +1,6 @@
 {
   "name": "toothmaster",
-  "version": "0.7.0",
+  "version": "0.9.10",
   "scripts": {
     "start": "webpack-dev-server --hot --inline --colors --content-base www/"
   },

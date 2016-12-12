@@ -59,7 +59,6 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   function getConnectedValue(cb) {
     $cordovaBluetoothSerial.isConnected().then(function () {
       isConnected = true;
-      // bugout.bugout.log('getConnectedValue ='+isConnected);
       return isConnected;
     }, function () {
       isConnected = false;
@@ -91,22 +90,6 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
     })
   }
 
-  // function connectToLastDevice(bluetoothOnVal, cb) {
-  //   let bluetoothOn;
-  //   if (bluetoothOnVal === undefined) {
-  //     self.getBluetoothEnabledValue(function (value) {
-  //       bluetoothOn = value;
-  //       valueRetrieved(cb);
-  //     });
-  //   }
-  //   else {
-  //     bluetoothOn = bluetoothOnVal;
-  //     valueRetrieved(cb);
-  //   }
-  //   logService.addOne('Trying to connect with last known device');
-  // }
-
-  //TODO refactor connect process into something more logical
   self.connectWithRetry = $async(function* () {
     try {
       let lastConnectedDevice = JSON.parse(getLastConnectedDevice());
@@ -145,18 +128,6 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
       })
     }
   });
-
-  // function connectWithRetry() {
-  //   bugout.bugout.log('connectWithRetry called in bluetoothService');
-  //
-  //   getConnectedValue(function (value) {
-  //     isConnected = value;
-  //     getBluetoothEnabledValue(function (value) {
-  //       bluetoothEnabled = value;
-  //       valuesRetrieved(bluetoothEnabled, isConnected);
-  //     });
-  //   });
-  // }
 
   function turnOn(cb) {
     $cordovaBluetoothSerial.enable().then(function () {

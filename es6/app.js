@@ -64,7 +64,7 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .directive('errorHeader', ['$rootScope', errorDirective])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-    bugout.bugout.log('version 0.9.9.99');
+    bugout.bugout.log('version 0.9.10.0');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){

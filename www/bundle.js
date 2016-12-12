@@ -8278,7 +8278,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.9.99');
+	  bugout.bugout.log('version 0.9.10.0');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -9324,7 +9324,6 @@
 	                      }
 	
 	                      console.log('try: ' + _i + ', command: ' + str);
-	                      //TODO remove this test
 	                      _context.next = 6;
 	                      return sendAndReceiveService.writeAsync(str);
 	
@@ -9526,7 +9525,6 @@
 	  //SECTION: startMoving \ take steps logic
 	  //
 	
-	  //TODO refactor this with a listener for wydone
 	  $scope.startMoving = $async(regeneratorRuntime.mark(function _callee4() {
 	    return regeneratorRuntime.wrap(function _callee4$(_context4) {
 	      while (1) {
@@ -11338,7 +11336,6 @@
 	  function getConnectedValue(cb) {
 	    $cordovaBluetoothSerial.isConnected().then(function () {
 	      isConnected = true;
-	      // bugout.bugout.log('getConnectedValue ='+isConnected);
 	      return isConnected;
 	    }, function () {
 	      isConnected = false;
@@ -11370,22 +11367,6 @@
 	    });
 	  }
 	
-	  // function connectToLastDevice(bluetoothOnVal, cb) {
-	  //   let bluetoothOn;
-	  //   if (bluetoothOnVal === undefined) {
-	  //     self.getBluetoothEnabledValue(function (value) {
-	  //       bluetoothOn = value;
-	  //       valueRetrieved(cb);
-	  //     });
-	  //   }
-	  //   else {
-	  //     bluetoothOn = bluetoothOnVal;
-	  //     valueRetrieved(cb);
-	  //   }
-	  //   logService.addOne('Trying to connect with last known device');
-	  // }
-	
-	  //TODO refactor connect process into something more logical
 	  self.connectWithRetry = $async(regeneratorRuntime.mark(function _callee2() {
 	    var _this = this;
 	
@@ -11514,18 +11495,6 @@
 	      }
 	    }, _callee2, this, [[0, 28]]);
 	  }));
-	
-	  // function connectWithRetry() {
-	  //   bugout.bugout.log('connectWithRetry called in bluetoothService');
-	  //
-	  //   getConnectedValue(function (value) {
-	  //     isConnected = value;
-	  //     getBluetoothEnabledValue(function (value) {
-	  //       bluetoothEnabled = value;
-	  //       valuesRetrieved(bluetoothEnabled, isConnected);
-	  //     });
-	  //   });
-	  // }
 	
 	  function turnOn(cb) {
 	    $cordovaBluetoothSerial.enable().then(function () {

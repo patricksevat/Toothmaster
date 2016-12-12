@@ -291,7 +291,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       let res;
       for (let i = 0; i < 5; i++) {
         console.log('try: '+i+', command: '+str);
-        //TODO remove this test
         res = yield sendAndReceiveService.writeAsync(str);
         console.log('res in sendWithretry: '+res);
         if (i === 4)
@@ -394,8 +393,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //
   //SECTION: startMoving \ take steps logic
   //
-
-  //TODO refactor this with a listener for wydone
+  
   $scope.startMoving = $async(function* () {
     try {
       logService.consoleLog('$scope.movements in startMoving:');
