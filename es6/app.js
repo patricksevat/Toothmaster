@@ -57,14 +57,14 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout',
     pauseService])
   .service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope',
-    'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout',
+    'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout',
     sendAndReceiveService])
   .service('crcService', [crcService])
   .service('errorService', ['$rootScope', errorService])
   .directive('errorHeader', ['$rootScope', errorDirective])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-    bugout.bugout.log('version 0.9.9.77');
+    bugout.bugout.log('version 0.9.9.85');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){

@@ -11,13 +11,18 @@ export default function ($scope, $rootScope, errorService, $ionicScrollDelegate)
     loadErrors();
   });
 
+  $rootScope.$on('emergencyOff', () => {
+    errorService.removeEmergencyError();
+  });
+
+
   function loadErrors() {
     $scope.errors = errorService.getErrors();
     if ($scope.errors.length > 0) {
       $scope.showErrorHeader = true;
       $ionicScrollDelegate.scrollTop();
     }
-    else 
+    else
       $scope.showErrorHeader = false;
   }
 

@@ -4,21 +4,14 @@
 module.exports = sendAndReceiveService;
 
   function sendAndReceiveService(statusService, emergencyService, $window, logService, $rootScope,
-                                 buttonService, crcService, $ionicPopup, shareSettings, $interval, $timeout, $q, $async, bugout) {
+                                 buttonService, crcService, shareSettings, $timeout, $async, bugout) {
     const sendAndReceive = this;
     //Available methods
     sendAndReceive.subscribe = subscribe;
     sendAndReceive.subscribeRawData = subscribeRawData;
     sendAndReceive.unsubscribe = unsubscribe;
     sendAndReceive.write = write;
-    // sendAndReceive.writeAsync = writeAsync;
-    // sendAndReceive.writeBuffered = writeBuffered;
-    // sendAndReceive.checkInterpretedResponse = checkInterpretedResponse;
-    // sendAndReceive.getNewCommandID = getNewCommandID;
-    // sendAndReceive.setCommandID = setCommandID;
-    // sendAndReceive.resetCommandObj = resetCommandObj;
     sendAndReceive.expectedResponse = expectedResponse;
-    // sendAndReceive.addToCommandObj = addToCommandObj;
     sendAndReceive.emitResponse = emitResponse;
     sendAndReceive.sendEmergency = sendEmergency;
     sendAndReceive.createResetListener = createResetListener;
@@ -29,7 +22,6 @@ module.exports = sendAndReceiveService;
     $rootScope.$on('emergencyOn', function () {
       bugout.bugout.log('emergencyOn received in sendAndReceiveService');
       sendAndReceive.sendEmergency();
-      // sendAndReceive.resetCommandObj();
     });
 
     //service-scoped variables
@@ -39,8 +31,6 @@ module.exports = sendAndReceiveService;
     let lastCommandTime;
     let lastReceivedTime;
     let subscribed = statusService.getSubscribed();
-    let commandIdStr = $window.localStorage['commandIdNum'];
-    let commandObj = {};
 
     //method functions
     function subscribe() {
@@ -179,61 +169,6 @@ module.exports = sendAndReceiveService;
       })
     }
 
-    // function writeBuffered(str) {
-    //   var commandIDObj = sendAndReceive.addToCommandObj(str);
-    //   if (statusService.getEmergency() === false) {
-    //     var command;
-    //     //Used for buffered commands. Command with brackets: "<r34001>", without brackets: "r34001
-    //     var commandWithoutBrackets = str.slice(1, str.length-1);
-    //     command = '<c'+commandWithoutBrackets+'$'+commandIDObj.ID+'>';
-    //
-    //     $window.bluetoothSerial.write(command, function () {
-    //       logService.consoleLog('sent: '+command);
-    //       lastCommandTime = Date.now();
-    //     }, function () {
-    //       logService.consoleLog('ERROR: could not send command '+str+' , callingFunction: '+callingFunction);
-    //     });
-    //     sendAndReceive.checkInterpretedResponse(commandIDObj.ID);
-    //   }
-    //   else {
-    //     logService.addOne('Emergency pressed, will not send command')
-    //   }
-    // }
-
-    // //TODO remove this?
-    // function checkInterpretedResponse(commandID) {
-    //   var interpreted = false;
-    //   var checkInterpreted = $rootScope.$on('bluetoothResponse', function (event, res) {
-    //     if (res.search('10:<c') > -1 && res.search(commandID) > -1) {
-    //       interpreted = true;
-    //       checkInterpreted();
-    //     }
-    //   });
-    //   $timeout(function () {
-    //     if (!interpreted) {
-    //       logService.consoleLog('incorrect interpretation, ID: '+commandID);
-    //       $rootScope.$emit('faultyResponse');
-    //       checkInterpreted();
-    //     }
-    //   },2500)
-    // }
-    //
-    // function getNewCommandID() {
-    //   commandIdStr = window.localStorage['commandIdNum'];
-    //   var commandIdNum = Number(commandIdStr);
-    //   commandIdNum += 1;
-    //   sendAndReceive.setCommandID(commandIdNum);
-    //   return commandIdNum;
-    // }
-    //
-    // function setCommandID(num) {
-    //   window.localStorage['commandIdNum'] = num;
-    // }
-    //
-    // function resetCommandObj() {
-    //   commandObj= {};
-    // }
-
     function expectedResponse(str) {
       stepMotorNum = shareSettings.getObj().stepMotorNum;
       switch (str) {
@@ -285,20 +220,6 @@ module.exports = sendAndReceiveService;
           break;
       }
     }
-
-    // function addToCommandObj(str) {
-    //   var id = sendAndReceive.getNewCommandID();
-    //   var expectedResponse = sendAndReceive.expectedResponse(str);
-    //   var obj = {
-    //     'ID': id,
-    //     'command': str, //ex: <q2456>
-    //     'expectedResponse': expectedResponse,
-    //     'interpreted': false,
-    //     'response': ''
-    //   };
-    //   commandObj[id] = obj;
-    //   return obj;
-    // }
 
     function emitResponse(res) {
       console.log('res in emitResponse: '+res);
@@ -367,7 +288,7 @@ module.exports = sendAndReceiveService;
 
     function stopSwitchHit(res) {
       const posStopswitch = res.lastIndexOf('@')-3;
-      logService.addOne('Unexpected stopswitch'+res.charAt(posStopswitch)+' has been hit. Aborting task and resetting program.', true);
+      logService.addOne('Stopswitch '+res.charAt(posStopswitch)+' has been hit. Aborting task and resetting program.', true);
       logService.consoleLog('Error: hit stopswitch '+res.charAt(posStopswitch));
       //emergencyService.on sets correct buttons and sends resetcommand
       emergencyService.on();
@@ -384,20 +305,6 @@ module.exports = sendAndReceiveService;
       emergencyService.on();
       $rootScope.$emit('maxSteps', res, missedSteps)
     }
-
-    // function faultyResponse(res) {
-    //   logService.consoleLog('\nERROR:\nPotential faulty response: '+res);
-    //   var numStr1 = res.slice(res.indexOf('$')+1, res.indexOf('>'));
-    //   var commandID1 = Number(numStr1);
-    //   var commandIDObj = commandObj[commandID1];
-    //   logService.consoleLog('commandIDObj.command: '+commandIDObj.command);
-    //   if (res.search(commandIDObj.command) === -1) {
-    //     logService.consoleLog('confirmed faulty response');
-    //     $rootScope.$emit('faultyResponse', res);
-    //     delete commandObj[commandID1];
-    //   }
-    // }
-
   }
 
 

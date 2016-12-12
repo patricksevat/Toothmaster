@@ -2,7 +2,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
                         $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
                         bluetoothService, logService, calculateVarsService, sendAndReceiveService,
                         statusService, logModalService, modalService, $async, errorService){
-  //TODO interval check on bluetoothConnected
+
   const self = this;
 
   $scope.bluetoothLog = logService.getLog();
@@ -351,7 +351,8 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   function checkWydone() {
     console.log('checkWydone');
     let timer = $interval(() => {
-      sendAndReceiveService.write('<w'+stepMotorNum+'>');
+      sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
+      // sendAndReceiveService.write('<w'+stepMotorNum+'>');
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
@@ -397,75 +398,103 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //
 
   //TODO refactor this with a listener for wydone
-  $scope.startMoving = function () {
-    logService.consoleLog('$scope.movements in startMoving:');
-    logService.consoleLog($scope.movements);
-    logService.consoleLog('$scope.movementsNum in startMoving:');
-    logService.consoleLog($scope.movementsNum);
-    if (statusService.getEmergency() === false) {
-      if (done) {
-        statusService.setSending(true);
-        done = false;
-        setButtons({'showSpinner':true});
-        sendAndReceiveService.write('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
-      }
-      else {
-        addToLog('Please wait untill this step is finished', true, 'warning');
-      }
-    }
-    else {
-      addToLog('Emergency on, will not continue with movement', true);
-    }
-
-    //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
-    function checkDone() {
-      var check = $rootScope.$on('bluetoothResponse', function (event, res) {
-        logService.consoleLog('on bluetoothResponse in checkDone called');
-        if (res.search('wydone') > -1) {
-          checkDoneReceivedWydone()
+  $scope.startMoving = $async(function* () {
+    try {
+      logService.consoleLog('$scope.movements in startMoving:');
+      logService.consoleLog($scope.movements);
+      logService.consoleLog('$scope.movementsNum in startMoving:');
+      logService.consoleLog($scope.movementsNum);
+      if (statusService.getEmergency() === false) {
+        if (done) {
+          statusService.setSending(true);
+          done = false;
+          setButtons({'showSpinner':true});
+          yield self.sendWithRetry('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>');
+          checkDone();
+          // sendAndReceiveService.writeAsync('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>', checkDone);
         }
         else {
-          $timeout(function () {
-            logService.consoleLog('no wydone, sending <w>');
-            sendAndReceiveService.write('<w'+stepMotorNum+'>', checkDone);
-          }, 250);
+          addToLog('Please wait untill this step is finished', true, 'warning');
         }
-        check();
+      }
+      else {
+        addToLog('Emergency on, will not continue with movement', true);
+      }
+    }
+    catch (err) {
+      addToLog('Error: '+err, true);
+      addToLog('Cancelling current tasks');
+      // emergencyService.on(function () {
+      //   emergencyService.off();
+      // });
+      emergencyService.on();
+      emergencyService.off();
+    }
+  });
+
+  //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
+  function checkDone() {
+    console.log('checkDone');
+    let timer = $interval(() => {
+      sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
+    }, 250);
+
+    let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
+      console.log('bluetoothResponseListener: '+res);
+    });
+
+    let wydoneListener = $rootScope.$on('wydone', (event, res) => {
+      $interval.cancel(timer);
+      checkDoneReceivedWydone();
+      bluetoothResponseListener();
+      wydoneListener();
+    });
+
+    // var check = $rootScope.$on('bluetoothResponse', function (event, res) {
+    //   logService.consoleLog('on bluetoothResponse in checkDone called');
+    //   if (res.search('wydone') > -1) {
+    //     checkDoneReceivedWydone()
+    //   }
+    //   else {
+    //     $timeout(function () {
+    //       logService.consoleLog('no wydone, sending <w>');
+    //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkDone);
+    //     }, 250);
+    //   }
+    //   check();
+    // });
+  }
+
+  function checkDoneReceivedWydone() {
+    addToLog('Movement done');
+    addToLog($scope.movements[$scope.movementsNum].description);
+    done = true;
+    setButtons({'showSpinner':false, 'showHoming': true, 'showResetButton': false});
+    if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut'
+      && $scope.movementsNum !== $scope.movements.length -1){
+      $ionicPopup.alert({
+        title: $scope.movements[$scope.movementsNum].description
       });
+      //increment movementsNum, so when user clicks Start Moving button again,
+      // startMoving() will be called with next command
+      $scope.movementsNum += 1;
     }
-
-    function checkDoneReceivedWydone() {
-      addToLog('Movement done');
-      addToLog($scope.movements[$scope.movementsNum].description);
-      done = true;
-      setButtons({'showSpinner':false, 'showHoming': true, 'showResetButton': false});
-      if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut'
-        && $scope.movementsNum !== $scope.movements.length -1){
-        $ionicPopup.alert({
-          title: $scope.movements[$scope.movementsNum].description
-        });
-        //increment movementsNum, so when user clicks Start Moving button again,
-        // startMoving() will be called with next command
-        $scope.movementsNum += 1;
-      }
-      //once last movement is completed show restart program popup
-      else if ($scope.movementsNum === $scope.movements.length -1) {
-        $ionicPopup.alert({
-          title: $scope.movements[$scope.movementsNum].description,
-          buttons: [{
-            type: 'button-calm',
-            text: 'OK',
-            onTap: $scope.showRestartPopup()
-          }]
-        });
-        setButtons({'showMovingButton':false,'showEmergency':false,'showResetButton':false});
-        statusService.setSending(false);
-        $scope.movements = [];
-        $scope.movementsNum = 0;
-      }
+    //once last movement is completed show restart program popup
+    else if ($scope.movementsNum === $scope.movements.length -1) {
+      $ionicPopup.alert({
+        title: $scope.movements[$scope.movementsNum].description,
+        buttons: [{
+          type: 'button-calm',
+          text: 'OK',
+          onTap: $scope.showRestartPopup()
+        }]
+      });
+      setButtons({'showMovingButton':false,'showEmergency':false,'showResetButton':false});
+      statusService.setSending(false);
+      $scope.movements = [];
+      $scope.movementsNum = 0;
     }
-  };
-
+  }
 
 
   //

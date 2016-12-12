@@ -235,6 +235,8 @@ iframe {
   text-overflow: initial;
   white-space: normal;
   height: auto;
+  text-align: left;
+  line-height: initial;
 }
 
 .error-header-animation {

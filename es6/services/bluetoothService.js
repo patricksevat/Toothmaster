@@ -11,6 +11,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   this.getDeviceName = getDeviceName;
   this.setDeviceName = setDeviceName;
   this.connectToLastDevice = connectToLastDevice;
+  this.connectToSelectedDevice = connectToSelectedDevice;
   this.connectWithRetry = connectWithRetry;
   this.turnOnBluetooth = turnOn;
   this.disconnect = disconnect;
@@ -61,6 +62,19 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
     deviceName = str;
   }
 
+  function connectToSelectedDevice(deviceID, deviceName) {
+    return new Promise((resolve, reject) => {
+      $cordovaBluetoothSerial.connect(deviceID).then(function () {
+        saveLastConnectedDevice(deviceID, deviceName);
+        setDeviceName(deviceName);
+        checkConnectionAliveInterval();
+        resolve();
+      }, function (error) {
+        reject(error);
+      })
+    })
+  }
+
   function connectToLastDevice(bluetoothOnVal, cb) {
     let bluetoothOn;
     if (bluetoothOnVal === undefined) {
@@ -100,15 +114,16 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
 
   function disconnect() {
     const stepMotorNum = shareSettings.getObj().stepMotorNum;
-    $cordovaBluetoothSerial.write('<<y8:y'+stepMotorNum+'>').then(function () {
+    $cordovaBluetoothSerial.write('<y8:y'+stepMotorNum+'>').then(function () {
       $window.bluetoothSerial.disconnect(function () {
+        cancelConnectionAliveInterval();
         logService.addOne('User disconnected');
         setDeviceName('');
         buttonService.setValues({'showCalcButton':false});
         getConnectedValue();
       }, function () {
         bugout.bugout.log('User could not disconnect');
-        logService.addOne('Could not disconnect from device');
+        logService.addOne('Could not disconnect from device', true, 'warning');
       })
     });
   }
@@ -124,8 +139,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   //
   //Emitters
   //
-
-  //TODO do we need an emergency listener for connectionLost => prolly not
+  
   let connectionAlive = null;
 
   function checkConnectionAliveInterval() {
@@ -136,7 +150,8 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
           console.log('connection lost from interval');
           $rootScope.$emit('connectionLost');
           $interval.cancel(connectionAlive);
-          console.log('should be null: connectionAlive: '+connectionAlive)
+          console.log('\nshould be null: connectionAlive: ');
+          console.log(connectionAlive);
         }
       })
     }, 1000);
@@ -150,6 +165,14 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   //
   //  Helpers
   //
+
+  function saveLastConnectedDevice(id, name) {
+    var obj = {'id':id,'name':name};
+    // $scope.deviceName = name;
+    window.localStorage.setItem('lastConnectedDevice', JSON.stringify(obj));
+    logService.consoleLog('Local storage last connected device set to: '+window.localStorage['lastConnectedDevice']);
+    // showSavedDeviceAlert();
+  }
 
   function valuesRetrieved(bluetoothOn, isConnected) {
     if (bluetoothOn && !isConnected) {

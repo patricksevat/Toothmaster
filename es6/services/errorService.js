@@ -10,6 +10,7 @@ export default function ($rootScope) {
 
   this.addError = (errorObj) => {
     errors.unshift(errorObj);
+    $rootScope.$emit('errorAdded');
   };
 
   this.removeFirstError = () => {
@@ -29,11 +30,7 @@ export default function ($rootScope) {
     self.addError({level: 'critical', message: 'Emergency is on'});
     $rootScope.$emit('errorAdded');
   });
-
-  $rootScope.$on('emergencyOff', () => {
-    self.removeEmergencyError();
-  });
-
+  
   // connection lost listeners
   $rootScope.$on('connectionLost', () => {
     self.addError({
