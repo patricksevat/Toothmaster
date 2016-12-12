@@ -8,8 +8,7 @@ import shareProgramService from './services/shareProgramService';
 import skipService from './services/skipService';
 import buttonService from './services/buttonService';
 import emergencyService from './services/emergencyService';
-import {bluetoothEnabledService, bluetoothConnectedService, bluetoothConnectedToDeviceService,
-  turnOnBluetoothService, disconnectService} from './services/bluetoothService';
+import { bluetoothService} from './services/bluetoothService';
 import logService from './services/logService'
 import calculateVarsService from './services/calculateVarsService'
 import logModalService from './services/logModalService'
@@ -48,29 +47,24 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .service('skipService', skipService)
   .service('buttonService', ['bugout', buttonService])
   .service('emergencyService',['buttonService', 'statusService', '$rootScope', 'bugout', emergencyService])
-  .service('checkBluetoothEnabledService', ['bugout', '$cordovaBluetoothSerial', bluetoothEnabledService])
-  .service('isConnectedService', ['bugout', '$cordovaBluetoothSerial', bluetoothConnectedService])
-  .service('connectToDeviceService', ['isConnectedService', 'logService', 'checkBluetoothEnabledService', 'buttonService', '$rootScope', '$timeout', '$window', 'bugout',
-    bluetoothConnectedToDeviceService])
-  .service('turnOnBluetoothService',['$cordovaBluetoothSerial', 'checkBluetoothEnabledService', 'logService', turnOnBluetoothService])
-  .service('disconnectService',['$cordovaBluetoothSerial', 'logService', 'buttonService', 'isConnectedService', '$window', 'connectToDeviceService', 'shareSettings', 'bugout',
-    disconnectService])
-  .service('logService', ['bugout', logService])
+  .service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings',
+    'buttonService', '$rootScope', '$interval', bluetoothService])
+  .service('logService', ['bugout', 'errorService', logService])
   .service('calculateVarsService',['shareProgram', 'shareSettings', calculateVarsService])
   .service('logModalService', ['bugout', logModalService])
   .service('modalService', ['$ionicModal', '$rootScope', modalService])
   .service('statusService', ['bugout', statusService])
-  .service('pauseService', ['statusService', 'isConnectedService', 'logService', 'disconnectService', 'buttonService', 'connectToDeviceService', 'bugout',
+  .service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout',
     pauseService])
   .service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope',
     'buttonService', 'crcService', '$ionicPopup', 'shareSettings', '$interval', '$timeout', '$q', '$async', 'bugout',
     sendAndReceiveService])
   .service('crcService', [crcService])
-  .service('errorService', [errorService])
+  .service('errorService', ['$rootScope', errorService])
   .directive('errorHeader', ['$rootScope', errorDirective])
 
-  .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, connectToDeviceService, bugout) {
-    bugout.bugout.log('version 0.9.9.65');
+  .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
+    bugout.bugout.log('version 0.9.9.77');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){
@@ -118,7 +112,7 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
     else {
       $ionicPlatform.ready(function () {
         bugout.bugout.log('trying to connectwithretry on startup');
-        connectToDeviceService.connectWithRetry();
+        bluetoothService.connectWithRetry();
       });
     }
 

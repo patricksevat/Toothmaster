@@ -1,34 +1,32 @@
 export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
-                         $state, $ionicPlatform, $window, turnOnBluetoothService, statusService, isConnectedService, logService,
-                         buttonService, checkBluetoothEnabledService, connectToDeviceService, disconnectService, $timeout,
+                         $state, $ionicPlatform, $window, statusService, logService,
+                         buttonService, bluetoothService, $timeout,
                          logModalService, modalService, errorService) {
 
+  //TODO connection lost timer
+  //TODO add spinner on connecting
   $scope.availableDevices = [];
   $scope.pairedDevices = [];
-  logService.getLog(function (arr) {
-    $scope.bluetoothLog = arr;
-  });
+  $scope.bluetoothLog = logService.getLog();
   $scope.bluetoothOn = function () {
-    turnOnBluetoothService.turnOn(function () {
-      checkBluetoothEnabledService.getValue(function (val) {
+    bluetoothService.turnOnBluetooth(function () {
+      bluetoothService.getBluetoothEnabledValue(function (val) {
         $scope.bluetoothEnabled = val;
         if ($scope.bluetoothEnabled) $scope.getAvailableDevices();
       })
     });
   };
-  checkBluetoothEnabledService.getValue(function (val) {
+  bluetoothService.getBluetoothEnabledValue(function (val) {
     $scope.bluetoothEnabled = val;
   });
-  $scope.deviceName= connectToDeviceService.getDeviceName();
+  $scope.deviceName= bluetoothService.getDeviceName();
   $scope.buttons = buttonService.getValues();
-  $scope.isConnected = isConnectedService.getValue();
+  $scope.isConnected = bluetoothService.getConnectedValue();
 
   function addToLog(str, isError) {
     logService.consoleLog(str);
     logService.addOne(str);
-    logService.getLog(function (arr) {
-      $scope.bluetoothLog = arr;
-    });
+    $scope.bluetoothLog = logService.getLog();
     if (isError === true) {
       errorService.addError({level: 'critical', message: str});
     }
@@ -43,18 +41,14 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     $scope.availableDevices = [];
     $scope.pairedDevices = [];
     logService.consoleLog('enterView in bluetoothConnectionCtrl fired');
-    logService.getLog(function (arr) {
-      $scope.bluetoothLog = arr;
-    });
-    checkBluetoothEnabledService.getValue(function (value) {
+    $scope.bluetoothLog = logService.getLog();
+    bluetoothService.getBluetoothEnabledValue(function (value) {
       $scope.bluetoothEnabled = value;
       logService.consoleLog('$scope.bluetoothEnabled: '+$scope.bluetoothEnabled);
     });
-    connectToDeviceService.getDeviceName(function (value) {
-      $scope.deviceName= value;
-    });
+    $scope.deviceName= bluetoothService.getDeviceName();
     $scope.buttons = buttonService.getValues();
-    isConnectedService.getValue(function (value) {
+    bluetoothService.getConnectedValue(function (value) {
       $scope.isConnected = value;
       logService.consoleLog('$scope.isConnected: '+$scope.isConnected);
       if (!$scope.isConnected) {
@@ -65,7 +59,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   });
 
   $scope.userDisconnect = function () {
-    disconnectService.disconnect();
+    bluetoothService.disconnect();
     $scope.isConnected = false;
     $timeout(function () {
       $scope.getAvailableDevices();
@@ -83,7 +77,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   $scope.getAvailableDevices = function () {
     $scope.availableDevices = [];
     $scope.pairedDevices = [];
-    isConnectedService.getValue(function (value) {
+    bluetoothService.getConnectedValue(function (value) {
       if (value === false) {
         $ionicPlatform.ready(function() {
           logService.consoleLog('Calling get available devices');
@@ -137,39 +131,45 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       $cordovaBluetoothSerial.connectInsecure($scope.availableDevices[$index].id).then(function () {
         addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
         saveLastConnectedDevice($scope.availableDevices[$index].id, $scope.availableDevices[$index].name);
-        connectToDeviceService.setDeviceName($scope.availableDevices[$index].name);
-        isConnectedService.getValue(function (val) {
-          $timeout(function () {
-            $scope.$apply(function () {
-              $scope.isConnected = val;
-            })
-          }, 500);
-        });
+        bluetoothService.setDeviceName($scope.availableDevices[$index].name);
+        $scope.isConnected = bluetoothService.getConnectedValue();
+        bluetoothService.checkConnectionAliveInterval();
+        // isConnectedService.getValue(function (val) {
+        //   $timeout(function () {
+        //     $scope.$apply(function () {
+        //       $scope.isConnected = val;
+        //     })
+        //   }, 500);
+        // });
       }, function (error) {
         //failure callback
         addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device', true);
         addToLog('error: '+error);
-        $scope.isConnected = isConnectedService.getValue();
+        $scope.isConnected = bluetoothService.getConnectedValue();
       })
     })
   };
 
+  //TODO cleaner to move connecting to bluetoothService
+  
   $scope.connectToPairedDevice = function ($index) {
     $ionicPlatform.ready(function() {
       addToLog('Trying to connect');
       logService.consoleLog('Id = '+$scope.pairedDevices[$index].id);
       $cordovaBluetoothSerial.connect($scope.pairedDevices[$index].id).then(function () {
         saveLastConnectedDevice($scope.pairedDevices[$index].id, $scope.pairedDevices[$index].name);
-        connectToDeviceService.setDeviceName($scope.pairedDevices[$index].name);
+        bluetoothService.setDeviceName($scope.pairedDevices[$index].name);
         addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
-        isConnectedService.getValue(function (val) {
-          $timeout(function () {
-            $scope.$apply(function () {
-              $scope.isConnected = val;
-            })
-          }, 500);
-
-        });
+        $scope.isConnected = bluetoothService.getConnectedValue();
+        bluetoothService.checkConnectionAliveInterval();
+        // isConnectedService.getValue(function (val) {
+        //   $timeout(function () {
+        //     $scope.$apply(function () {
+        //       $scope.isConnected = val;
+        //     })
+        //   }, 500);
+        //
+        // });
       }, function (error) {
         addToLog('Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device', true);
         addToLog('error: '+error);

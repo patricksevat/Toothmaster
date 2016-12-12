@@ -1,7 +1,7 @@
 export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                         $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
-                        checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-                        statusService, connectToDeviceService, logModalService, modalService, $async, errorService){
+                        bluetoothService, logService, calculateVarsService, sendAndReceiveService,
+                        statusService, logModalService, modalService, $async, errorService){
   //TODO interval check on bluetoothConnected
   const self = this;
 
@@ -16,7 +16,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   //remove unnecessary $scope variables
   $scope.settings = shareSettings.getObj();
-  $scope.deviceName= connectToDeviceService.getDeviceName();
+  $scope.deviceName= bluetoothService.getDeviceName();
   $scope.buttons = buttonService.getValues();
 
   logService.consoleLog('program:');
@@ -43,16 +43,14 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   $scope.$on('$ionicView.enter',function () {
     logService.consoleLog('enterView in runBluetoothCtrl fired');
-    isConnectedService.getValue(function (value) {
+    bluetoothService.getConnectedValue(function (value) {
       $scope.isConnected = value;
     });
-    checkBluetoothEnabledService.getValue(function (value) {
+    bluetoothService.getBluetoothEnabledValue(function (value) {
       $scope.bluetoothEnabled = value;
       logService.consoleLog('$scope.bluetoothEnabled: '+$scope.bluetoothEnabled);
     });
-    logService.getLog(function (arr) {
-      $scope.bluetoothLog = arr;
-    });
+    $scope.bluetoothLog = logService.getLog();
     //no need to connect or anything, connectToLastDevice is done on app startup
     $scope.settings = shareSettings.getObj();
     program = shareProgram.getObj();
@@ -68,7 +66,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       logService.consoleLog('commands:');
       logService.consoleLog(commands);
     });
-    $scope.deviceName= connectToDeviceService.getDeviceName();
+    $scope.deviceName= bluetoothService.getDeviceName();
     $scope.buttons = buttonService.getValues();
     if (statusService.getEmergency() === true) {
       logService.consoleLog('set resetbutton true');
@@ -114,7 +112,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   });
 
   $scope.userDisconnect = function () {
-    disconnectService.disconnect();
+    bluetoothService.disconnect();
     $scope.isConnected = false;
   };
 
@@ -124,9 +122,10 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   function setButtons(obj) {
     buttonService.setValues(obj);
-    $scope.$apply(function () {
-      $scope.buttons = buttonService.getValues()
-    });
+    $scope.buttons = buttonService.getValues();
+    // $scope.$apply(function () {
+    //   $scope.buttons = buttonService.getValues()
+    // });
     logService.consoleLog($scope.buttons);
   }
 
@@ -136,9 +135,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   function addToLog(str, isError, errorType) {
     logService.addOne(str);
-    logService.getLog(function (arr) {
-      $scope.bluetoothLog = arr;
-    });
+    $scope.bluetoothLog= logService.getLog();
     if (isError === true) {
       errorService.addError({level: errorType ? errorType : 'critical', message: str});
     }
@@ -380,7 +377,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     statusService.setSending(false);
     addToLog('Moved to start position');
     const cutsRoundedUp = Math.ceil(program.cutWidth / program.sawWidth);
-    
+
     //On popup user is able to indicate that cut is complete
     //Button on popup triggers startMoving()
     if (program.cutWidth !== program.sawWidth) {
@@ -399,6 +396,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //SECTION: startMoving \ take steps logic
   //
 
+  //TODO refactor this with a listener for wydone
   $scope.startMoving = function () {
     logService.consoleLog('$scope.movements in startMoving:');
     logService.consoleLog($scope.movements);

@@ -1,4 +1,4 @@
-export default function (statusService, isConnectedService, logService, disconnectService, buttonService, connectToDeviceService, bugout) {
+export default function (statusService, bluetoothService, logService, buttonService, bugout) {
   const pause = this;
   pause.pause = pauseFunc;
   pause.resume = resume;
@@ -7,11 +7,11 @@ export default function (statusService, isConnectedService, logService, disconne
     //var sending = statusService.getSending();
     const sending = statusService.getSending();
     bugout.bugout.log('sending in pause:'+statusService.getSending());
-    const connected = isConnectedService.getValue();
+    const connected = bluetoothService.getConnectedValue();
     bugout.bugout.log('pause.pause called, sending: '+sending+', connected'+connected);
     if (!sending && connected) {
       logService.addOne('Disconnected after pausing application');
-      disconnectService.disconnect();
+      bluetoothService.disconnect();
       buttonService.setValues({'showCalcButton': false, 'readyForData': false});
     }
     else {
@@ -22,7 +22,7 @@ export default function (statusService, isConnectedService, logService, disconne
   function resume() {
     const sending = statusService.getSending();
     if (window.localStorage['lastConnectedDevice'] !== '' && !sending) {
-      connectToDeviceService.connectWithRetry();
+      bluetoothService.connectWithRetry();
     }
     else if (sending) {
       bugout.bugout.log('skipped reconnect, because sending is '+sending);

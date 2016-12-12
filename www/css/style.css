@@ -223,7 +223,21 @@ iframe {
 
 /*errorHeader.html*/
 #error-header-wrapper {
-  position: relative !important;
+  position: initial !important;
+  height: auto;
+}
+
+
+/*TODO leave some margin right for close icon in error message*/
+#error-message {
+  position: initial;
+  word-wrap: break-word;
+  text-overflow: initial;
+  white-space: normal;
+  height: auto;
+}
+
+.error-header-animation {
   -moz-animation-name: dropHeader;
   -moz-animation-iteration-count: 1;
   -moz-animation-timing-function: ease-in;
@@ -264,3 +278,5 @@ iframe {
     transform: translateY(0);
   }
 }
+
+

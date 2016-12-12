@@ -1,7 +1,7 @@
 export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                          $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
-                         checkBluetoothEnabledService, isConnectedService, logService, disconnectService, calculateVarsService, sendAndReceiveService,
-                         statusService, connectToDeviceService, $ionicHistory, logModalService, modalService, $async, errorService) {
+                         bluetoothService, logService, calculateVarsService, sendAndReceiveService,
+                         statusService, $ionicHistory, logModalService, modalService, $async, errorService) {
   $scope.$on('$ionicView.unloaded', function () {
     logService.consoleLog('\nUNLOADED\n');
   });
@@ -25,8 +25,8 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   $scope.bluetoothEnabled = null;
   $scope.buttons = buttonService.getValues();
   $scope.userDisconnect = function () {
-    disconnectService.disconnect();
-    isConnectedService.getValue(function (val) {
+    bluetoothService.disconnect();
+    bluetoothService.getConnectedValue(function (val) {
       $scope.isConnected = val;
     })
   };
@@ -34,26 +34,23 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
 
   function setButtons(obj) {
     buttonService.setValues(obj);
-    $scope.$apply(function () {
-      $scope.buttons = buttonService.getValues()
-    });
+    $scope.buttons = buttonService.getValues();
+    // $scope.$apply(function () {
+    //   $scope.buttons = buttonService.getValues()
+    // });
     logService.consoleLog($scope.buttons);
   }
 
   $scope.$on('$ionicView.enter', function () {
     logService.consoleLog('enterView in homingCtrl fired');
-    logService.getLog(function (arr) {
-      $scope.bluetoothLog = arr;
-    });
-    checkBluetoothEnabledService.getValue(function (value) {
+    $scope.bluetoothLog= logService.getLog();
+    bluetoothService.getBluetoothEnabledValue(function (value) {
       $scope.bluetoothEnabled = value;
       logService.consoleLog('$scope.bluetoothEnabled: '+$scope.bluetoothEnabled);
     });
-    connectToDeviceService.getDeviceName(function (value) {
-      $scope.deviceName= value;
-    });
+    $scope.deviceName = bluetoothService.getDeviceName();
     $scope.buttons = buttonService.getValues();
-    isConnectedService.getValue(function (value) {
+    bluetoothService.getConnectedValue(function (value) {
       $scope.isConnected = value;
       logService.consoleLog('$scope.isConnected: '+$scope.isConnected);
     });
@@ -184,9 +181,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
 
   function addToLog(str) {
     logService.addOne(str);
-    logService.getLog(function (arr) {
-      $scope.bluetoothLog = arr;
-    });
+    $scope.bluetoothLog = logService.getLog();
   }
 
   $scope.openHelpModal = function () {

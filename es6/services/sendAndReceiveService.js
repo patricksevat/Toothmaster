@@ -12,13 +12,13 @@ module.exports = sendAndReceiveService;
     sendAndReceive.unsubscribe = unsubscribe;
     sendAndReceive.write = write;
     // sendAndReceive.writeAsync = writeAsync;
-    sendAndReceive.writeBuffered = writeBuffered;
-    sendAndReceive.checkInterpretedResponse = checkInterpretedResponse;
-    sendAndReceive.getNewCommandID = getNewCommandID;
-    sendAndReceive.setCommandID = setCommandID;
-    sendAndReceive.resetCommandObj = resetCommandObj;
+    // sendAndReceive.writeBuffered = writeBuffered;
+    // sendAndReceive.checkInterpretedResponse = checkInterpretedResponse;
+    // sendAndReceive.getNewCommandID = getNewCommandID;
+    // sendAndReceive.setCommandID = setCommandID;
+    // sendAndReceive.resetCommandObj = resetCommandObj;
     sendAndReceive.expectedResponse = expectedResponse;
-    sendAndReceive.addToCommandObj = addToCommandObj;
+    // sendAndReceive.addToCommandObj = addToCommandObj;
     sendAndReceive.emitResponse = emitResponse;
     sendAndReceive.sendEmergency = sendEmergency;
     sendAndReceive.createResetListener = createResetListener;
@@ -29,18 +29,18 @@ module.exports = sendAndReceiveService;
     $rootScope.$on('emergencyOn', function () {
       bugout.bugout.log('emergencyOn received in sendAndReceiveService');
       sendAndReceive.sendEmergency();
-      sendAndReceive.resetCommandObj();
+      // sendAndReceive.resetCommandObj();
     });
 
     //service-scoped variables
     let stepMotorNum = shareSettings.getObj().stepMotorNum;
-    var command;
-    var response;
-    var lastCommandTime;
-    var lastReceivedTime;
-    var subscribed = statusService.getSubscribed();
-    var commandIdStr = $window.localStorage['commandIdNum'];
-    var commandObj = {};
+    let command;
+    let response;
+    let lastCommandTime;
+    let lastReceivedTime;
+    let subscribed = statusService.getSubscribed();
+    let commandIdStr = $window.localStorage['commandIdNum'];
+    let commandObj = {};
 
     //method functions
     function subscribe() {
@@ -179,60 +179,60 @@ module.exports = sendAndReceiveService;
       })
     }
 
-    function writeBuffered() {
-      var commandIDObj = sendAndReceive.addToCommandObj(str);
-      if (statusService.getEmergency() === false) {
-        var command;
-        //Used for buffered commands. Command with brackets: "<r34001>", without brackets: "r34001
-        var commandWithoutBrackets = str.slice(1, str.length-1);
-        command = '<c'+commandWithoutBrackets+'$'+commandIDObj.ID+'>';
+    // function writeBuffered(str) {
+    //   var commandIDObj = sendAndReceive.addToCommandObj(str);
+    //   if (statusService.getEmergency() === false) {
+    //     var command;
+    //     //Used for buffered commands. Command with brackets: "<r34001>", without brackets: "r34001
+    //     var commandWithoutBrackets = str.slice(1, str.length-1);
+    //     command = '<c'+commandWithoutBrackets+'$'+commandIDObj.ID+'>';
+    //
+    //     $window.bluetoothSerial.write(command, function () {
+    //       logService.consoleLog('sent: '+command);
+    //       lastCommandTime = Date.now();
+    //     }, function () {
+    //       logService.consoleLog('ERROR: could not send command '+str+' , callingFunction: '+callingFunction);
+    //     });
+    //     sendAndReceive.checkInterpretedResponse(commandIDObj.ID);
+    //   }
+    //   else {
+    //     logService.addOne('Emergency pressed, will not send command')
+    //   }
+    // }
 
-        $window.bluetoothSerial.write(command, function () {
-          logService.consoleLog('sent: '+command);
-          lastCommandTime = Date.now();
-        }, function () {
-          logService.consoleLog('ERROR: could not send command '+str+' , callingFunction: '+callingFunction);
-        });
-        sendAndReceive.checkInterpretedResponse(commandIDObj.ID);
-      }
-      else {
-        logService.addOne('Emergency pressed, will not send command')
-      }
-    }
-
-    //TODO remove this?
-    function checkInterpretedResponse(commandID) {
-      var interpreted = false;
-      var checkInterpreted = $rootScope.$on('bluetoothResponse', function (event, res) {
-        if (res.search('10:<c') > -1 && res.search(commandID) > -1) {
-          interpreted = true;
-          checkInterpreted();
-        }
-      });
-      $timeout(function () {
-        if (!interpreted) {
-          logService.consoleLog('incorrect interpretation, ID: '+commandID);
-          $rootScope.$emit('faultyResponse');
-          checkInterpreted();
-        }
-      },2500)
-    }
-
-    function getNewCommandID() {
-      commandIdStr = window.localStorage['commandIdNum'];
-      var commandIdNum = Number(commandIdStr);
-      commandIdNum += 1;
-      sendAndReceive.setCommandID(commandIdNum);
-      return commandIdNum;
-    }
-
-    function setCommandID(num) {
-      window.localStorage['commandIdNum'] = num;
-    }
-
-    function resetCommandObj() {
-      commandObj= {};
-    }
+    // //TODO remove this?
+    // function checkInterpretedResponse(commandID) {
+    //   var interpreted = false;
+    //   var checkInterpreted = $rootScope.$on('bluetoothResponse', function (event, res) {
+    //     if (res.search('10:<c') > -1 && res.search(commandID) > -1) {
+    //       interpreted = true;
+    //       checkInterpreted();
+    //     }
+    //   });
+    //   $timeout(function () {
+    //     if (!interpreted) {
+    //       logService.consoleLog('incorrect interpretation, ID: '+commandID);
+    //       $rootScope.$emit('faultyResponse');
+    //       checkInterpreted();
+    //     }
+    //   },2500)
+    // }
+    //
+    // function getNewCommandID() {
+    //   commandIdStr = window.localStorage['commandIdNum'];
+    //   var commandIdNum = Number(commandIdStr);
+    //   commandIdNum += 1;
+    //   sendAndReceive.setCommandID(commandIdNum);
+    //   return commandIdNum;
+    // }
+    //
+    // function setCommandID(num) {
+    //   window.localStorage['commandIdNum'] = num;
+    // }
+    //
+    // function resetCommandObj() {
+    //   commandObj= {};
+    // }
 
     function expectedResponse(str) {
       stepMotorNum = shareSettings.getObj().stepMotorNum;
@@ -286,19 +286,19 @@ module.exports = sendAndReceiveService;
       }
     }
 
-    function addToCommandObj(str) {
-      var id = sendAndReceive.getNewCommandID();
-      var expectedResponse = sendAndReceive.expectedResponse(str);
-      var obj = {
-        'ID': id,
-        'command': str, //ex: <q2456>
-        'expectedResponse': expectedResponse,
-        'interpreted': false,
-        'response': ''
-      };
-      commandObj[id] = obj;
-      return obj;
-    }
+    // function addToCommandObj(str) {
+    //   var id = sendAndReceive.getNewCommandID();
+    //   var expectedResponse = sendAndReceive.expectedResponse(str);
+    //   var obj = {
+    //     'ID': id,
+    //     'command': str, //ex: <q2456>
+    //     'expectedResponse': expectedResponse,
+    //     'interpreted': false,
+    //     'response': ''
+    //   };
+    //   commandObj[id] = obj;
+    //   return obj;
+    // }
 
     function emitResponse(res) {
       console.log('res in emitResponse: '+res);
@@ -323,7 +323,7 @@ module.exports = sendAndReceiveService;
       }
       else if (res.search('wydone:') > -1) {
         $rootScope.$emit('wydone', res);
-      }  
+      }
       else {
         $rootScope.$emit('bluetoothResponse', res);
       }
@@ -338,20 +338,20 @@ module.exports = sendAndReceiveService;
       $window.bluetoothSerial.write(resetCommand, function () {
         logService.addOne('Program reset command sent: '+resetCommand);
       }, function (err) {
-        logService.addOne('Error: Program reset command could not be sent. '+err);
+        logService.addOne('Error: Program reset command could not be sent. '+err, true);
       });
     }
 
     function createResetListener() {
       let emergencyResponse = $rootScope.$on('emergencyReset', function (event, res) {
-        console.log('res in emergencyListener: '+res);
+        bugout.bugout.log('res in emergencyListener: '+res);
         if (res.search('8:y') > -1) {
           logService.addOne('Program succesfully reset');
           sendAndReceive.unsubscribe();
           emergencyResponse();
         }
       });
-      console.log('resetListener created');
+      bugout.bugout.log('resetListener created');
     }
 
     function clearBuffer() {
@@ -367,12 +367,8 @@ module.exports = sendAndReceiveService;
 
     function stopSwitchHit(res) {
       const posStopswitch = res.lastIndexOf('@')-3;
-      $ionicPopup.alert({
-        title: 'Error: hit stopswitch '+res.charAt(posStopswitch),
-        template: 'Unexpected stopswitch has been hit. Aborting task and resetting program.'
-      });
+      logService.addOne('Unexpected stopswitch'+res.charAt(posStopswitch)+' has been hit. Aborting task and resetting program.', true);
       logService.consoleLog('Error: hit stopswitch '+res.charAt(posStopswitch));
-      logService.addOne('Error: hit stopswitch '+res.charAt(posStopswitch));
       //emergencyService.on sets correct buttons and sends resetcommand
       emergencyService.on();
       $rootScope.$emit('stopswitchHit', res, res.charAt(posStopswitch));
@@ -382,28 +378,25 @@ module.exports = sendAndReceiveService;
       const splicedStr = res.slice(res.lastIndexOf('@'));
       const missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
       const maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : 'unknown';
-      $ionicPopup.alert({
-        title: 'You have missed the maximum number of allowed steps',
-        template: 'The program has been stopped.<p>Maximum steps to miss: '+maxAllowedMiss+'</p><p>Number of steps actually missed '+missedSteps+'</p>'
-      });
+
+      logService.addOne('You have exceeded the maximum number of allowed steps ('+maxAllowedMiss+'). If your machine did not move at all, make sure you set the correct stepmotor number in Settings', true);
       logService.consoleLog('ERROR: hit max number of allowed steps');
-      logService.addOne('ERROR: exceeded maximum number of steps to miss (encoder setting)');
       emergencyService.on();
       $rootScope.$emit('maxSteps', res, missedSteps)
     }
 
-    function faultyResponse(res) {
-      logService.consoleLog('\nERROR:\nPotential faulty response: '+res);
-      var numStr1 = res.slice(res.indexOf('$')+1, res.indexOf('>'));
-      var commandID1 = Number(numStr1);
-      var commandIDObj = commandObj[commandID1];
-      logService.consoleLog('commandIDObj.command: '+commandIDObj.command);
-      if (res.search(commandIDObj.command) === -1) {
-        logService.consoleLog('confirmed faulty response');
-        $rootScope.$emit('faultyResponse', res);
-        delete commandObj[commandID1];
-      }
-    }
+    // function faultyResponse(res) {
+    //   logService.consoleLog('\nERROR:\nPotential faulty response: '+res);
+    //   var numStr1 = res.slice(res.indexOf('$')+1, res.indexOf('>'));
+    //   var commandID1 = Number(numStr1);
+    //   var commandIDObj = commandObj[commandID1];
+    //   logService.consoleLog('commandIDObj.command: '+commandIDObj.command);
+    //   if (res.search(commandIDObj.command) === -1) {
+    //     logService.consoleLog('confirmed faulty response');
+    //     $rootScope.$emit('faultyResponse', res);
+    //     delete commandObj[commandID1];
+    //   }
+    // }
 
   }
 

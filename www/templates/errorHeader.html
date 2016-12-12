@@ -9,6 +9,7 @@
   <h3
     id="error-message"
     class="title"
+    ng-class="{'error-header-animation': errors.length > 0}"
   >
     {{errors[0].message}}
     <i

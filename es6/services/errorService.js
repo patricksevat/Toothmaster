@@ -1,7 +1,7 @@
-export default function () {
+export default function ($rootScope) {
   let errors = [];
   //example error: {level: 'critical', message: 'something went wrong'}
-  
+
   let self = this;
 
   this.getErrors = () => {
@@ -27,9 +27,18 @@ export default function () {
   //  emergency listeners
   $rootScope.$on('emergencyOn', () => {
     self.addError({level: 'critical', message: 'Emergency is on'});
+    $rootScope.$emit('errorAdded');
   });
-  
+
   $rootScope.$on('emergencyOff', () => {
     self.removeEmergencyError();
+  });
+
+  // connection lost listeners
+  $rootScope.$on('connectionLost', () => {
+    self.addError({
+      level: 'critical', message: 'Connection with bluetooth device lost'
+    });
+    $rootScope.$emit('errorAdded');
   })
 }
