@@ -15,6 +15,7 @@ export default function (bugout) {
   button.value.showVersionButton = true;
   button.value.showMoveXMm = true;
   button.value.showSpinner = false;
+  button.value.showProgress = false;
 
 
   function getValues() {
@@ -40,7 +41,8 @@ export default function (bugout) {
       showVersionButton : false,
       showMoveXMm : false,
       readyForData : false,
-      showResetButton: true
+      showResetButton: true,
+      showProgress: false
     });
   }
 }

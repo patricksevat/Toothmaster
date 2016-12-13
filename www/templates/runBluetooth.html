@@ -59,6 +59,7 @@
           <button class="button button-calm" ng-show="buttons.showCalcButton" on-tap="calcSteps()">Calculate cuts</button>
           <button class="button button-positive" ng-show="buttons.showResetButton" on-tap="emergencyOff()">Reset program</button>
           <br><ion-spinner ng-show="buttons.showSpinner"></ion-spinner>
+          <progress ng-show="buttons.showProgress" max="100" value="{{progress}}" id="ft-prog"></progress>
         </div>
         <div class="item item-divider">
           <p class="bluetooth-text log-text">Activity log</p>

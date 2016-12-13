@@ -129,13 +129,13 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
             console.log('commands.length');
             console.log(homingCommands.length);
             console.log('last command of sendSettings is OK');
-            lastHomingCommand(res);
+            checkWydone();
           }
         }
       }
       else {
         $ionicPopup.alert({
-          title: 'Please wait untill moving to start position is done in run Bluetooth program'
+          title: 'Please wait until moving to current command is finished'
         });
       }
     }
@@ -148,36 +148,51 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
 
   function checkWydone() {
     console.log('checkWydone');
-    var rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-      lastHomingCommand(res);
-      rdy();
-    })
-  }
+    let timer = $interval(() => {
+      sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
+    }, 250);
 
-  function lastHomingCommand(res) {
-    console.log('res in lastHomingCommand: ' + res);
-    if (res.search('wydone:') > -1) {
+    let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
+      console.log('bluetoothResponseListener: '+res);
+    });
+
+    let wydoneListener = $rootScope.$on('wydone', (event, res) => {
+      $interval.cancel(timer);
       $scope.homingDone = true;
       setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
       $ionicPopup.alert({
         title: 'Homing completed'
       });
       statusService.setSending(false);
-    }
-    else if (res.search('kFAULT') !== -1){
-      addToLog('Settings have been sent incorrectly, please try again');
-      // emergencyService.on(function () {
-      //   emergencyService.off()
-      // });
-      emergencyService.on();
-      emergencyService.off();
-    }
-    else if (!$scope.homingDone) {
-      $timeout(function () {
-        sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
-      }, 100)
-    }
+      bluetoothResponseListener();
+      wydoneListener();
+    });
   }
+
+  // function lastHomingCommand(res) {
+  //   console.log('res in lastHomingCommand: ' + res);
+  //   if (res.search('wydone:') > -1) {
+  //     $scope.homingDone = true;
+  //     setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
+  //     $ionicPopup.alert({
+  //       title: 'Homing completed'
+  //     });
+  //     statusService.setSending(false);
+  //   }
+  //   else if (res.search('kFAULT') !== -1){
+  //     addToLog('Settings have been sent incorrectly, please try again');
+  //     // emergencyService.on(function () {
+  //     //   emergencyService.off()
+  //     // });
+  //     emergencyService.on();
+  //     emergencyService.off();
+  //   }
+  //   else if (!$scope.homingDone) {
+  //     $timeout(function () {
+  //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
+  //     }, 100)
+  //   }
+  // }
 
   function addToLog(str) {
     logService.addOne(str);

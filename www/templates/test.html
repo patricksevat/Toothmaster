@@ -3,6 +3,13 @@
     Test connection <img src="./img/icon.png" class="logo">
   </ion-nav-title>
   <ion-content>
+
+    <error-header
+      ng-controller="errorController"
+      ng-show="showErrorHeader === true"
+    ></error-header>
+
+
     <div class="row bluetooth-row">
       <div class="col col-center" >
         <div class="item item-divider">
@@ -58,6 +65,9 @@
           <button class="button button-calm" ng-show="buttons.showMoveXMm" on-tap="moveXMm()">Move X mm</button>
           <br><br><button class="button button-calm" ng-show="buttons.showVersionButton" on-tap="getVersion()">Get version number</button>
           <br><ion-spinner ng-show="buttons.showSpinner"></ion-spinner>
+
+          <progress ng-show="buttons.showProgress" max="100" value="{{progress}}" id="ft-prog"></progress>
+
           <div ng-show="testRunning">
             <p>Completed Tests: {{completedTest}}</p>
             <p>Retries: {{retriesNeeded}}</p>

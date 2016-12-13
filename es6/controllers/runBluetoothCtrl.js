@@ -14,7 +14,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   var program = shareProgram.getObj();
   var emergency = statusService.getEmergency();
 
-  //remove unnecessary $scope variables
+  $scope.progress = 0;
   $scope.settings = shareSettings.getObj();
   $scope.deviceName= bluetoothService.getDeviceName();
   $scope.buttons = buttonService.getValues();
@@ -78,7 +78,8 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
         'showMovingButton': false,
         'showEmergency': false,
         'readyForData': false,
-        'showSpinner': false
+        'showSpinner': false,
+        'showProgress': false
       })
     }
     $scope.movements = [];
@@ -286,6 +287,8 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //SECTION: send settings before homing, test and makeMovement logic
   //
 
+  //TODO refactor sendwithRetry, sendSettings, etc to sendAndReceiveService
+
   self.sendWithRetry = $async(function* (str) {
     try {
       let res;
@@ -317,7 +320,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     try {
       if (statusService.getEmergency() === false) {
         if (statusService.getSending() === false){
-          setButtons({'showSpinner':true,'showEmergency':true, 'readyForData':false});
+          setButtons({'showSpinner':true,'showEmergency':true, 'readyForData':false, 'showProgress': true});
           statusService.setSending(true);
           settingsDone = false;
 
@@ -345,15 +348,24 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     }
   });
 
+  //TODO add progress bar
+
+  function updateProgress(res) {
+    //  <w1>-9999;90#
+    if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
+      $scope.progress = res.slice(res.search(';')+1, res.search('#'));
+      console.log('progress: '+$scope.progress);
+    }
+  }
+
   function checkWydone() {
     console.log('checkWydone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
-      // sendAndReceiveService.write('<w'+stepMotorNum+'>');
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
-      console.log('bluetoothResponseListener: '+res);
+      updateProgress(res);
     });
 
     let wydoneListener = $rootScope.$on('wydone', (event, res) => {
@@ -370,7 +382,8 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       'showMovingButton':true,
       'showCalcButton':false,
       'showHoming':false,
-      'showSpinner': false
+      'showSpinner': false,
+      'showProgress': false
     });
     statusService.setSending(false);
     addToLog('Moved to start position');
@@ -393,7 +406,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //
   //SECTION: startMoving \ take steps logic
   //
-  
+
   $scope.startMoving = $async(function* () {
     try {
       logService.consoleLog('$scope.movements in startMoving:');
@@ -404,7 +417,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
         if (done) {
           statusService.setSending(true);
           done = false;
-          setButtons({'showSpinner':true});
+          setButtons({'showSpinner':true, 'showProgress': true});
           yield self.sendWithRetry('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>');
           checkDone();
         }
@@ -433,6 +446,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
       console.log('bluetoothResponseListener: '+res);
+      updateProgress(res);
     });
 
     let wydoneListener = $rootScope.$on('wydone', (event, res) => {
@@ -447,7 +461,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     addToLog('Movement done');
     addToLog($scope.movements[$scope.movementsNum].description);
     done = true;
-    setButtons({'showSpinner':false, 'showHoming': true, 'showResetButton': false});
+    setButtons({'showSpinner':false, 'showHoming': true, 'showResetButton': false, 'showProgress': false});
     if ($scope.movements[$scope.movementsNum].description !== 'Moving to next cut'
       && $scope.movementsNum !== $scope.movements.length -1){
       $ionicPopup.alert({

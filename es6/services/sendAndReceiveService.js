@@ -132,6 +132,31 @@ module.exports = sendAndReceiveService;
       return returnBool
     }
 
+    sendAndReceive.sendWithRetry = $async(function* (str) {
+      try {
+        let res;
+        for (let i = 0; i < 5; i++) {
+          console.log('try: '+i+', command: '+str);
+          res = yield sendAndReceive.writeAsync(str);
+          console.log('res in sendWithretry: '+res);
+          if (i === 4)
+            return new Promise((resolve, reject) => {
+              reject('exceeded num of tries');
+            });
+          else if (res === 'OK')
+            return new Promise((resolve, reject) => {
+              console.log('resolve value: '+res);
+              resolve('resolve value: '+res);
+            });
+        }
+      }
+      catch (err) {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        })
+      }
+    });
+
     sendAndReceive.writeAsync = $async(function* (str) {
       try {
         yield sendAndReceive.write(str);
@@ -237,14 +262,18 @@ module.exports = sendAndReceiveService;
       else if (res.search('wydone:') > -1 && res.search('@5') > -1 && settings.encoder.enable === true) {
         exceededMaximumNumberOfStepsToMiss(res);
       }
-      else if (res.search('2:') > -1) {
-        $rootScope.$emit('sendKfault', res);
-      }
+      // else if (res.search('2:') > -1) {
+      //   $rootScope.$emit('sendKfault', res);
+      // }
       else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
         faultyResponse(res);
       }
       else if (res.search('wydone:') > -1) {
-        $rootScope.$emit('wydone', res);
+        //Added a timeout so we can wait for some promises to finish before the wydone listener is initialised
+        $timeout(() => {
+          $rootScope.$emit('wydone', res);  
+        }, 200)
+        
       }
       else {
         $rootScope.$emit('bluetoothResponse', res);
