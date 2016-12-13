@@ -120,7 +120,7 @@ module.exports = sendAndReceiveService;
         bugout.bugout.log('returnBool: '+returnBool);
       }
       else if (Array.isArray(searchValues)) {
-        bugout.bugout.log('res: '+res+'searchValuesArr');
+        bugout.bugout.log('res: '+res+', searchValuesArr:');
         bugout.bugout.log(searchValues);
         searchValues.map((value) => {
           if (res.search(value) > -1) {
@@ -141,7 +141,7 @@ module.exports = sendAndReceiveService;
           console.log('res in sendWithretry: '+res);
           if (i === 4)
             return new Promise((resolve, reject) => {
-              reject('exceeded num of tries');
+              reject('exceeded num of tries, error: '+res);
             });
           else if (res === 'OK')
             return new Promise((resolve, reject) => {
@@ -173,7 +173,7 @@ module.exports = sendAndReceiveService;
       }
       catch (err) {
         bugout.bugout.log('ERR: '+err);
-        return new Promise((resolve, reject) => reject(err));
+        return new Promise((resolve, reject) => resolve(err));
       }
     });
 
@@ -271,9 +271,9 @@ module.exports = sendAndReceiveService;
       else if (res.search('wydone:') > -1) {
         //Added a timeout so we can wait for some promises to finish before the wydone listener is initialised
         $timeout(() => {
-          $rootScope.$emit('wydone', res);  
+          $rootScope.$emit('wydone', res);
         }, 200)
-        
+
       }
       else {
         $rootScope.$emit('bluetoothResponse', res);

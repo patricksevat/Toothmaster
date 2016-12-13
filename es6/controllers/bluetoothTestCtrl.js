@@ -94,12 +94,6 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     sentSettingsForTest = false;
     testsSent = 0;
     $scope.testRunning = false;
-    // sendKfault();
-    // rdy();
-    // rdy2();
-    // listen();
-    // newCommand();
-    // nextListener();
   };
 
   $scope.emergencyOff = function () {
@@ -132,12 +126,6 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     }
   };
 
-  // var sendKfault;
-  // var rdy;
-  // var rdy2;
-  // var listen;
-  // var newCommand;
-
   const sendSettings = $async(function* (type) {
     try {
       if (statusService.getEmergency() === false) {
@@ -169,31 +157,6 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     }
   });
 
-
-  // function sendSettings(type) {
-  //   logService.consoleLog('Commands in testCtrl -> sendSettings:');
-  //   logService.consoleLog(commands);
-  //   //send commands, except last one
-  //   for (var i = 0; i < commands.length -1; i++){
-  //     sendAndReceiveService.write(commands[i]);
-  //   }
-  //   //send last command on sendKfault notification
-  //   sendKfault = $rootScope.$on('sendKfault', function () {
-  //     sendAndReceiveService.write(commands[commands.length-1], function () {
-  //       initRdy(type);
-  //       sendKfault();
-  //     });
-  //   });
-  //   //check if commands have been sent correctly
-  // }
-
-  // function initRdy(typeStr) {
-  //   rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-  //     checkRdy(res, typeStr);
-  //     rdy();
-  //   });
-  // }
-
   function checkWydone(type) {
     console.log('checkWydone');
     let timer = $interval(() => {
@@ -207,6 +170,9 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
 
     let wydoneListener = $rootScope.$on('wydone', (event, res) => {
       $interval.cancel(timer);
+      bluetoothResponseListener();
+      wydoneListener();
+
       if (type === 'moveXMm') {
         $ionicPopup.alert({
           title: 'Moved '+$scope.numberOfTests.mm+' mm'
@@ -224,10 +190,17 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
         sentSettingsForTest = true;
         $scope.stressTest();
       }
-
-      bluetoothResponseListener();
-      wydoneListener();
+      else if (type === 'stressTestCommand') {
+        $scope.completedTest += 1;
+        $timeout(() => {
+          $scope.stressTest();
+        }, 300);
+      }
     });
+
+    $rootScope.$on('emergencyOn', () => {
+      $interval.cancel(timer);
+    })
   }
 
   function updateProgress(res) {
@@ -238,43 +211,6 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     }
   }
 
-  // function checkRdy(res, type) {
-  //   var typeStr = type;
-  //   if (res.search('wydone') > -1) {
-  //     if (typeStr === 'moveXMm') {
-  //       $ionicPopup.alert({
-  //         title: 'Moved '+$scope.numberOfTests.mm+' mm'
-  //       });
-  //       setButtons({'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false});
-  //       calculateVarsService.getVars('test', function (obj) {
-  //         logService.consoleLog('resetting commands in testCtrl');
-  //         commands = obj.commands;
-  //       });
-  //     }
-  //     else if (typeStr === 'stressTest') {
-  //       addToLog('Executing tests');
-  //       sentSettingsForTest = true;
-  //       $scope.stressTest();
-  //     }
-  //   }
-  //   else if (res.search('FAULT') > -1) {
-  //     addToLog('Error sending moveXMmResponse, aborting current task & resetting');
-  //     emergencyService.on(function () {
-  //       emergencyService.off();
-  //     })
-  //   }
-  //   else {
-  //     $timeout(function () {
-  //       sendAndReceiveService.write('<w'+stepMotorNum+'>');
-  //       rdy2 = $rootScope.$on('bluetoothResponse', function (event, response) {
-  //         checkRdy(response, typeStr);
-  //         rdy2();
-  //       })
-  //     }, 200);
-  //   }
-  // }
-
-  //TODO tried to work with buffered commands, did not work, reverting back to one at a time
   $scope.stressTest = $async(function* () {
     if (statusService.getEmergency() === true) {
       addToLog('Emergency on, cancelling stresstest');
@@ -297,11 +233,12 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       else {
         if (statusService.getEmergency() === false) {
           statusService.setSending(true);
-          for (let i = 0; i < $scope.numberOfTests.tests; i++) {
-            yield sendTestCommand();
-            testsSent += 1;
+          setButtons({'showProgress': true});
+          if (testsSent < $scope.numberOfTests.tests) {
+            sendTestCommand();
           }
-          allTestsSent();
+          else
+            allTestsSent();
         }
         else {
           addToLog('Emergency on, will not continue with stresstest');
@@ -310,17 +247,19 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     }
   });
 
+  //TODO debug this
   const sendTestCommand = $async(function* () {
-    return new Promise((resolve, reject) => {
+    const command = '<q'+Math.floor((Math.random()*5000)+1000) +stepMotorNum+'>';
+    try {
       testsSent += 1;
-      sendAndReceiveService.sendWithRetry('<q'+Math.floor((Math.random()*1000)+20) +stepMotorNum+'>').then(() => {
-        $scope.completedTest += 1;
-        resolve()
-      }, () => {
-        resolve()
-      })
-    });
-
+      yield sendAndReceiveService.sendWithRetry(command);
+      console.log('sendwithRetry yielded');
+      checkWydone('stressTestCommand');
+    }
+    catch (err) {
+      addToLog('Command '+testsSent+' failed: '+err+', command: '+command);
+      $scope.stressTest();
+    }
   });
 
   function allTestsSent() {

@@ -8278,7 +8278,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.13');
+	  bugout.bugout.log('version 0.9.10.23');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -9480,8 +9480,6 @@
 	    }, _callee3, this, [[0, 22]]);
 	  }));
 	
-	  //TODO add progress bar
-	
 	  function updateProgress(res) {
 	    //  <w1>-9999;90#
 	    if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
@@ -9505,6 +9503,10 @@
 	      movedToStartPosition();
 	      bluetoothResponseListener();
 	      wydoneListener();
+	    });
+	
+	    $rootScope.$on('emergencyOn', function () {
+	      $interval.cancel(timer);
 	    });
 	  }
 	
@@ -9619,6 +9621,10 @@
 	      checkDoneReceivedWydone();
 	      bluetoothResponseListener();
 	      wydoneListener();
+	    });
+	
+	    $rootScope.$on('emergencyOn', function () {
+	      $interval.cancel(timer);
 	    });
 	  }
 	
@@ -10012,32 +10018,11 @@
 	      bluetoothResponseListener();
 	      wydoneListener();
 	    });
-	  }
 	
-	  // function lastHomingCommand(res) {
-	  //   console.log('res in lastHomingCommand: ' + res);
-	  //   if (res.search('wydone:') > -1) {
-	  //     $scope.homingDone = true;
-	  //     setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
-	  //     $ionicPopup.alert({
-	  //       title: 'Homing completed'
-	  //     });
-	  //     statusService.setSending(false);
-	  //   }
-	  //   else if (res.search('kFAULT') !== -1){
-	  //     addToLog('Settings have been sent incorrectly, please try again');
-	  //     // emergencyService.on(function () {
-	  //     //   emergencyService.off()
-	  //     // });
-	  //     emergencyService.on();
-	  //     emergencyService.off();
-	  //   }
-	  //   else if (!$scope.homingDone) {
-	  //     $timeout(function () {
-	  //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
-	  //     }, 100)
-	  //   }
-	  // }
+	    $rootScope.$on('emergencyOn', function () {
+	      $interval.cancel(timer);
+	    });
+	  }
 	
 	  function addToLog(str) {
 	    logService.addOne(str);
@@ -10200,12 +10185,6 @@
 	    sentSettingsForTest = false;
 	    testsSent = 0;
 	    $scope.testRunning = false;
-	    // sendKfault();
-	    // rdy();
-	    // rdy2();
-	    // listen();
-	    // newCommand();
-	    // nextListener();
 	  };
 	
 	  $scope.emergencyOff = function () {
@@ -10235,12 +10214,6 @@
 	      }
 	    }
 	  };
-	
-	  // var sendKfault;
-	  // var rdy;
-	  // var rdy2;
-	  // var listen;
-	  // var newCommand;
 	
 	  var sendSettings = $async(regeneratorRuntime.mark(function _callee(type) {
 	    var _i, res;
@@ -10319,30 +10292,6 @@
 	    }, _callee, this, [[0, 21]]);
 	  }));
 	
-	  // function sendSettings(type) {
-	  //   logService.consoleLog('Commands in testCtrl -> sendSettings:');
-	  //   logService.consoleLog(commands);
-	  //   //send commands, except last one
-	  //   for (var i = 0; i < commands.length -1; i++){
-	  //     sendAndReceiveService.write(commands[i]);
-	  //   }
-	  //   //send last command on sendKfault notification
-	  //   sendKfault = $rootScope.$on('sendKfault', function () {
-	  //     sendAndReceiveService.write(commands[commands.length-1], function () {
-	  //       initRdy(type);
-	  //       sendKfault();
-	  //     });
-	  //   });
-	  //   //check if commands have been sent correctly
-	  // }
-	
-	  // function initRdy(typeStr) {
-	  //   rdy = $rootScope.$on('bluetoothResponse', function (event, res) {
-	  //     checkRdy(res, typeStr);
-	  //     rdy();
-	  //   });
-	  // }
-	
 	  function checkWydone(type) {
 	    console.log('checkWydone');
 	    var timer = $interval(function () {
@@ -10356,6 +10305,9 @@
 	
 	    var wydoneListener = $rootScope.$on('wydone', function (event, res) {
 	      $interval.cancel(timer);
+	      bluetoothResponseListener();
+	      wydoneListener();
+	
 	      if (type === 'moveXMm') {
 	        $ionicPopup.alert({
 	          title: 'Moved ' + $scope.numberOfTests.mm + ' mm'
@@ -10371,10 +10323,16 @@
 	        addToLog('Executing tests');
 	        sentSettingsForTest = true;
 	        $scope.stressTest();
+	      } else if (type === 'stressTestCommand') {
+	        $scope.completedTest += 1;
+	        $timeout(function () {
+	          $scope.stressTest();
+	        }, 300);
 	      }
+	    });
 	
-	      bluetoothResponseListener();
-	      wydoneListener();
+	    $rootScope.$on('emergencyOn', function () {
+	      $interval.cancel(timer);
 	    });
 	  }
 	
@@ -10386,123 +10344,40 @@
 	    }
 	  }
 	
-	  // function checkRdy(res, type) {
-	  //   var typeStr = type;
-	  //   if (res.search('wydone') > -1) {
-	  //     if (typeStr === 'moveXMm') {
-	  //       $ionicPopup.alert({
-	  //         title: 'Moved '+$scope.numberOfTests.mm+' mm'
-	  //       });
-	  //       setButtons({'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false});
-	  //       calculateVarsService.getVars('test', function (obj) {
-	  //         logService.consoleLog('resetting commands in testCtrl');
-	  //         commands = obj.commands;
-	  //       });
-	  //     }
-	  //     else if (typeStr === 'stressTest') {
-	  //       addToLog('Executing tests');
-	  //       sentSettingsForTest = true;
-	  //       $scope.stressTest();
-	  //     }
-	  //   }
-	  //   else if (res.search('FAULT') > -1) {
-	  //     addToLog('Error sending moveXMmResponse, aborting current task & resetting');
-	  //     emergencyService.on(function () {
-	  //       emergencyService.off();
-	  //     })
-	  //   }
-	  //   else {
-	  //     $timeout(function () {
-	  //       sendAndReceiveService.write('<w'+stepMotorNum+'>');
-	  //       rdy2 = $rootScope.$on('bluetoothResponse', function (event, response) {
-	  //         checkRdy(response, typeStr);
-	  //         rdy2();
-	  //       })
-	  //     }, 200);
-	  //   }
-	  // }
-	
-	  //TODO tried to work with buffered commands, did not work, reverting back to one at a time
 	  $scope.stressTest = $async(regeneratorRuntime.mark(function _callee2() {
-	    var _i2;
-	
 	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
 	      while (1) {
 	        switch (_context2.prev = _context2.next) {
 	          case 0:
-	            if (!(statusService.getEmergency() === true)) {
-	              _context2.next = 4;
-	              break;
+	            if (statusService.getEmergency() === true) {
+	              addToLog('Emergency on, cancelling stresstest');
+	            } else if ($scope.numberOfTests.tests === undefined || $scope.numberOfTests.tests === 0) {
+	              $ionicPopup.alert({
+	                title: 'Please fill in the number of test commands'
+	              });
+	            } else {
+	              setButtons({ 'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXMm': false, 'showSpinner': true });
+	              $scope.testRunning = true;
+	              if (!sentSettingsForTest) {
+	                if (statusService.getEmergency() === false) {
+	                  logService.consoleLog('numberOfTests:' + $scope.numberOfTests.tests);
+	                  addToLog('Sending settings needed for testing');
+	                  sendSettings('stressTest');
+	                }
+	              } else {
+	                if (statusService.getEmergency() === false) {
+	                  statusService.setSending(true);
+	                  setButtons({ 'showProgress': true });
+	                  if (testsSent < $scope.numberOfTests.tests) {
+	                    sendTestCommand();
+	                  } else allTestsSent();
+	                } else {
+	                  addToLog('Emergency on, will not continue with stresstest');
+	                }
+	              }
 	            }
 	
-	            addToLog('Emergency on, cancelling stresstest');
-	            _context2.next = 28;
-	            break;
-	
-	          case 4:
-	            if (!($scope.numberOfTests.tests === undefined || $scope.numberOfTests.tests === 0)) {
-	              _context2.next = 8;
-	              break;
-	            }
-	
-	            $ionicPopup.alert({
-	              title: 'Please fill in the number of test commands'
-	            });
-	            _context2.next = 28;
-	            break;
-	
-	          case 8:
-	            setButtons({ 'showEmergency': true, 'showResetButton': false, 'showStressTest': false, 'showVersionButton': false, 'showMoveXMm': false, 'showSpinner': true });
-	            $scope.testRunning = true;
-	
-	            if (sentSettingsForTest) {
-	              _context2.next = 14;
-	              break;
-	            }
-	
-	            if (statusService.getEmergency() === false) {
-	              logService.consoleLog('numberOfTests:' + $scope.numberOfTests.tests);
-	              addToLog('Sending settings needed for testing');
-	              sendSettings('stressTest');
-	            }
-	            _context2.next = 28;
-	            break;
-	
-	          case 14:
-	            if (!(statusService.getEmergency() === false)) {
-	              _context2.next = 27;
-	              break;
-	            }
-	
-	            statusService.setSending(true);
-	            _i2 = 0;
-	
-	          case 17:
-	            if (!(_i2 < $scope.numberOfTests.tests)) {
-	              _context2.next = 24;
-	              break;
-	            }
-	
-	            _context2.next = 20;
-	            return sendTestCommand();
-	
-	          case 20:
-	            testsSent += 1;
-	
-	          case 21:
-	            _i2++;
-	            _context2.next = 17;
-	            break;
-	
-	          case 24:
-	            allTestsSent();
-	            _context2.next = 28;
-	            break;
-	
-	          case 27:
-	            addToLog('Emergency on, will not continue with stresstest');
-	
-	          case 28:
+	          case 1:
 	          case 'end':
 	            return _context2.stop();
 	        }
@@ -10510,27 +10385,39 @@
 	    }, _callee2, this);
 	  }));
 	
+	  //TODO debug this
 	  var sendTestCommand = $async(regeneratorRuntime.mark(function _callee3() {
+	    var command;
 	    return regeneratorRuntime.wrap(function _callee3$(_context3) {
 	      while (1) {
 	        switch (_context3.prev = _context3.next) {
 	          case 0:
-	            return _context3.abrupt('return', new Promise(function (resolve, reject) {
-	              testsSent += 1;
-	              sendAndReceiveService.sendWithRetry('<q' + Math.floor(Math.random() * 1000 + 20) + stepMotorNum + '>').then(function () {
-	                $scope.completedTest += 1;
-	                resolve();
-	              }, function () {
-	                resolve();
-	              });
-	            }));
+	            command = '<q' + Math.floor(Math.random() * 5000 + 1000) + stepMotorNum + '>';
+	            _context3.prev = 1;
 	
-	          case 1:
+	            testsSent += 1;
+	            _context3.next = 5;
+	            return sendAndReceiveService.sendWithRetry(command);
+	
+	          case 5:
+	            console.log('sendwithRetry yielded');
+	            checkWydone('stressTestCommand');
+	            _context3.next = 13;
+	            break;
+	
+	          case 9:
+	            _context3.prev = 9;
+	            _context3.t0 = _context3['catch'](1);
+	
+	            addToLog('Command ' + testsSent + ' failed: ' + _context3.t0 + ', command: ' + command);
+	            $scope.stressTest();
+	
+	          case 13:
 	          case 'end':
 	            return _context3.stop();
 	        }
 	      }
-	    }, _callee3, this);
+	    }, _callee3, this, [[1, 9]]);
 	  }));
 	
 	  function allTestsSent() {
@@ -11073,7 +10960,7 @@
 	      returnBool = res.search(searchValues) > -1;
 	      bugout.bugout.log('returnBool: ' + returnBool);
 	    } else if (Array.isArray(searchValues)) {
-	      bugout.bugout.log('res: ' + res + 'searchValuesArr');
+	      bugout.bugout.log('res: ' + res + ', searchValuesArr:');
 	      bugout.bugout.log(searchValues);
 	      searchValues.map(function (value) {
 	        if (res.search(value) > -1) {
@@ -11126,7 +11013,7 @@
 	
 	                      return _context.abrupt('return', {
 	                        v: new Promise(function (resolve, reject) {
-	                          reject('exceeded num of tries');
+	                          reject('exceeded num of tries, error: ' + res);
 	                        })
 	                      });
 	
@@ -11252,7 +11139,7 @@
 	
 	            bugout.bugout.log('ERR: ' + _context4.t1);
 	            return _context4.abrupt('return', new Promise(function (resolve, reject) {
-	              return reject(_context4.t1);
+	              return resolve(_context4.t1);
 	            }));
 	
 	          case 11:

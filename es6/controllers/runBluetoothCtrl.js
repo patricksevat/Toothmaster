@@ -348,8 +348,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     }
   });
 
-  //TODO add progress bar
-
   function updateProgress(res) {
     //  <w1>-9999;90#
     if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
@@ -374,6 +372,10 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       bluetoothResponseListener();
       wydoneListener();
     });
+
+    $rootScope.$on('emergencyOn', () => {
+      $interval.cancel(timer);
+    })
   }
 
   function movedToStartPosition() {
@@ -455,6 +457,10 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       bluetoothResponseListener();
       wydoneListener();
     });
+
+    $rootScope.$on('emergencyOn', () => {
+      $interval.cancel(timer);
+    })    
   }
 
   function checkDoneReceivedWydone() {

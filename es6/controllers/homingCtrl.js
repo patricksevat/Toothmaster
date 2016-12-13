@@ -167,32 +167,11 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       bluetoothResponseListener();
       wydoneListener();
     });
-  }
 
-  // function lastHomingCommand(res) {
-  //   console.log('res in lastHomingCommand: ' + res);
-  //   if (res.search('wydone:') > -1) {
-  //     $scope.homingDone = true;
-  //     setButtons({'showSpinner': false, 'showEmergency': false, 'showHoming': true});
-  //     $ionicPopup.alert({
-  //       title: 'Homing completed'
-  //     });
-  //     statusService.setSending(false);
-  //   }
-  //   else if (res.search('kFAULT') !== -1){
-  //     addToLog('Settings have been sent incorrectly, please try again');
-  //     // emergencyService.on(function () {
-  //     //   emergencyService.off()
-  //     // });
-  //     emergencyService.on();
-  //     emergencyService.off();
-  //   }
-  //   else if (!$scope.homingDone) {
-  //     $timeout(function () {
-  //       sendAndReceiveService.write('<w'+stepMotorNum+'>', checkWydone());
-  //     }, 100)
-  //   }
-  // }
+    $rootScope.$on('emergencyOn', () => {
+      $interval.cancel(timer);
+    })
+  }
 
   function addToLog(str) {
     logService.addOne(str);
