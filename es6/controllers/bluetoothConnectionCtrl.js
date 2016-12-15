@@ -20,6 +20,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   $scope.deviceName= bluetoothService.getDeviceName();
   $scope.buttons = buttonService.getValues();
   $scope.isConnected = bluetoothService.getConnectedValue();
+  $scope.noUnpairedDevices = false;
 
   function addToLog(str, isError, errorType) {
     logService.consoleLog(str);
@@ -70,9 +71,8 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     logService.setBulk($scope.bluetoothLog);
   });
 
-  $scope.noUnpairedDevices = false;
-
   $scope.getAvailableDevices = function () {
+    console.log('getAvailableDevices Called');
     $scope.availableDevices = [];
     $scope.pairedDevices = [];
     bluetoothService.getConnectedValue(function (value) {
@@ -80,47 +80,58 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
         $ionicPlatform.ready(function() {
           logService.consoleLog('Calling get available devices');
           if (ionic.Platform.isAndroid) {
-            //discover unpaired
-            addToLog('Searching for unpaired Bluetooth devices');
-            $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
-              if (devices.length === 0) {
-                $scope.noUnpairedDevices = true;
-              }
-              console.log('unpaired devices');
-              console.log(devices);
-              devices.forEach(function (device) {
-                  $scope.availableDevices.push(device);
-                  addToLog('Unpaired Bluetooth device found');
-                }
-              )}, function () {
-              addToLog('Cannot find unpaired Bluetooth devices', true);
-            });
-            //discover paired
-            $cordovaBluetoothSerial.list().then(function (devices) {
-              addToLog('Searching for paired Bluetooth devices');
-              devices.forEach(function (device) {
-                $scope.pairedDevices.push(device);
-                addToLog('Paired Bluetooth device found');
-              })
-            },function () {
-              addToLog('Cannot find paired Bluetooth devices', true);
-            })
+            getAndroidDevices();
           }
           else if (ionic.Platform.isIOS) {
-            $cordovaBluetoothSerial.list().then(function (devices) {
-              addToLog('Searching for Bluetooth devices');
-              devices.forEach(function (device) {
-                addToLog('Bluetooth device found');
-                $scope.availableDevices.push(device);
-              })
-            }, function () {
-              addToLog('No devices found', true);
-            })
+            getiOSDevices();
           }
         })
       }
     })
   };
+
+  function getAndroidDevices() {
+    //discover unpaired
+    addToLog('Searching for unpaired Bluetooth devices');
+    $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
+      console.log('devices: ');
+      console.log(devices);
+      if (devices.length === 0) {
+        $scope.noUnpairedDevices = true;
+        console.log('$scope.noUnpairedDevices: '+$scope.noUnpairedDevices);
+      }
+      console.log('unpaired devices');
+      console.log(devices);
+      devices.forEach(function (device) {
+          $scope.availableDevices.push(device);
+          addToLog('Unpaired Bluetooth device found');
+        }
+      )}, function () {
+      addToLog('Cannot find unpaired Bluetooth devices', true);
+    });
+    //discover paired
+    $cordovaBluetoothSerial.list().then(function (devices) {
+      addToLog('Searching for paired Bluetooth devices');
+      devices.forEach(function (device) {
+        $scope.pairedDevices.push(device);
+        addToLog('Paired Bluetooth device found');
+      })
+    },function () {
+      addToLog('Cannot find paired Bluetooth devices', true);
+    })
+  }
+
+  function getiOSDevices() {
+    $cordovaBluetoothSerial.list().then(function (devices) {
+      addToLog('Searching for Bluetooth devices');
+      devices.forEach(function (device) {
+        addToLog('Bluetooth device found');
+        $scope.availableDevices.push(device);
+      })
+    }, function () {
+      addToLog('No devices found', true);
+    })
+  }
 
   function connectToDevice(deviceID, deviceName) {
     $ionicPlatform.ready(function() {
@@ -217,7 +228,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     logModalService.emailFullLog();
   } ;
 
-  $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+  $scope.fullLog = [];
 
   $scope.fullLogPage = 0;
 

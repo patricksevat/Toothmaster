@@ -15,7 +15,7 @@ module.exports = {
       {
         test: /.js$/,
         loader: 'babel-loader',
-        exclude: [/www\/lib/, /node_modules/, /ignore/, /hooks/, /documentation/, /platforms/, /testResults/],
+        exclude: [/www\/lib/, /node_modules/, /ignore/, /hooks/, /documentation/, /platforms/, /testResults/, /tests/],
         query: {
           presets: ['es2015'],
           plugins: ["syntax-async-functions", "transform-regenerator"]
