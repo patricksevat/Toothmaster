@@ -20,6 +20,7 @@ import errorService from './services/errorService'
 
 //directives
 import errorDirective from './directives/errorDirective'
+import modalDirective from './directives/modalDirective'
 
 import ngAsync from './ng-async';
 import router from './router'
@@ -52,7 +53,6 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .service('logService', ['bugout', 'errorService', logService])
   .service('calculateVarsService',['shareProgram', 'shareSettings', calculateVarsService])
   .service('logModalService', ['bugout', logModalService])
-  .service('modalService', ['$ionicModal', '$rootScope', modalService])
   .service('statusService', ['bugout', statusService])
   .service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async',
     pauseService])
@@ -61,7 +61,9 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
     sendAndReceiveService])
   .service('crcService', [crcService])
   .service('errorService', ['$rootScope', errorService])
+  .service('modalService', ['$ionicModal', '$rootScope', 'logService', modalService])
   .directive('errorHeader', ['$rootScope', errorDirective])
+  .directive('modals', [modalDirective])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
     bugout.bugout.log('version 0.9.10.23');

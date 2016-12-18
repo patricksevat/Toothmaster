@@ -8246,23 +8246,27 @@
 	
 	var _errorDirective2 = _interopRequireDefault(_errorDirective);
 	
+	var _modalDirective = __webpack_require__(326);
+	
+	var _modalDirective2 = _interopRequireDefault(_modalDirective);
+	
 	var _ngAsync = __webpack_require__(300);
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _router = __webpack_require__(326);
+	var _router = __webpack_require__(327);
 	
 	var _router2 = _interopRequireDefault(_router);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	// services
+	//directives
+	//controllers
 	if (window.localStorage['Safety'] === undefined) {
 	  window.localStorage.setItem('Safety', '');
 	}
 	
-	//directives
-	//controllers
+	// services
 	
 	if (window.localStorage['settings'] === undefined) {
 	  window.localStorage['settings'] = '{"stepMotorNum": 1, "maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
@@ -8277,7 +8281,7 @@
 	angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', 'ngTouch', _ngAsync2.default.name]).service('bugout', function () {
 	  var bugout = new debugout();
 	  this.bugout = bugout;
-	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('modalService', ['$ionicModal', '$rootScope', _modalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
+	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
 	  bugout.bugout.log('version 0.9.10.23');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
@@ -9311,22 +9315,21 @@
 	          case 0:
 	            _context2.prev = 0;
 	            return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
-	              var res, _i;
-	
+	              var res, i;
 	              return regeneratorRuntime.wrap(function _callee$(_context) {
 	                while (1) {
 	                  switch (_context.prev = _context.next) {
 	                    case 0:
 	                      res = void 0;
-	                      _i = 0;
+	                      i = 0;
 	
 	                    case 2:
-	                      if (!(_i < 5)) {
+	                      if (!(i < 5)) {
 	                        _context.next = 17;
 	                        break;
 	                      }
 	
-	                      console.log('try: ' + _i + ', command: ' + str);
+	                      console.log('try: ' + i + ', command: ' + str);
 	                      _context.next = 6;
 	                      return sendAndReceiveService.writeAsync(str);
 	
@@ -9335,7 +9338,7 @@
 	
 	                      console.log('res in sendWithretry: ' + res);
 	
-	                      if (!(_i === 4)) {
+	                      if (!(i === 4)) {
 	                        _context.next = 12;
 	                        break;
 	                      }
@@ -9360,7 +9363,7 @@
 	                      });
 	
 	                    case 14:
-	                      _i++;
+	                      i++;
 	                      _context.next = 2;
 	                      break;
 	
@@ -9403,8 +9406,7 @@
 	
 	  //user clicks button front end, sendSettingsData() called
 	  $scope.sendSettingsData = $async(regeneratorRuntime.mark(function _callee3() {
-	    var _i2, res;
-	
+	    var i, res;
 	    return regeneratorRuntime.wrap(function _callee3$(_context3) {
 	      while (1) {
 	        switch (_context3.prev = _context3.next) {
@@ -9425,30 +9427,30 @@
 	            statusService.setSending(true);
 	            settingsDone = false;
 	
-	            _i2 = 0;
+	            i = 0;
 	
 	          case 7:
-	            if (!(_i2 < commands.length)) {
+	            if (!(i < commands.length)) {
 	              _context3.next = 17;
 	              break;
 	            }
 	
-	            console.log('going to await for command reply to command: ' + commands[_i2]);
+	            console.log('going to await for command reply to command: ' + commands[i]);
 	            _context3.next = 11;
-	            return self.sendWithRetry(commands[_i2]);
+	            return self.sendWithRetry(commands[i]);
 	
 	          case 11:
 	            res = _context3.sent;
 	
-	            console.log('awaited reply for command: ' + commands[_i2] + ', i=' + _i2 + ', response: ' + res);
+	            console.log('awaited reply for command: ' + commands[i] + ', i=' + i + ', response: ' + res);
 	
 	            //On last command, start check if settings have been sent correctly
-	            if (_i2 === commands.length - 1) {
+	            if (i === commands.length - 1) {
 	              checkWydone();
 	            }
 	
 	          case 14:
-	            _i2++;
+	            i++;
 	            _context3.next = 7;
 	            break;
 	
@@ -9711,52 +9713,52 @@
 	      modal.show();
 	    });
 	  };
-	
-	  $scope.show = null;
-	
-	  $scope.showAnswer = function (obj) {
-	    $scope.show = $scope.show === obj ? null : obj;
-	  };
-	
-	  $scope.QAList = [];
-	  for (var i = 1; i < 11; i++) {
-	    $scope.QAList.push({
-	      question: 'Question ' + i,
-	      answer: 'Lorem ipsum'
-	    });
-	  }
+	  //
+	  // $scope.show = null;
+	  //
+	  // $scope.showAnswer = function(obj) {
+	  //   $scope.show = $scope.show === obj ? null : obj;
+	  // };
+	  //
+	  // $scope.QAList = [];
+	  // for (var i=1; i<11; i++) {
+	  //   $scope.QAList.push({
+	  //     question: 'Question '+i,
+	  //     answer: 'Lorem ipsum'
+	  //   })
+	  // }
 	
 	  $scope.showFullLog = function () {
-	    $scope.fullLog = $scope.bluetoothLog.slice(0, 19);
+	    // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
 	    modalService.init('log-modal.html', $scope).then(function (modal) {
 	      modal.show();
 	    });
 	  };
-	
-	  $scope.emailFullLog = function () {
-	    logModalService.emailFullLog();
-	  };
-	
-	  $scope.fullLog = $scope.bluetoothLog.slice(0, 19);
-	
-	  $scope.fullLogPage = 0;
-	
-	  $scope.getFullLogExtract = function (start, end) {
-	    logService.consoleLog('getFullLogExtract, start: ' + start + ' end: ' + end);
-	    $scope.fullLog = $scope.bluetoothLog.slice(start, end);
-	  };
-	
-	  $scope.previousFullLogPage = function () {
-	    logService.consoleLog('prevFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage - 1) * 10, ($scope.fullLogPage - 1) * 10 + 9);
-	    $scope.fullLogPage -= 1;
-	  };
-	
-	  $scope.nextFullLogPage = function () {
-	    logService.consoleLog('nextFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage + 1) * 10, ($scope.fullLogPage + 1) * 10 + 9);
-	    $scope.fullLogPage += 1;
-	  };
+	  //
+	  // $scope.emailFullLog = function () {
+	  //   logModalService.emailFullLog();
+	  // } ;
+	  //
+	  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+	  //
+	  // $scope.fullLogPage = 0;
+	  //
+	  // $scope.getFullLogExtract = function(start, end) {
+	  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
+	  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+	  // };
+	  //
+	  // $scope.previousFullLogPage = function () {
+	  //   logService.consoleLog('prevFullLogPage');
+	  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+	  //   $scope.fullLogPage -= 1;
+	  // };
+	  //
+	  // $scope.nextFullLogPage = function () {
+	  //   logService.consoleLog('nextFullLogPage');
+	  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+	  //   $scope.fullLogPage += 1;
+	  // };
 	};
 
 /***/ },
@@ -9861,22 +9863,21 @@
 	  //
 	
 	  $scope.sendWithRetry = $async(regeneratorRuntime.mark(function _callee(str) {
-	    var res, _i;
-	
+	    var res, i;
 	    return regeneratorRuntime.wrap(function _callee$(_context) {
 	      while (1) {
 	        switch (_context.prev = _context.next) {
 	          case 0:
 	            res = void 0;
-	            _i = 0;
+	            i = 0;
 	
 	          case 2:
-	            if (!(_i < 5)) {
+	            if (!(i < 5)) {
 	              _context.next = 17;
 	              break;
 	            }
 	
-	            console.log('try: ' + _i + ', command: ' + str);
+	            console.log('try: ' + i + ', command: ' + str);
 	            _context.next = 6;
 	            return sendAndReceiveService.writeAsync(str);
 	
@@ -9885,7 +9886,7 @@
 	
 	            console.log('res in sendWithretry: ' + res);
 	
-	            if (!(_i === 4)) {
+	            if (!(i === 4)) {
 	              _context.next = 12;
 	              break;
 	            }
@@ -9906,7 +9907,7 @@
 	            }));
 	
 	          case 14:
-	            _i++;
+	            i++;
 	            _context.next = 2;
 	            break;
 	
@@ -9919,8 +9920,7 @@
 	  }));
 	
 	  $scope.homing = $async(regeneratorRuntime.mark(function _callee2() {
-	    var _i2, res;
-	
+	    var i, res;
 	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
 	      while (1) {
 	        switch (_context2.prev = _context2.next) {
@@ -9940,24 +9940,24 @@
 	            setButtons({ 'showSpinner': true, 'showEmergency': true, 'showHoming': false });
 	            statusService.setSending(true);
 	
-	            _i2 = 0;
+	            i = 0;
 	
 	          case 6:
-	            if (!(_i2 < homingCommands.length)) {
+	            if (!(i < homingCommands.length)) {
 	              _context2.next = 16;
 	              break;
 	            }
 	
-	            console.log('going to await for command reply to command: ' + homingCommands[_i2]);
+	            console.log('going to await for command reply to command: ' + homingCommands[i]);
 	            _context2.next = 10;
-	            return $scope.sendWithRetry(homingCommands[_i2]);
+	            return $scope.sendWithRetry(homingCommands[i]);
 	
 	          case 10:
 	            res = _context2.sent;
 	
-	            console.log('awaited reply for command: ' + homingCommands[_i2] + ', i=' + _i2 + ', response: ' + res);
+	            console.log('awaited reply for command: ' + homingCommands[i] + ', i=' + i + ', response: ' + res);
 	
-	            if (_i2 === homingCommands.length - 1) {
+	            if (i === homingCommands.length - 1) {
 	              console.log('commands');
 	              console.log(homingCommands);
 	              console.log('commands.length');
@@ -9967,7 +9967,7 @@
 	            }
 	
 	          case 13:
-	            _i2++;
+	            i++;
 	            _context2.next = 6;
 	            break;
 	
@@ -10034,53 +10034,53 @@
 	      modal.show();
 	    });
 	  };
-	
-	  $scope.show = null;
-	
-	  $scope.showAnswer = function (obj) {
-	    $scope.show = $scope.show === obj ? null : obj;
-	  };
-	
-	  //TODO write Q&A's
-	  $scope.QAList = [];
-	  for (var i = 1; i < 11; i++) {
-	    $scope.QAList.push({
-	      question: 'Question ' + i,
-	      answer: 'Lorem ipsum'
-	    });
-	  }
+	  //
+	  // $scope.show = null;
+	  //
+	  // $scope.showAnswer = function(obj) {
+	  //   $scope.show = $scope.show === obj ? null : obj;
+	  // };
+	  //
+	  // //TODO write Q&A's
+	  // $scope.QAList = [];
+	  // for (var i=1; i<11; i++) {
+	  //   $scope.QAList.push({
+	  //     question: 'Question '+i,
+	  //     answer: 'Lorem ipsum'
+	  //   })
+	  // }
 	
 	  $scope.showFullLog = function () {
-	    $scope.fullLog = $scope.bluetoothLog.slice(0, 19);
+	    // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
 	    modalService.init('log-modal.html', $scope).then(function (modal) {
 	      modal.show();
 	    });
 	  };
 	
-	  $scope.emailFullLog = function () {
-	    logModalService.emailFullLog();
-	  };
-	
-	  $scope.fullLog = $scope.bluetoothLog.slice(0, 19);
-	
-	  $scope.fullLogPage = 0;
-	
-	  $scope.getFullLogExtract = function (start, end) {
-	    logService.consoleLog('getFullLogExtract, start: ' + start + ' end: ' + end);
-	    $scope.fullLog = $scope.bluetoothLog.slice(start, end);
-	  };
-	
-	  $scope.previousFullLogPage = function () {
-	    logService.consoleLog('prevFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage - 1) * 10, ($scope.fullLogPage - 1) * 10 + 9);
-	    $scope.fullLogPage -= 1;
-	  };
-	
-	  $scope.nextFullLogPage = function () {
-	    logService.consoleLog('nextFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage + 1) * 10, ($scope.fullLogPage + 1) * 10 + 9);
-	    $scope.fullLogPage += 1;
-	  };
+	  // $scope.emailFullLog = function () {
+	  //   logModalService.emailFullLog();
+	  // } ;
+	  //
+	  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+	  //
+	  // $scope.fullLogPage = 0;
+	  //
+	  // $scope.getFullLogExtract = function(start, end) {
+	  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
+	  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+	  // };
+	  //
+	  // $scope.previousFullLogPage = function () {
+	  //   logService.consoleLog('prevFullLogPage');
+	  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+	  //   $scope.fullLogPage -= 1;
+	  // };
+	  //
+	  // $scope.nextFullLogPage = function () {
+	  //   logService.consoleLog('nextFullLogPage');
+	  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+	  //   $scope.fullLogPage += 1;
+	  // };
 	};
 
 /***/ },
@@ -10216,8 +10216,7 @@
 	  };
 	
 	  var sendSettings = $async(regeneratorRuntime.mark(function _callee(type) {
-	    var _i, res;
-	
+	    var i, res;
 	    return regeneratorRuntime.wrap(function _callee$(_context) {
 	      while (1) {
 	        switch (_context.prev = _context.next) {
@@ -10237,30 +10236,30 @@
 	            setButtons({ 'showSpinner': true, 'showEmergency': true, 'readyForData': false, 'showProgress': type === 'moveXMm' });
 	            statusService.setSending(true);
 	
-	            _i = 0;
+	            i = 0;
 	
 	          case 6:
-	            if (!(_i < commands.length)) {
+	            if (!(i < commands.length)) {
 	              _context.next = 16;
 	              break;
 	            }
 	
-	            console.log('going to await for command reply to command: ' + commands[_i]);
+	            console.log('going to await for command reply to command: ' + commands[i]);
 	            _context.next = 10;
-	            return sendAndReceiveService.sendWithRetry(commands[_i]);
+	            return sendAndReceiveService.sendWithRetry(commands[i]);
 	
 	          case 10:
 	            res = _context.sent;
 	
-	            console.log('awaited reply for command: ' + commands[_i] + ', i=' + _i + ', response: ' + res);
+	            console.log('awaited reply for command: ' + commands[i] + ', i=' + i + ', response: ' + res);
 	
 	            //On last command, start check if settings have been sent correctly
-	            if (_i === commands.length - 1) {
+	            if (i === commands.length - 1) {
 	              checkWydone(type);
 	            }
 	
 	          case 13:
-	            _i++;
+	            i++;
 	            _context.next = 6;
 	            break;
 	
@@ -10507,19 +10506,19 @@
 	    });
 	  };
 	
-	  $scope.show = null;
-	
-	  $scope.showAnswer = function (obj) {
-	    $scope.show = $scope.show === obj ? null : obj;
-	  };
-	
-	  $scope.QAList = [];
-	  for (var i = 1; i < 11; i++) {
-	    $scope.QAList.push({
-	      question: 'Question ' + i,
-	      answer: 'Lorem ipsum'
-	    });
-	  }
+	  // $scope.show = null;
+	  //
+	  // $scope.showAnswer = function(obj) {
+	  //   $scope.show = $scope.show === obj ? null : obj;
+	  // };
+	  //
+	  // $scope.QAList = [];
+	  // for (var i=1; i<11; i++) {
+	  //   $scope.QAList.push({
+	  //     question: 'Question '+i,
+	  //     answer: 'Lorem ipsum'
+	  //   })
+	  // }
 	
 	  $scope.showFullLog = function () {
 	    $scope.fullLog = $scope.bluetoothLog.slice(0, 19);
@@ -10528,30 +10527,30 @@
 	    });
 	  };
 	
-	  $scope.emailFullLog = function () {
-	    logModalService.emailFullLog();
-	  };
-	
-	  $scope.fullLog = $scope.bluetoothLog.slice(0, 19);
-	
-	  $scope.fullLogPage = 0;
-	
-	  $scope.getFullLogExtract = function (start, end) {
-	    logService.consoleLog('getFullLogExtract, start: ' + start + ' end: ' + end);
-	    $scope.fullLog = $scope.bluetoothLog.slice(start, end);
-	  };
-	
-	  $scope.previousFullLogPage = function () {
-	    logService.consoleLog('prevFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage - 1) * 10, ($scope.fullLogPage - 1) * 10 + 9);
-	    $scope.fullLogPage -= 1;
-	  };
-	
-	  $scope.nextFullLogPage = function () {
-	    logService.consoleLog('nextFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage + 1) * 10, ($scope.fullLogPage + 1) * 10 + 9);
-	    $scope.fullLogPage += 1;
-	  };
+	  // $scope.emailFullLog = function () {
+	  //   logModalService.emailFullLog();
+	  // } ;
+	  //
+	  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+	  //
+	  // $scope.fullLogPage = 0;
+	  //
+	  // $scope.getFullLogExtract = function(start, end) {
+	  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
+	  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+	  // };
+	  //
+	  // $scope.previousFullLogPage = function () {
+	  //   logService.consoleLog('prevFullLogPage');
+	  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+	  //   $scope.fullLogPage -= 1;
+	  // };
+	  //
+	  // $scope.nextFullLogPage = function () {
+	  //   logService.consoleLog('nextFullLogPage');
+	  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+	  //   $scope.fullLogPage += 1;
+	  // };
 	};
 
 /***/ },
@@ -10621,10 +10620,13 @@
 	  });
 	
 	  $scope.userDisconnect = function () {
+	    console.log('$scope.userDisconnect called');
 	    bluetoothService.disconnect();
 	    $scope.isConnected = false;
+	    // $scope.getAvailableDevices();
 	    $timeout(function () {
 	      $scope.getAvailableDevices();
+	      console.log('getAvailableDevices called in userDisconnect after timeout');
 	    }, 500);
 	  };
 	
@@ -10641,9 +10643,11 @@
 	      if (value === false) {
 	        $ionicPlatform.ready(function () {
 	          logService.consoleLog('Calling get available devices');
-	          if (ionic.Platform.isAndroid) {
+	          if (ionic.Platform.isAndroid()) {
+	            console.log('platform android');
 	            getAndroidDevices();
-	          } else if (ionic.Platform.isIOS) {
+	          } else if (ionic.Platform.isIOS()) {
+	            console.log('platform iOS');
 	            getiOSDevices();
 	          }
 	        });
@@ -10714,7 +10718,7 @@
 	  }
 	
 	  $scope.connectToUnpairedDevice = function ($index) {
-	    connectToDevice($scope.pairedDevices[$index].id, $scope.pairedDevices[$index].name);
+	    connectToDevice($scope.availableDevices[$index].id, $scope.availableDevices[$index].name);
 	  };
 	
 	  $scope.connectToPairedDevice = function ($index) {
@@ -10748,7 +10752,7 @@
 	  }
 	
 	  $scope.openBluetoothSettings = function () {
-	    $cordovaBluetoothSerial.showBluetoothSettings();
+	    bluetoothService.openBluetoothSettings();
 	  };
 	
 	  $scope.openHelpModal = function () {
@@ -10757,51 +10761,50 @@
 	    });
 	  };
 	
-	  $scope.show = null;
-	
-	  $scope.showAnswer = function (obj) {
-	    $scope.show = $scope.show === obj ? null : obj;
-	  };
-	
-	  $scope.QAList = [];
-	  for (var i = 1; i < 11; i++) {
-	    $scope.QAList.push({
-	      question: 'Question ' + i,
-	      answer: 'Lorem ipsum'
-	    });
-	  }
+	  // $scope.show = null;
+	  //
+	  // $scope.showAnswer = function(obj) {
+	  //   $scope.show = $scope.show === obj ? null : obj;
+	  // };
+	  //
+	  // $scope.QAList = [];
+	  // for (var i=1; i<11; i++) {
+	  //   $scope.QAList.push({
+	  //     question: 'Question '+i,
+	  //     answer: 'Lorem ipsum'
+	  //   })
+	  // }
 	
 	  $scope.showFullLog = function () {
-	    $scope.fullLog = $scope.bluetoothLog.slice(0, 19);
 	    modalService.init('log-modal.html', $scope).then(function (modal) {
 	      modal.show();
 	    });
 	  };
 	
-	  $scope.emailFullLog = function () {
-	    logModalService.emailFullLog();
-	  };
-	
-	  $scope.fullLog = [];
-	
-	  $scope.fullLogPage = 0;
-	
-	  $scope.getFullLogExtract = function (start, end) {
-	    logService.consoleLog('getFullLogExtract, start: ' + start + ' end: ' + end);
-	    $scope.fullLog = $scope.bluetoothLog.slice(start, end);
-	  };
-	
-	  $scope.previousFullLogPage = function () {
-	    logService.consoleLog('prevFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage - 1) * 10, ($scope.fullLogPage - 1) * 10 + 9);
-	    $scope.fullLogPage -= 1;
-	  };
-	
-	  $scope.nextFullLogPage = function () {
-	    logService.consoleLog('nextFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage + 1) * 10, ($scope.fullLogPage + 1) * 10 + 9);
-	    $scope.fullLogPage += 1;
-	  };
+	  // $scope.emailFullLog = function () {
+	  //   logModalService.emailFullLog();
+	  // } ;
+	  //
+	  // $scope.fullLog = [];
+	  //
+	  // $scope.fullLogPage = 0;
+	  //
+	  // $scope.getFullLogExtract = function(start, end) {
+	  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
+	  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+	  // };
+	  //
+	  // $scope.previousFullLogPage = function () {
+	  //   logService.consoleLog('prevFullLogPage');
+	  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+	  //   $scope.fullLogPage -= 1;
+	  // };
+	  //
+	  // $scope.nextFullLogPage = function () {
+	  //   logService.consoleLog('nextFullLogPage');
+	  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+	  //   $scope.fullLogPage += 1;
+	  // };
 	};
 
 /***/ },
@@ -11542,6 +11545,7 @@
 	  this.turnOnBluetooth = turnOn;
 	  this.disconnect = disconnect;
 	  this.checkConnectionAliveInterval = checkConnectionAliveInterval;
+	  this.openBluetoothSettings = openBluetoothSettings;
 	
 	  //
 	  //service scope vars
@@ -11767,6 +11771,10 @@
 	        logService.addOne('Could not disconnect from device', true, 'warning');
 	      });
 	    });
+	  }
+	
+	  function openBluetoothSettings() {
+	    $cordovaBluetoothSerial.showBluetoothSettings();
 	  }
 	
 	  //
@@ -12054,8 +12062,27 @@
 	  value: true
 	});
 	exports.default = modalService;
-	function modalService($ionicModal, $rootScope) {
-	  var init = function init(template, $scope) {
+	function modalService($ionicModal, $rootScope, logService) {
+	  var self = this;
+	
+	  //Public available methods
+	  self.init = init;
+	  self.getFullLog = getFullLog;
+	  self.setFullLog = setFullLog;
+	
+	  //Scoped variables
+	  self.log = [];
+	
+	  // function setFullLog(logArr) {
+	  //   self.log = logArr;
+	  // }
+	
+	  // function getFullLog() {
+	  //  
+	  //   return self.log;
+	  // }
+	
+	  function init(template, $scope) {
 	
 	    var promise = void 0;
 	    $scope = $scope || $rootScope.$new();
@@ -12078,10 +12105,7 @@
 	    });
 	
 	    return promise;
-	  };
-	  return {
-	    init: init
-	  };
+	  }
 	}
 
 /***/ },
@@ -12331,6 +12355,25 @@
 
 /***/ },
 /* 326 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function () {
+	  console.log('error directive');
+	  return {
+	    restrict: 'E',
+	    replace: 'true',
+	    templateUrl: './templates/modals.html'
+	  };
+	};
+
+/***/ },
+/* 327 */
 /***/ function(module, exports) {
 
 	'use strict';

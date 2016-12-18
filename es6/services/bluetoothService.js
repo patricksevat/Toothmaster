@@ -17,6 +17,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   this.turnOnBluetooth = turnOn;
   this.disconnect = disconnect;
   this.checkConnectionAliveInterval = checkConnectionAliveInterval;
+  this.openBluetoothSettings = openBluetoothSettings;
 
   //
   //service scope vars
@@ -153,6 +154,10 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
         logService.addOne('Could not disconnect from device', true, 'warning');
       })
     });
+  }
+  
+  function openBluetoothSettings() {
+    $cordovaBluetoothSerial.showBluetoothSettings();
   }
 
   //

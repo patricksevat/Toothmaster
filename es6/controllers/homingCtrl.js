@@ -185,24 +185,24 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
         modal.show();
       })
   };
-
-  $scope.show = null;
-
-  $scope.showAnswer = function(obj) {
-    $scope.show = $scope.show === obj ? null : obj;
-  };
-
-  //TODO write Q&A's
-  $scope.QAList = [];
-  for (var i=1; i<11; i++) {
-    $scope.QAList.push({
-      question: 'Question '+i,
-      answer: 'Lorem ipsum'
-    })
-  }
+  //
+  // $scope.show = null;
+  //
+  // $scope.showAnswer = function(obj) {
+  //   $scope.show = $scope.show === obj ? null : obj;
+  // };
+  //
+  // //TODO write Q&A's
+  // $scope.QAList = [];
+  // for (var i=1; i<11; i++) {
+  //   $scope.QAList.push({
+  //     question: 'Question '+i,
+  //     answer: 'Lorem ipsum'
+  //   })
+  // }
 
   $scope.showFullLog = function () {
-    $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+    // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
     modalService
       .init('log-modal.html', $scope)
       .then(function (modal) {
@@ -210,29 +210,29 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       })
   };
 
-  $scope.emailFullLog = function () {
-    logModalService.emailFullLog();
-  } ;
-
-  $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-
-  $scope.fullLogPage = 0;
-
-  $scope.getFullLogExtract = function(start, end) {
-    logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
-    $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-  };
-
-  $scope.previousFullLogPage = function () {
-    logService.consoleLog('prevFullLogPage');
-    $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-    $scope.fullLogPage -= 1;
-  };
-
-  $scope.nextFullLogPage = function () {
-    logService.consoleLog('nextFullLogPage');
-    $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-    $scope.fullLogPage += 1;
-  };
+  // $scope.emailFullLog = function () {
+  //   logModalService.emailFullLog();
+  // } ;
+  //
+  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+  //
+  // $scope.fullLogPage = 0;
+  //
+  // $scope.getFullLogExtract = function(start, end) {
+  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
+  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+  // };
+  //
+  // $scope.previousFullLogPage = function () {
+  //   logService.consoleLog('prevFullLogPage');
+  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+  //   $scope.fullLogPage -= 1;
+  // };
+  //
+  // $scope.nextFullLogPage = function () {
+  //   logService.consoleLog('nextFullLogPage');
+  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+  //   $scope.fullLogPage += 1;
+  // };
 
 }

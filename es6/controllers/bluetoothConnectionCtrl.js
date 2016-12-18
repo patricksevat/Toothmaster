@@ -58,10 +58,13 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   });
 
   $scope.userDisconnect = function () {
+    console.log('$scope.userDisconnect called');
     bluetoothService.disconnect();
     $scope.isConnected = false;
+    // $scope.getAvailableDevices();
     $timeout(function () {
       $scope.getAvailableDevices();
+      console.log('getAvailableDevices called in userDisconnect after timeout');
     }, 500);
 
   };
@@ -79,10 +82,12 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       if (value === false) {
         $ionicPlatform.ready(function() {
           logService.consoleLog('Calling get available devices');
-          if (ionic.Platform.isAndroid) {
+          if (ionic.Platform.isAndroid()) {
+            console.log('platform android');
             getAndroidDevices();
           }
-          else if (ionic.Platform.isIOS) {
+          else if (ionic.Platform.isIOS()) {
+            console.log('platform iOS');
             getiOSDevices();
           }
         })
@@ -154,7 +159,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   }
 
   $scope.connectToUnpairedDevice = function ($index) {
-    connectToDevice($scope.pairedDevices[$index].id, $scope.pairedDevices[$index].name);
+    connectToDevice($scope.availableDevices[$index].id, $scope.availableDevices[$index].name);
   };
 
   $scope.connectToPairedDevice = function ($index) {
@@ -190,7 +195,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   }
 
   $scope.openBluetoothSettings = function() {
-    $cordovaBluetoothSerial.showBluetoothSettings();
+    bluetoothService.openBluetoothSettings();
   };
 
   $scope.openHelpModal = function () {
@@ -201,22 +206,21 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       })
   };
 
-  $scope.show = null;
-
-  $scope.showAnswer = function(obj) {
-    $scope.show = $scope.show === obj ? null : obj;
-  };
-
-  $scope.QAList = [];
-  for (var i=1; i<11; i++) {
-    $scope.QAList.push({
-      question: 'Question '+i,
-      answer: 'Lorem ipsum'
-    })
-  }
+  // $scope.show = null;
+  //
+  // $scope.showAnswer = function(obj) {
+  //   $scope.show = $scope.show === obj ? null : obj;
+  // };
+  //
+  // $scope.QAList = [];
+  // for (var i=1; i<11; i++) {
+  //   $scope.QAList.push({
+  //     question: 'Question '+i,
+  //     answer: 'Lorem ipsum'
+  //   })
+  // }
 
   $scope.showFullLog = function () {
-    $scope.fullLog = $scope.bluetoothLog.slice(0,19);
     modalService
       .init('log-modal.html', $scope)
       .then(function (modal) {
@@ -224,28 +228,28 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       })
   };
 
-  $scope.emailFullLog = function () {
-    logModalService.emailFullLog();
-  } ;
-
-  $scope.fullLog = [];
-
-  $scope.fullLogPage = 0;
-
-  $scope.getFullLogExtract = function(start, end) {
-    logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
-    $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-  };
-
-  $scope.previousFullLogPage = function () {
-    logService.consoleLog('prevFullLogPage');
-    $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-    $scope.fullLogPage -= 1;
-  };
-
-  $scope.nextFullLogPage = function () {
-    logService.consoleLog('nextFullLogPage');
-    $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-    $scope.fullLogPage += 1;
-  };
+  // $scope.emailFullLog = function () {
+  //   logModalService.emailFullLog();
+  // } ;
+  //
+  // $scope.fullLog = [];
+  //
+  // $scope.fullLogPage = 0;
+  //
+  // $scope.getFullLogExtract = function(start, end) {
+  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
+  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
+  // };
+  //
+  // $scope.previousFullLogPage = function () {
+  //   logService.consoleLog('prevFullLogPage');
+  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
+  //   $scope.fullLogPage -= 1;
+  // };
+  //
+  // $scope.nextFullLogPage = function () {
+  //   logService.consoleLog('nextFullLogPage');
+  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
+  //   $scope.fullLogPage += 1;
+  // };
 }
