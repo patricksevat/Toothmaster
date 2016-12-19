@@ -8372,9 +8372,12 @@
 	
 	var _errorController2 = _interopRequireDefault(_errorController);
 	
+	var _modalCtrl = __webpack_require__(328);
+	
+	var _modalCtrl2 = _interopRequireDefault(_modalCtrl);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	//controllers
 	module.exports = angular.module('toothmasterControllers', [_ngAsync2.default.name])
 	/*
 	* $rootScope emits:
@@ -8385,7 +8388,9 @@
 	* $rootScope.$on('bluetoothResponse', response)
 	* */
 	
-	.controller('SafetySlides', _safetySlides2.default).controller('ProgramController', _programCtrl2.default).controller('SettingsCtrl', _settingsCtrl2.default).controller('runBluetoothCtrl', _runBluetoothCtrl2.default).controller('homingCtrl', _homingCtrl2.default).controller('testCtrl', _bluetoothTestCtrl2.default).controller('bluetoothConnectionCtrl', _bluetoothConnectionCtrl2.default).controller('errorController', _errorController2.default);
+	.controller('SafetySlides', _safetySlides2.default).controller('ProgramController', _programCtrl2.default).controller('SettingsCtrl', _settingsCtrl2.default).controller('runBluetoothCtrl', _runBluetoothCtrl2.default).controller('homingCtrl', _homingCtrl2.default).controller('testCtrl', _bluetoothTestCtrl2.default).controller('bluetoothConnectionCtrl', _bluetoothConnectionCtrl2.default).controller('errorController', _errorController2.default).controller('modalCtrl', _modalCtrl2.default);
+	
+	//controllers
 
 /***/ },
 /* 300 */
@@ -10034,53 +10039,12 @@
 	      modal.show();
 	    });
 	  };
-	  //
-	  // $scope.show = null;
-	  //
-	  // $scope.showAnswer = function(obj) {
-	  //   $scope.show = $scope.show === obj ? null : obj;
-	  // };
-	  //
-	  // //TODO write Q&A's
-	  // $scope.QAList = [];
-	  // for (var i=1; i<11; i++) {
-	  //   $scope.QAList.push({
-	  //     question: 'Question '+i,
-	  //     answer: 'Lorem ipsum'
-	  //   })
-	  // }
 	
 	  $scope.showFullLog = function () {
-	    // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
 	    modalService.init('log-modal.html', $scope).then(function (modal) {
 	      modal.show();
 	    });
 	  };
-	
-	  // $scope.emailFullLog = function () {
-	  //   logModalService.emailFullLog();
-	  // } ;
-	  //
-	  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-	  //
-	  // $scope.fullLogPage = 0;
-	  //
-	  // $scope.getFullLogExtract = function(start, end) {
-	  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
-	  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-	  // };
-	  //
-	  // $scope.previousFullLogPage = function () {
-	  //   logService.consoleLog('prevFullLogPage');
-	  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-	  //   $scope.fullLogPage -= 1;
-	  // };
-	  //
-	  // $scope.nextFullLogPage = function () {
-	  //   logService.consoleLog('nextFullLogPage');
-	  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-	  //   $scope.fullLogPage += 1;
-	  // };
 	};
 
 /***/ },
@@ -10432,52 +10396,6 @@
 	    statusService.setSending(false);
 	  }
 	
-	  // var nextListener;
-	  // function sendNext() {
-	  //   nextListener = $rootScope.$on('bluetoothResponse', function (event, res) {
-	  //     if ($scope.numberOfTests.tests === testsSent && res.search('wydone')) {
-	  //       $scope.completedTest +=1;
-	  //       $ionicPopup.alert({
-	  //         title: 'Tests completed',
-	  //         template: 'Completed '+$scope.completedTest+' out of '+$scope.numberOfTests.tests
-	  //       });
-	  //       setButtons({'showEmergency':false, 'showSpinner': false, 'showStressTest':true, 'showVersionButton': true, 'showMoveXMm': true});
-	  //       $scope.testRunning = false;
-	  //       addToLog('Tests completed');
-	  //       logService.consoleLog('completed tests: '+$scope.completedTest+' number of tests: '+$scope.numberOfTests.tests+' sent tests: '+testsSent);
-	  //       sentSettingsForTest = false;
-	  //       statusService.setSending(false);
-	  //       nextListener();
-	  //     }
-	  //     else if (res.search('wydone') > -1) {
-	  //       $scope.completedTest +=1;
-	  //       $scope.stressTest();
-	  //       nextListener();
-	  //     }
-	  //     else {
-	  //       $timeout(function () {
-	  //         sendAndReceiveService.write('<w'+stepMotorNum+'>', sendNext);
-	  //       }, 200);
-	  //       nextListener();
-	  //     }
-	  //   })
-	  // }
-	  //
-	  // function send(str, cb) {
-	  //   if (str === undefined){
-	  //     $ionicPopup.alert({
-	  //       title: 'Encountered an error',
-	  //       template: 'Please email a bug report via \'Show full log\''
-	  //     })
-	  //   }
-	  //   if (statusService.getEmergency() === false) {
-	  //     //calling .write() with original command (str). callingFunction is optional.
-	  //     sendAndReceiveService.write(str);
-	  //     testsSent += 1;
-	  //     if (cb) cb();
-	  //   }
-	  // }
-	
 	  $scope.getVersion = function () {
 	    if (statusService.getEmergency() === false && statusService.getSending() === false) {
 	      sendAndReceiveService.write('<y8:y' + stepMotorNum + '>');
@@ -10506,51 +10424,12 @@
 	    });
 	  };
 	
-	  // $scope.show = null;
-	  //
-	  // $scope.showAnswer = function(obj) {
-	  //   $scope.show = $scope.show === obj ? null : obj;
-	  // };
-	  //
-	  // $scope.QAList = [];
-	  // for (var i=1; i<11; i++) {
-	  //   $scope.QAList.push({
-	  //     question: 'Question '+i,
-	  //     answer: 'Lorem ipsum'
-	  //   })
-	  // }
-	
 	  $scope.showFullLog = function () {
 	    $scope.fullLog = $scope.bluetoothLog.slice(0, 19);
 	    modalService.init('log-modal.html', $scope).then(function (modal) {
 	      modal.show();
 	    });
 	  };
-	
-	  // $scope.emailFullLog = function () {
-	  //   logModalService.emailFullLog();
-	  // } ;
-	  //
-	  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-	  //
-	  // $scope.fullLogPage = 0;
-	  //
-	  // $scope.getFullLogExtract = function(start, end) {
-	  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
-	  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-	  // };
-	  //
-	  // $scope.previousFullLogPage = function () {
-	  //   logService.consoleLog('prevFullLogPage');
-	  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-	  //   $scope.fullLogPage -= 1;
-	  // };
-	  //
-	  // $scope.nextFullLogPage = function () {
-	  //   logService.consoleLog('nextFullLogPage');
-	  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-	  //   $scope.fullLogPage += 1;
-	  // };
 	};
 
 /***/ },
@@ -10761,50 +10640,11 @@
 	    });
 	  };
 	
-	  // $scope.show = null;
-	  //
-	  // $scope.showAnswer = function(obj) {
-	  //   $scope.show = $scope.show === obj ? null : obj;
-	  // };
-	  //
-	  // $scope.QAList = [];
-	  // for (var i=1; i<11; i++) {
-	  //   $scope.QAList.push({
-	  //     question: 'Question '+i,
-	  //     answer: 'Lorem ipsum'
-	  //   })
-	  // }
-	
 	  $scope.showFullLog = function () {
 	    modalService.init('log-modal.html', $scope).then(function (modal) {
 	      modal.show();
 	    });
 	  };
-	
-	  // $scope.emailFullLog = function () {
-	  //   logModalService.emailFullLog();
-	  // } ;
-	  //
-	  // $scope.fullLog = [];
-	  //
-	  // $scope.fullLogPage = 0;
-	  //
-	  // $scope.getFullLogExtract = function(start, end) {
-	  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
-	  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-	  // };
-	  //
-	  // $scope.previousFullLogPage = function () {
-	  //   logService.consoleLog('prevFullLogPage');
-	  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-	  //   $scope.fullLogPage -= 1;
-	  // };
-	  //
-	  // $scope.nextFullLogPage = function () {
-	  //   logService.consoleLog('nextFullLogPage');
-	  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-	  //   $scope.fullLogPage += 1;
-	  // };
 	};
 
 /***/ },
@@ -12067,20 +11907,6 @@
 	
 	  //Public available methods
 	  self.init = init;
-	  self.getFullLog = getFullLog;
-	  self.setFullLog = setFullLog;
-	
-	  //Scoped variables
-	  self.log = [];
-	
-	  // function setFullLog(logArr) {
-	  //   self.log = logArr;
-	  // }
-	
-	  // function getFullLog() {
-	  //  
-	  //   return self.log;
-	  // }
 	
 	  function init(template, $scope) {
 	
@@ -12488,6 +12314,87 @@
 	}
 	
 	exports.default = router;
+
+/***/ },
+/* 328 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($scope, modalService, logService, logModalService) {
+	  var self = this;
+	  // $scope.openHelpModal = function () {
+	  //   modalService
+	  //     .init('help-modal.html', $scope)
+	  //     .then(function (modal) {
+	  //       modal.show();
+	  //     })
+	  // };
+	
+	  //TODO test if this works as expected
+	
+	  $scope.$on('modal.shown', function () {
+	    console.log('modal shown');
+	    $scope.fullLog = logService.getLog();
+	  });
+	
+	  $scope.show = null;
+	
+	  $scope.showAnswer = function (obj) {
+	    $scope.show = $scope.show === obj ? null : obj;
+	  };
+	
+	  $scope.QAList = [];
+	  for (var i = 1; i < 11; i++) {
+	    $scope.QAList.push({
+	      question: 'Question ' + i,
+	      answer: 'Lorem ipsum'
+	    });
+	  }
+	
+	  // $scope.showFullLog = function () {
+	  //   $scope.fullLog = $scope.bluetoothLog.slice(0,19);
+	  //   modalService
+	  //     .init('log-modal.html', $scope)
+	  //     .then(function (modal) {
+	  //       modal.show();
+	  //     })
+	  // };
+	
+	  $scope.emailFullLog = function () {
+	    logModalService.emailFullLog();
+	  };
+	
+	  //TODO get fullLog from modalService
+	  $scope.fullLog = [];
+	
+	  self.getFullLog = function () {
+	    $scope.fullLog = modalService.getFullLog();
+	  };
+	
+	  $scope.fullLogPage = 0;
+	
+	  $scope.getFullLogExtract = function (start, end) {
+	    logService.consoleLog('getFullLogExtract, start: ' + start + ' end: ' + end);
+	    $scope.fullLog = $scope.bluetoothLog.slice(start, end);
+	  };
+	
+	  $scope.previousFullLogPage = function () {
+	    logService.consoleLog('prevFullLogPage');
+	    $scope.getFullLogExtract(($scope.fullLogPage - 1) * 10, ($scope.fullLogPage - 1) * 10 + 9);
+	    $scope.fullLogPage -= 1;
+	  };
+	
+	  $scope.nextFullLogPage = function () {
+	    logService.consoleLog('nextFullLogPage');
+	    $scope.getFullLogExtract(($scope.fullLogPage + 1) * 10, ($scope.fullLogPage + 1) * 10 + 9);
+	    $scope.fullLogPage += 1;
+	  };
+	};
 
 /***/ }
 /******/ ]);

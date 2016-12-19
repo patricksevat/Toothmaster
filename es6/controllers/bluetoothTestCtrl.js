@@ -275,52 +275,6 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     statusService.setSending(false);
   }
 
-  // var nextListener;
-  // function sendNext() {
-  //   nextListener = $rootScope.$on('bluetoothResponse', function (event, res) {
-  //     if ($scope.numberOfTests.tests === testsSent && res.search('wydone')) {
-  //       $scope.completedTest +=1;
-  //       $ionicPopup.alert({
-  //         title: 'Tests completed',
-  //         template: 'Completed '+$scope.completedTest+' out of '+$scope.numberOfTests.tests
-  //       });
-  //       setButtons({'showEmergency':false, 'showSpinner': false, 'showStressTest':true, 'showVersionButton': true, 'showMoveXMm': true});
-  //       $scope.testRunning = false;
-  //       addToLog('Tests completed');
-  //       logService.consoleLog('completed tests: '+$scope.completedTest+' number of tests: '+$scope.numberOfTests.tests+' sent tests: '+testsSent);
-  //       sentSettingsForTest = false;
-  //       statusService.setSending(false);
-  //       nextListener();
-  //     }
-  //     else if (res.search('wydone') > -1) {
-  //       $scope.completedTest +=1;
-  //       $scope.stressTest();
-  //       nextListener();
-  //     }
-  //     else {
-  //       $timeout(function () {
-  //         sendAndReceiveService.write('<w'+stepMotorNum+'>', sendNext);
-  //       }, 200);
-  //       nextListener();
-  //     }
-  //   })
-  // }
-  //
-  // function send(str, cb) {
-  //   if (str === undefined){
-  //     $ionicPopup.alert({
-  //       title: 'Encountered an error',
-  //       template: 'Please email a bug report via \'Show full log\''
-  //     })
-  //   }
-  //   if (statusService.getEmergency() === false) {
-  //     //calling .write() with original command (str). callingFunction is optional.
-  //     sendAndReceiveService.write(str);
-  //     testsSent += 1;
-  //     if (cb) cb();
-  //   }
-  // }
-
   $scope.getVersion = function() {
     if (statusService.getEmergency() === false && statusService.getSending() === false){
       sendAndReceiveService.write('<y8:y'+stepMotorNum+'>');
@@ -350,21 +304,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
         modal.show();
       })
   };
-
-  // $scope.show = null;
-  //
-  // $scope.showAnswer = function(obj) {
-  //   $scope.show = $scope.show === obj ? null : obj;
-  // };
-  //
-  // $scope.QAList = [];
-  // for (var i=1; i<11; i++) {
-  //   $scope.QAList.push({
-  //     question: 'Question '+i,
-  //     answer: 'Lorem ipsum'
-  //   })
-  // }
-
+  
   $scope.showFullLog = function () {
     $scope.fullLog = $scope.bluetoothLog.slice(0,19);
     modalService
@@ -373,29 +313,4 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
         modal.show();
       })
   };
-
-  // $scope.emailFullLog = function () {
-  //   logModalService.emailFullLog();
-  // } ;
-  //
-  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-  //
-  // $scope.fullLogPage = 0;
-  //
-  // $scope.getFullLogExtract = function(start, end) {
-  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
-  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-  // };
-  //
-  // $scope.previousFullLogPage = function () {
-  //   logService.consoleLog('prevFullLogPage');
-  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-  //   $scope.fullLogPage -= 1;
-  // };
-  //
-  // $scope.nextFullLogPage = function () {
-  //   logService.consoleLog('nextFullLogPage');
-  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-  //   $scope.fullLogPage += 1;
-  // };
 }

@@ -3,20 +3,6 @@ export default function modalService($ionicModal, $rootScope, logService) {
 
   //Public available methods
   self.init = init;
-  self.getFullLog = getFullLog;
-  self.setFullLog = setFullLog;
-
-  //Scoped variables
-  self.log = [];
-
-  // function setFullLog(logArr) {
-  //   self.log = logArr;
-  // }
-
-  // function getFullLog() {
-  //  
-  //   return self.log;
-  // }
 
   function init(template, $scope) {
 

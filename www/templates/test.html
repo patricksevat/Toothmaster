@@ -14,7 +14,7 @@
       <div class="col col-center" >
         <div class="item item-divider">
           <p class="bluetooth-text log-text">Connection status</p>
-          <button class="button button-small button-calm button-log" on-tap="openModal(2)">
+          <button class="button button-small button-calm button-log" on-tap="openHelpModal()">
             Help
           </button>
           <button class="button button-small button-assertive button-log" ng-show="isConnected" on-tap="userDisconnect()" ui-sref="app.bluetoothConnection">
@@ -88,47 +88,3 @@
 </ion-view>
 
 <modals></modals>
-<!--<script id="log-modal.html" type="text/ng-template">-->
-  <!--<ion-modal-view>-->
-    <!--<ion-header-bar>-->
-      <!--<h1 class="title">-->
-        <!--Full activity log-->
-        <!--<i class="glyphicon glyphicon-remove-sign padding remove-button" on-tap="closeModal(1)"></i>-->
-      <!--</h1>-->
-    <!--</ion-header-bar>-->
-    <!--<ion-content class="padding">-->
-      <!--<div class="height-90">-->
-        <!--<p class="bluetooth-text" ng-repeat="message in fullLog |limitTo: 10 track by $index">-->
-          <!--{{message}}-->
-        <!--</p>-->
-      <!--</div>-->
-      <!--<div class="height-10">-->
-        <!--<i class="glyphicon glyphicon-chevron-left padding" on-tap="previousFullLogPage()" ng-hide="fullLogPage === 0"></i>-->
-        <!--<span>Current page: {{fullLogPage+1}}</span>-->
-        <!--<i class="glyphicon glyphicon-chevron-right padding" on-tap="nextFullLogPage()" ng-hide="(fullLogPage+1)*10 > bluetoothLog.length"></i>-->
-        <!--<br><i class="glyphicon glyphicon-envelope padding" on-tap="emailFullLog()"></i>-->
-        <!--<span on-tap="emailFullLog()">Email bug report</span>-->
-      <!--</div>-->
-    <!--</ion-content>-->
-  <!--</ion-modal-view>-->
-<!--</script>-->
-
-<!--<script id="help-modal.html" type="text/ng-template">-->
-  <!--<ion-modal-view>-->
-    <!--<ion-header-bar>-->
-      <!--<h1 class="title">Help<i class="glyphicon glyphicon-remove-sign padding" on-tap="closeModal(2)"></i></h1>-->
-    <!--</ion-header-bar>-->
-    <!--<ion-content class="padding">-->
-      <!--<ion-list>-->
-        <!--<div ng-repeat="QA in QAList">-->
-          <!--<ion-item on-tap="showAnswer(QA)" class="item-divider">-->
-            <!--{{QA.question}}-->
-          <!--</ion-item>-->
-          <!--<ion-item ng-show="show === QA" class="animate-show">-->
-            <!--{{QA.answer}}-->
-          <!--</ion-item>-->
-        <!--</div>-->
-      <!--</ion-list>-->
-    <!--</ion-content>-->
-  <!--</ion-modal-view>-->
-<!--</script>-->

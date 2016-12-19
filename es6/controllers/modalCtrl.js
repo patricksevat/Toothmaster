@@ -9,8 +9,9 @@ export default function ($scope, modalService, logService, logModalService) {
   // };
 
   //TODO test if this works as expected
-  
+
   $scope.$on('modal.shown', () => {
+    console.log('modal shown');
     $scope.fullLog = logService.getLog();
   });
 
