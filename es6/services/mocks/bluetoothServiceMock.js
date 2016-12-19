@@ -1,24 +1,44 @@
-let bluetoothServiceMock = jasmine.createSpyObj('bluetoothService spy', ['getBluetoothEnabledValue',
-  'getDeviceName', 'disconnect', 'openBluetoothSettings']);
+let bluetoothServiceMock = {
+  getBluetoothEnabledValue: function () {
 
-bluetoothServiceMock.getConnectedValue = function (cb) {
+  },
+  getDeviceName: function () {
+
+  },
+  disconnect: function () {
+
+  },
+  openBluetoothSettings: function () {
+
+  },
+  getConnectedValue: function (cb) {
   if (cb)
     cb(false);
   else
     return false
+  },
+  connectToSelectedDevice: function () {
+    return new Promise((resolve, reject) => {
+      resolve();
+    })
+  },
+  openBluetoothSettings: function () {
+
+  }
 };
 
-spyOn(bluetoothServiceMock, 'getConnectedValue').and.callThrough();
 
-spyOn(bluetoothServiceMock, 'getConnectedValue').and.callThrough();
+function spyOnBluetoothServiceMock() {
+  spyOn(bluetoothServiceMock, 'getBluetoothEnabledValue').and.callThrough();
+  spyOn(bluetoothServiceMock, 'getDeviceName').and.callThrough();
+  spyOn(bluetoothServiceMock, 'disconnect').and.callThrough();
+  spyOn(bluetoothServiceMock, 'getConnectedValue').and.callThrough();
+  spyOn(bluetoothServiceMock, 'connectToSelectedDevice').and.callThrough();
+  spyOn(bluetoothServiceMock, 'openBluetoothSettings').and.callThrough();
+}
 
-bluetoothServiceMock.connectToSelectedDevice = function (deviceID, deviceName) {
-  return new Promise((resolve, reject) => {
-    resolve();
-  })
-};
-spyOn(bluetoothServiceMock, 'connectToSelectedDevice').and.callThrough();
 
-export default bluetoothServiceMock;
+
+export {bluetoothServiceMock, spyOnBluetoothServiceMock} ;
 
 //TODO test this in CtrlTest

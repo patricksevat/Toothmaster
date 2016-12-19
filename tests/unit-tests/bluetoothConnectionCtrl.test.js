@@ -1,3 +1,6 @@
+
+import {bluetoothServiceMock, spyOnBluetoothServiceMock} from '../../es6/services/mocks/bluetoothServiceMock'
+
 describe('bluetoothConnectionCtrl', () => {
   let createController,
     $rootScope,
@@ -8,53 +11,33 @@ describe('bluetoothConnectionCtrl', () => {
     ionicModalMock,
     stateMock,
     ionicPlatformMock,
-    window,
     statusServiceMock,
     logServiceMock,
     buttonServiceMock,
-    bluetoothServiceMock,
     $timeout,
     logModalServiceMock,
     modalServiceMock,
     errorServiceMock,
     ionicLoadingMock;
 
-  beforeEach(module('toothmasterControllers'));
+  beforeEach(angular.mock.module('toothmasterControllers'));
 
 
   beforeEach(inject(function($controller, _$rootScope_, $window, _$timeout_) {
     $scope = _$rootScope_.$new();
     $rootScope = _$rootScope_;
     $timeout = _$timeout_;
-
     cordovaClipboardMock = {};
     ionicPopupMock = jasmine.createSpyObj('$ionicPopup spy', ['alert']);
     ionicModalMock = jasmine.createSpyObj('$ionicModal spy', ['']);
     stateMock = jasmine.createSpyObj('$state spy', ['go']);
     logServiceMock = jasmine.createSpyObj('logService spy', ['getLog', 'consoleLog', 'addOne', 'setBulk']);
-    bluetoothServiceMock = jasmine.createSpyObj('bluetoothService spy', ['getBluetoothEnabledValue',
-      'getDeviceName', 'disconnect', 'openBluetoothSettings']);
+    spyOnBluetoothServiceMock();
     modalServiceMock = jasmine.createSpyObj('$state spy', ['init']);
     modalServiceMock.init = function () {
       return Promise.resolve();
     };
     spyOn(modalServiceMock, 'init').and.callThrough();
-
-    bluetoothServiceMock.getConnectedValue = function (cb) {
-      if (cb)
-        cb(false);
-      else
-        return false
-    };
-    spyOn(bluetoothServiceMock, 'getConnectedValue').and.callThrough();
-
-    bluetoothServiceMock.connectToSelectedDevice = function (deviceID, deviceName) {
-    //  TODO write both resolve and reject
-      return new Promise((resolve, reject) => {
-        resolve();
-      })
-    };
-    spyOn(bluetoothServiceMock, 'connectToSelectedDevice').and.callThrough();
 
     buttonServiceMock= jasmine.createSpyObj('$state spy', ['getValues']);
     ionicPlatformMock = {

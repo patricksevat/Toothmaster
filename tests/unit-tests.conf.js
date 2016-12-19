@@ -1,5 +1,8 @@
 // Karma configuration
 // Generated on Wed Dec 14 2016 12:02:30 GMT+0100 (W. Europe Standard Time)
+var webpackConfig = require('../webpack.config');
+webpackConfig.entry = {};
+webpackConfig.module.loaders[0].exclude = [/www\/lib/, /node_modules/, /ignore/, /hooks/, /documentation/, /platforms/, /testResults/];
 
 module.exports = function(config) {
   config.set({
@@ -16,13 +19,12 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       '../www/lib/ionic/js/ionic.bundle.js',
-      '../node_modules/angular-mocks/angular-mocks.js',
       '../www/lib/ngCordova/dist/ng-cordova.js',
-      '../www/cordova.js',
       '../www/js/jquery-2.2.0.min.js',
       '../www/js/bootstrap.min.js',
       '../www/js/angular-touch.js',
       '../www/js/debugout.js',
+      '../node_modules/angular-mocks/angular-mocks.js',
       '../www/bundle.js',
       'unit-tests/**/*.js'
     ],
@@ -36,8 +38,11 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      // '../es6/app.js': ['webpack'],
+      'unit-tests/**/*.js': ['webpack']
     },
 
+    webpack: webpackConfig,
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
