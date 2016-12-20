@@ -32,7 +32,7 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
     }
 
     //  Make sure all regular settings are filled in correctly
-    else if ($scope.settings.maxFreq == null || $scope.settings.dipswitch == null ||
+    else if ($scope.settings.stepMotorNum == null || $scope.settings.maxFreq == null || $scope.settings.dipswitch == null ||
       $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
       $scope.showAlertSettings();
     }

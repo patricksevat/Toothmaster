@@ -1,68 +1,40 @@
-
 import {bluetoothServiceMock, spyOnBluetoothServiceMock} from '../../es6/services/mocks/bluetoothServiceMock'
+import {ionicPopupMock, spyOnIonicPopupMock} from '../../es6/services/mocks/ionicPopupMock'
+import {stateMock, spyOnStateMock} from '../../es6/services/mocks/stateMock'
+import {logServiceMock, spyOnLogServiceMock} from '../../es6/services/mocks/logServiceMock'
+import {modalServiceMock, spyOnModalServiceMock} from '../../es6/services/mocks/modalServiceMock'
+import {buttonServiceMock, spyOnButtonServiceMock} from '../../es6/services/mocks/buttonServiceMock'
+import {ionicPlatformMock, spyOnIonicPlatformMock} from '../../es6/services/mocks/ionicPlatformMock'
+import {cordovaBluetoothSerialMock, spyOnCordovaBluetoothSerialMock} from '../../es6/services/mocks/cordovaBluetoothSerialMock'
+import {ionicLoadingMock, spyOnIonicLoadingMock} from '../../es6/services/mocks/ionicLoadingMock'
+import {errorServiceMock, spyOnErrorServiceMock} from '../../es6/services/mocks/errorServiceMock'
 
 describe('bluetoothConnectionCtrl', () => {
   let createController,
     $rootScope,
     $scope,
-    cordovaClipboardMock,
-    cordovaBluetoothSerialMock = {},
-    ionicPopupMock,
-    ionicModalMock,
-    stateMock,
-    ionicPlatformMock,
+    $window,
     statusServiceMock,
-    logServiceMock,
-    buttonServiceMock,
     $timeout,
-    logModalServiceMock,
-    modalServiceMock,
-    errorServiceMock,
-    ionicLoadingMock;
+    logModalServiceMock;
 
   beforeEach(angular.mock.module('toothmasterControllers'));
 
-
-  beforeEach(inject(function($controller, _$rootScope_, $window, _$timeout_) {
+  beforeEach(inject(function($controller, _$rootScope_, _$window_, _$timeout_) {
     $scope = _$rootScope_.$new();
     $rootScope = _$rootScope_;
     $timeout = _$timeout_;
-    cordovaClipboardMock = {};
-    ionicPopupMock = jasmine.createSpyObj('$ionicPopup spy', ['alert']);
-    ionicModalMock = jasmine.createSpyObj('$ionicModal spy', ['']);
-    stateMock = jasmine.createSpyObj('$state spy', ['go']);
-    logServiceMock = jasmine.createSpyObj('logService spy', ['getLog', 'consoleLog', 'addOne', 'setBulk']);
+    $window = _$window_;
+    spyOnIonicPopupMock();
+    spyOnStateMock();
+    spyOnLogServiceMock();
     spyOnBluetoothServiceMock();
-    modalServiceMock = jasmine.createSpyObj('$state spy', ['init']);
-    modalServiceMock.init = function () {
-      return Promise.resolve();
-    };
-    spyOn(modalServiceMock, 'init').and.callThrough();
-
-    buttonServiceMock= jasmine.createSpyObj('$state spy', ['getValues']);
-    ionicPlatformMock = {
-      ready: function (cb) {
-        cb();
-      }
-    };
-    cordovaBluetoothSerialMock = {
-      discoverUnpaired: function () {
-        return new Promise((resolve, reject) => {
-          resolve([])
-        })
-      },
-      list: function () {
-        return new Promise((resolve, reject) => {
-          resolve([])
-        })
-      }
-    };
-    spyOn(cordovaBluetoothSerialMock, 'discoverUnpaired').and.callThrough();
-    spyOn(cordovaBluetoothSerialMock, 'list').and.callThrough();
-
-    ionicLoadingMock = jasmine.createSpyObj('ionicLoading spy', ['show', 'hide']);
-
-    errorServiceMock = jasmine.createSpyObj('errorService spy', ['addError']);
+    spyOnModalServiceMock();
+    spyOnButtonServiceMock();
+    spyOnIonicPlatformMock();
+    spyOnCordovaBluetoothSerialMock();
+    spyOnIonicLoadingMock();
+    spyOnErrorServiceMock();
 
     createController = function (overrideObj, evalArr) {
       console.log('override: ');
@@ -93,10 +65,8 @@ describe('bluetoothConnectionCtrl', () => {
       return $controller('bluetoothConnectionCtrl', {
         $rootScope: $rootScope,
         $scope: override('scope', $scope),
-        $cordovaClipboard: override('cordovaClipboardMock', cordovaClipboardMock ),
         $cordovaBluetoothSerial: override('cordovaBluetoothSerialMock', cordovaBluetoothSerialMock),
         $ionicPopup: override('ionicPopupMock', ionicPopupMock),
-        $ionicModal: override('ionicModalMock', ionicModalMock),
         $state: override('stateMock', stateMock),
         $ionicPlatform: override('ionicPlatformMock', ionicPlatformMock),
         $window: override('$window', $window),
@@ -116,7 +86,8 @@ describe('bluetoothConnectionCtrl', () => {
   describe('getAvailableDevices', () => {
     describe('Correct functions are called', () => {
       beforeEach(inject(function () {
-        createController(undefined, ['spyOn($window.ionic.Platform, \'isAndroid\').and.returnValue(true)']);
+        createController();
+        spyOn($window.ionic.Platform, 'isAndroid').and.returnValue(true);
         $scope.getAvailableDevices();
       }));
 
@@ -146,7 +117,8 @@ describe('bluetoothConnectionCtrl', () => {
         describe('No available devices', () => {
           beforeEach(function (done) {
             inject(function () {
-              createController(undefined, ['spyOn($window.ionic.Platform, \'isAndroid\').and.returnValue(true)']);
+              createController();
+              spyOn($window.ionic.Platform, 'isAndroid').and.returnValue(true);
               $scope.getAvailableDevices();
               setTimeout(() => {
                 console.log('noUnpairedDevices: '+$scope.noUnpairedDevices);
@@ -180,7 +152,8 @@ describe('bluetoothConnectionCtrl', () => {
                   }
                 }
               };
-              createController(override, ['spyOn($window.ionic.Platform, \'isAndroid\').and.returnValue(true)']);
+              createController(override);
+              spyOn($window.ionic.Platform, 'isAndroid').and.returnValue(true);
               $scope.getAvailableDevices();
               setTimeout(() => {
                 done()
@@ -204,8 +177,9 @@ describe('bluetoothConnectionCtrl', () => {
         describe('No available devices', () => {
           beforeEach(function (done) {
             inject(function () {
-              createController(undefined, ['spyOn($window.ionic.Platform, \'isAndroid\').and.returnValue(false)',
-                'spyOn($window.ionic.Platform, \'isIOS\').and.returnValue(true)']);
+              createController();
+              spyOn($window.ionic.Platform, 'isAndroid').and.returnValue(false);
+                spyOn($window.ionic.Platform, 'isIOS').and.returnValue(true);
               $scope.getAvailableDevices();
               setTimeout(() => {
                 done();
@@ -240,8 +214,9 @@ describe('bluetoothConnectionCtrl', () => {
                   }
                 }
               };
-              createController(override, ['spyOn($window.ionic.Platform, \'isAndroid\').and.returnValue(false)',
-                'spyOn($window.ionic.Platform, \'isIOS\').and.returnValue(true)']);
+              createController(override);
+              spyOn($window.ionic.Platform, 'isAndroid').and.returnValue(false);
+              spyOn($window.ionic.Platform, 'isIOS').and.returnValue(true);
               $scope.getAvailableDevices();
               setTimeout(() => {
                 done();
@@ -483,11 +458,15 @@ describe('bluetoothConnectionCtrl', () => {
       });
 
       it('Should have the correct variables', () => {
+        spyOn($scope, 'getAvailableDevices');
         expect($scope.availableDevices).toEqual([]);
         expect($scope.pairedDevices).toEqual([]);
         //TODO check defaults for these
-        // expect($scope.bluetoothEnabled).toBe();
-        // expect($scope.isConnected).toBe();
+        setTimeout(() => {
+          expect($scope.bluetoothEnabled).toBe(true);
+          expect($scope.isConnected).toBe(false);
+          expect($scope.getAvailableDevices).toHaveBeenCalled();
+        }, 200);
       })
     });
 
@@ -500,7 +479,6 @@ describe('bluetoothConnectionCtrl', () => {
       it('Should have called logService.setBulk', () => {
         expect(logServiceMock.setBulk).toHaveBeenCalled();
       })
-
     })
   });
 });

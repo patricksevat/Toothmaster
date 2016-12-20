@@ -29,7 +29,7 @@ if (window.localStorage['Safety'] === undefined) {
   window.localStorage.setItem('Safety', '');
 }
 if (window.localStorage['settings'] === undefined) {
-  window.localStorage['settings'] = '{"stepMotorNum": 1, "maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
+  window.localStorage['settings'] = '{"stepMotorNum": null, "maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
 }
 if (window.localStorage['lastUsedProgram'] === undefined) {
   window.localStorage['lastUsedProgram'] = '';
@@ -66,7 +66,7 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .directive('modals', [modalDirective])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-    bugout.bugout.log('version 0.9.10.23');
+    bugout.bugout.log('version 0.9.10.24');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){

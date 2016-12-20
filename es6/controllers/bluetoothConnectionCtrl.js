@@ -1,4 +1,4 @@
-export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
+export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopup,
                          $state, $ionicPlatform, $window, statusService, logService,
                          buttonService, bluetoothService, $timeout,
                          logModalService, modalService, errorService, $ionicLoading) {

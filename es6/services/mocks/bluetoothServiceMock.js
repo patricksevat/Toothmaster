@@ -1,9 +1,9 @@
 let bluetoothServiceMock = {
-  getBluetoothEnabledValue: function () {
-
+  getBluetoothEnabledValue: function (cb) {
+    cb(true);
   },
   getDeviceName: function () {
-
+    return 'Device 1';
   },
   disconnect: function () {
 

@@ -8184,69 +8184,69 @@
 	
 	var _controllers2 = _interopRequireDefault(_controllers);
 	
-	var _sendAndReceiveService = __webpack_require__(309);
+	var _sendAndReceiveService = __webpack_require__(310);
 	
 	var _sendAndReceiveService2 = _interopRequireDefault(_sendAndReceiveService);
 	
-	var _shareSettingsService = __webpack_require__(310);
+	var _shareSettingsService = __webpack_require__(311);
 	
 	var _shareSettingsService2 = _interopRequireDefault(_shareSettingsService);
 	
-	var _shareProgramService = __webpack_require__(311);
+	var _shareProgramService = __webpack_require__(312);
 	
 	var _shareProgramService2 = _interopRequireDefault(_shareProgramService);
 	
-	var _skipService = __webpack_require__(312);
+	var _skipService = __webpack_require__(313);
 	
 	var _skipService2 = _interopRequireDefault(_skipService);
 	
-	var _buttonService = __webpack_require__(313);
+	var _buttonService = __webpack_require__(314);
 	
 	var _buttonService2 = _interopRequireDefault(_buttonService);
 	
-	var _emergencyService = __webpack_require__(314);
+	var _emergencyService = __webpack_require__(315);
 	
 	var _emergencyService2 = _interopRequireDefault(_emergencyService);
 	
-	var _bluetoothService = __webpack_require__(315);
+	var _bluetoothService = __webpack_require__(316);
 	
-	var _logService = __webpack_require__(316);
+	var _logService = __webpack_require__(317);
 	
 	var _logService2 = _interopRequireDefault(_logService);
 	
-	var _calculateVarsService = __webpack_require__(317);
+	var _calculateVarsService = __webpack_require__(318);
 	
 	var _calculateVarsService2 = _interopRequireDefault(_calculateVarsService);
 	
-	var _logModalService = __webpack_require__(318);
+	var _logModalService = __webpack_require__(319);
 	
 	var _logModalService2 = _interopRequireDefault(_logModalService);
 	
-	var _modalService = __webpack_require__(319);
+	var _modalService = __webpack_require__(320);
 	
 	var _modalService2 = _interopRequireDefault(_modalService);
 	
-	var _statusService = __webpack_require__(320);
+	var _statusService = __webpack_require__(321);
 	
 	var _statusService2 = _interopRequireDefault(_statusService);
 	
-	var _pauseService = __webpack_require__(321);
+	var _pauseService = __webpack_require__(322);
 	
 	var _pauseService2 = _interopRequireDefault(_pauseService);
 	
-	var _crcService = __webpack_require__(322);
+	var _crcService = __webpack_require__(323);
 	
 	var _crcService2 = _interopRequireDefault(_crcService);
 	
-	var _errorService = __webpack_require__(324);
+	var _errorService = __webpack_require__(325);
 	
 	var _errorService2 = _interopRequireDefault(_errorService);
 	
-	var _errorDirective = __webpack_require__(325);
+	var _errorDirective = __webpack_require__(326);
 	
 	var _errorDirective2 = _interopRequireDefault(_errorDirective);
 	
-	var _modalDirective = __webpack_require__(326);
+	var _modalDirective = __webpack_require__(327);
 	
 	var _modalDirective2 = _interopRequireDefault(_modalDirective);
 	
@@ -8254,7 +8254,7 @@
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _router = __webpack_require__(327);
+	var _router = __webpack_require__(328);
 	
 	var _router2 = _interopRequireDefault(_router);
 	
@@ -8269,7 +8269,7 @@
 	// services
 	
 	if (window.localStorage['settings'] === undefined) {
-	  window.localStorage['settings'] = '{"stepMotorNum": 1, "maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
+	  window.localStorage['settings'] = '{"stepMotorNum": null, "maxFreq":5000,"dipswitch":5000,"spindleAdvancement":5,"time":0.2, "homingStopswitch": false, "encoder":{"enable": false, "stepsPerRPM": 0, "stepsToMiss": 0, "direction": false}}';
 	}
 	if (window.localStorage['lastUsedProgram'] === undefined) {
 	  window.localStorage['lastUsedProgram'] = '';
@@ -8282,7 +8282,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.23');
+	  bugout.bugout.log('version 0.9.10.24');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8372,7 +8372,7 @@
 	
 	var _errorController2 = _interopRequireDefault(_errorController);
 	
-	var _modalCtrl = __webpack_require__(328);
+	var _modalCtrl = __webpack_require__(309);
 	
 	var _modalCtrl2 = _interopRequireDefault(_modalCtrl);
 	
@@ -8852,31 +8852,36 @@
 	        }]
 	      });
 	      return false;
-	    } else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.stepMotorNum !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === false) {
-	      logService.consoleLog('checkSettings passed');
-	      return true;
-	    } else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.stepMotorNum !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === true && $scope.settings.encoder.stepsPerRPM !== 0 && $scope.settings.encoder.stepsToMiss > 0) {
-	      logService.consoleLog('checkSettings passed');
-	      return true;
-	    } else {
-	      logService.consoleLog('settings are not filled in correctly');
-	      var templateText = '<p>Maximum frequency: ' + $scope.settings.maxFreq + '</p>' + '<p>Step motor dipswitch: ' + $scope.settings.dipswitch + '</p>' + '<p>Spindle advancement: ' + $scope.settings.spindleAdvancement + '</p>' + '<p>Time to maximum frequency: ' + $scope.settings.time + '</p>' + '<p>Encoder enabled: ' + $scope.settings.encoder.enable + '</p>';
-	      if ($scope.settings.encoder.enable) {
-	        templateText += '<p>Encoder steps per RPM: ' + $scope.settings.encoder.stepsPerRPM + '</p>' + '<p>Max allowable missed steps: ' + $scope.settings.encoder.stepsToMiss + '</p>' + '<p>Encoder directtion: ' + $scope.settings.encoder.stepsToMiss + '</p>';
-	      }
-	      $ionicPopup.alert({
-	        title: 'Please make sure your settings are filled in correctly',
-	        template: templateText,
-	        buttons: [{
-	          text: 'Edit settings',
-	          type: 'button-calm',
-	          onTap: function onTap() {
-	            $state.go('app.settings');
-	          }
-	        }]
-	      });
-	      return false;
 	    }
+	    //Pass the check without encoder enabled
+	    else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.stepMotorNum !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === false) {
+	        logService.consoleLog('checkSettings passed');
+	        return true;
+	      }
+	      //  Pass the check with encoder enabled
+	      else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.stepMotorNum !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === true && $scope.settings.encoder.stepsPerRPM !== 0 && $scope.settings.encoder.stepsToMiss > 0) {
+	          logService.consoleLog('checkSettings passed');
+	          return true;
+	        } else {
+	          //TODO build a nicer warning template, with css style if null
+	          logService.consoleLog('settings are not filled in correctly');
+	          var templateText = '<p>Stepmotor: ' + $scope.settings.stepMotorNum + '</p>' + '<p>Maximum frequency: ' + $scope.settings.maxFreq + '</p>' + '<p>Step motor dipswitch: ' + $scope.settings.dipswitch + '</p>' + '<p>Spindle advancement: ' + $scope.settings.spindleAdvancement + '</p>' + '<p>Time to maximum frequency: ' + $scope.settings.time + '</p>' + '<p>Encoder enabled: ' + $scope.settings.encoder.enable + '</p>';
+	          if ($scope.settings.encoder.enable) {
+	            templateText += '<p>Encoder steps per RPM: ' + $scope.settings.encoder.stepsPerRPM + '</p>' + '<p>Max allowable missed steps: ' + $scope.settings.encoder.stepsToMiss + '</p>' + '<p>Encoder directtion: ' + $scope.settings.encoder.stepsToMiss + '</p>';
+	          }
+	          $ionicPopup.alert({
+	            title: 'Please make sure your settings are filled in correctly',
+	            template: templateText,
+	            buttons: [{
+	              text: 'Edit settings',
+	              type: 'button-calm',
+	              onTap: function onTap() {
+	                $state.go('app.settings');
+	              }
+	            }]
+	          });
+	          return false;
+	        }
 	  };
 	};
 
@@ -8924,7 +8929,7 @@
 	    }
 	
 	    //  Make sure all regular settings are filled in correctly
-	    else if ($scope.settings.maxFreq == null || $scope.settings.dipswitch == null || $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
+	    else if ($scope.settings.stepMotorNum == null || $scope.settings.maxFreq == null || $scope.settings.dipswitch == null || $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
 	        $scope.showAlertSettings();
 	      }
 	
@@ -10057,7 +10062,7 @@
 	  value: true
 	});
 	
-	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, logModalService, modalService, $async) {
+	exports.default = function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, modalService, $async) {
 	
 	  $scope.$on('$ionicView.unloaded', function () {
 	    logService.consoleLog('\nUNLOADED\n');
@@ -10069,6 +10074,7 @@
 	  });
 	
 	  $scope.$on('$ionicView.afterEnter', function () {
+	    console.log('After enter');
 	    logService.consoleLog('AFTER ENTER');
 	    sendAndReceiveService.subscribe();
 	  });
@@ -10442,7 +10448,7 @@
 	  value: true
 	});
 	
-	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, statusService, logService, buttonService, bluetoothService, $timeout, logModalService, modalService, errorService, $ionicLoading) {
+	exports.default = function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopup, $state, $ionicPlatform, $window, statusService, logService, buttonService, bluetoothService, $timeout, logModalService, modalService, errorService, $ionicLoading) {
 	
 	  $scope.availableDevices = [];
 	  $scope.pairedDevices = [];
@@ -10693,6 +10699,68 @@
 
 /***/ },
 /* 309 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($scope, modalService, logService, logModalService) {
+	  var self = this;
+	
+	  $scope.$on('modal.shown', function () {
+	    console.log('modal shown');
+	    $scope.fullLog = logService.getLog();
+	  });
+	
+	  $scope.show = null;
+	
+	  $scope.showAnswer = function (obj) {
+	    $scope.show = $scope.show === obj ? null : obj;
+	  };
+	
+	  $scope.QAList = [];
+	  for (var i = 1; i < 11; i++) {
+	    $scope.QAList.push({
+	      question: 'Question ' + i,
+	      answer: 'Lorem ipsum'
+	    });
+	  }
+	
+	  $scope.emailFullLog = function () {
+	    logModalService.emailFullLog();
+	  };
+	
+	  $scope.fullLog = [];
+	
+	  self.getFullLog = function () {
+	    $scope.fullLog = modalService.getFullLog();
+	  };
+	
+	  $scope.fullLogPage = 0;
+	
+	  $scope.getFullLogExtract = function (start, end) {
+	    logService.consoleLog('getFullLogExtract, start: ' + start + ' end: ' + end);
+	    $scope.fullLog = $scope.bluetoothLog.slice(start, end);
+	  };
+	
+	  $scope.previousFullLogPage = function () {
+	    logService.consoleLog('prevFullLogPage');
+	    $scope.getFullLogExtract(($scope.fullLogPage - 1) * 10, ($scope.fullLogPage - 1) * 10 + 9);
+	    $scope.fullLogPage -= 1;
+	  };
+	
+	  $scope.nextFullLogPage = function () {
+	    logService.consoleLog('nextFullLogPage');
+	    $scope.getFullLogExtract(($scope.fullLogPage + 1) * 10, ($scope.fullLogPage + 1) * 10 + 9);
+	    $scope.fullLogPage += 1;
+	  };
+	};
+
+/***/ },
+/* 310 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11164,7 +11232,7 @@
 	}
 
 /***/ },
-/* 310 */
+/* 311 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11197,7 +11265,7 @@
 	}
 
 /***/ },
-/* 311 */
+/* 312 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11229,7 +11297,7 @@
 	};
 
 /***/ },
-/* 312 */
+/* 313 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11254,7 +11322,7 @@
 	};
 
 /***/ },
-/* 313 */
+/* 314 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11311,7 +11379,7 @@
 	};
 
 /***/ },
-/* 314 */
+/* 315 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11356,7 +11424,7 @@
 	};
 
 /***/ },
-/* 315 */
+/* 316 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11671,7 +11739,7 @@
 	exports.bluetoothService = bluetoothService;
 
 /***/ },
-/* 316 */
+/* 317 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11756,7 +11824,7 @@
 	exports.default = logService;
 
 /***/ },
-/* 317 */
+/* 318 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11834,7 +11902,7 @@
 	}
 
 /***/ },
-/* 318 */
+/* 319 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11893,7 +11961,7 @@
 	}
 
 /***/ },
-/* 319 */
+/* 320 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11935,7 +12003,7 @@
 	}
 
 /***/ },
-/* 320 */
+/* 321 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11986,7 +12054,7 @@
 	}
 
 /***/ },
-/* 321 */
+/* 322 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12043,7 +12111,7 @@
 	};
 
 /***/ },
-/* 322 */
+/* 323 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12053,7 +12121,7 @@
 	});
 	exports.default = crcService;
 	
-	var _crc = __webpack_require__(323);
+	var _crc = __webpack_require__(324);
 	
 	var _crc2 = _interopRequireDefault(_crc);
 	
@@ -12070,7 +12138,7 @@
 	}
 
 /***/ },
-/* 323 */
+/* 324 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12110,7 +12178,7 @@
 	module.exports = crc16;
 
 /***/ },
-/* 324 */
+/* 325 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12161,7 +12229,7 @@
 	};
 
 /***/ },
-/* 325 */
+/* 326 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12180,7 +12248,7 @@
 	};
 
 /***/ },
-/* 326 */
+/* 327 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12199,7 +12267,7 @@
 	};
 
 /***/ },
-/* 327 */
+/* 328 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12314,87 +12382,6 @@
 	}
 	
 	exports.default = router;
-
-/***/ },
-/* 328 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function ($scope, modalService, logService, logModalService) {
-	  var self = this;
-	  // $scope.openHelpModal = function () {
-	  //   modalService
-	  //     .init('help-modal.html', $scope)
-	  //     .then(function (modal) {
-	  //       modal.show();
-	  //     })
-	  // };
-	
-	  //TODO test if this works as expected
-	
-	  $scope.$on('modal.shown', function () {
-	    console.log('modal shown');
-	    $scope.fullLog = logService.getLog();
-	  });
-	
-	  $scope.show = null;
-	
-	  $scope.showAnswer = function (obj) {
-	    $scope.show = $scope.show === obj ? null : obj;
-	  };
-	
-	  $scope.QAList = [];
-	  for (var i = 1; i < 11; i++) {
-	    $scope.QAList.push({
-	      question: 'Question ' + i,
-	      answer: 'Lorem ipsum'
-	    });
-	  }
-	
-	  // $scope.showFullLog = function () {
-	  //   $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-	  //   modalService
-	  //     .init('log-modal.html', $scope)
-	  //     .then(function (modal) {
-	  //       modal.show();
-	  //     })
-	  // };
-	
-	  $scope.emailFullLog = function () {
-	    logModalService.emailFullLog();
-	  };
-	
-	  //TODO get fullLog from modalService
-	  $scope.fullLog = [];
-	
-	  self.getFullLog = function () {
-	    $scope.fullLog = modalService.getFullLog();
-	  };
-	
-	  $scope.fullLogPage = 0;
-	
-	  $scope.getFullLogExtract = function (start, end) {
-	    logService.consoleLog('getFullLogExtract, start: ' + start + ' end: ' + end);
-	    $scope.fullLog = $scope.bluetoothLog.slice(start, end);
-	  };
-	
-	  $scope.previousFullLogPage = function () {
-	    logService.consoleLog('prevFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage - 1) * 10, ($scope.fullLogPage - 1) * 10 + 9);
-	    $scope.fullLogPage -= 1;
-	  };
-	
-	  $scope.nextFullLogPage = function () {
-	    logService.consoleLog('nextFullLogPage');
-	    $scope.getFullLogExtract(($scope.fullLogPage + 1) * 10, ($scope.fullLogPage + 1) * 10 + 9);
-	    $scope.fullLogPage += 1;
-	  };
-	};
 
 /***/ }
 /******/ ]);

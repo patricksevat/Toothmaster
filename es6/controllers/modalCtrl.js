@@ -1,14 +1,5 @@
 export default function ($scope, modalService, logService, logModalService) {
   const self = this;
-  // $scope.openHelpModal = function () {
-  //   modalService
-  //     .init('help-modal.html', $scope)
-  //     .then(function (modal) {
-  //       modal.show();
-  //     })
-  // };
-
-  //TODO test if this works as expected
 
   $scope.$on('modal.shown', () => {
     console.log('modal shown');
@@ -28,21 +19,11 @@ export default function ($scope, modalService, logService, logModalService) {
       answer: 'Lorem ipsum'
     })
   }
-
-  // $scope.showFullLog = function () {
-  //   $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-  //   modalService
-  //     .init('log-modal.html', $scope)
-  //     .then(function (modal) {
-  //       modal.show();
-  //     })
-  // };
-
+  
   $scope.emailFullLog = function () {
     logModalService.emailFullLog();
   } ;
-
-  //TODO get fullLog from modalService
+  
   $scope.fullLog = [];
 
   self.getFullLog = function () {

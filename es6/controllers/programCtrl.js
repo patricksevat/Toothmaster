@@ -306,13 +306,14 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
         });
       return false;
     }
-
+    //Pass the check without encoder enabled
     else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null &&
       $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.stepMotorNum !== null &&
       $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === false) {
       logService.consoleLog('checkSettings passed');
       return true;
     }
+    //  Pass the check with encoder enabled
     else if ($scope.settings.maxFreq !== null  && $scope.settings.dipswitch !== null && $scope.settings.stepMotorNum !== null &&
       $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === true &&
       $scope.settings.encoder.stepsPerRPM !== 0 && $scope.settings.encoder.stepsToMiss > 0) {
@@ -320,8 +321,9 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
       return true;
     }
     else {
+      //TODO build a nicer warning template, with css style if null
       logService.consoleLog('settings are not filled in correctly');
-      var templateText = '<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+
+      var templateText = '<p>Stepmotor: '+$scope.settings.stepMotorNum+'</p>'+'<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+
         '<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+
         '<p>Time to maximum frequency: '+$scope.settings.time+'</p>'+'<p>Encoder enabled: '+$scope.settings.encoder.enable+'</p>';
       if ($scope.settings.encoder.enable) {

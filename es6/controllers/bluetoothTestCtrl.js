@@ -1,7 +1,7 @@
-export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
-                         $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
-                         bluetoothService, logService, calculateVarsService, sendAndReceiveService,
-                         statusService, logModalService, modalService, $async) {
+export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, 
+                         buttonService, emergencyService, bluetoothService, logService, 
+                         calculateVarsService, sendAndReceiveService, statusService,
+                         modalService, $async) {
 
   $scope.$on('$ionicView.unloaded', function () {
     logService.consoleLog('\nUNLOADED\n');
@@ -13,6 +13,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   });
 
   $scope.$on('$ionicView.afterEnter', function () {
+    console.log('After enter');
     logService.consoleLog('AFTER ENTER');
     sendAndReceiveService.subscribe();
   });
@@ -273,7 +274,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     logService.consoleLog('completed tests: '+$scope.completedTest+' number of tests: '+$scope.numberOfTests.tests+' sent tests: '+testsSent);
     sentSettingsForTest = false;
     statusService.setSending(false);
-  }
+  } 
 
   $scope.getVersion = function() {
     if (statusService.getEmergency() === false && statusService.getSending() === false){
