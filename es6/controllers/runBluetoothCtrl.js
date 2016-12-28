@@ -152,6 +152,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   });
 
   $rootScope.$on('emergencyOff', function () {
+    statusService.setSending(false);
     emergency = false;
     $scope.movements = [];
     $scope.movementsNum = 0;
@@ -166,9 +167,8 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   };
 
   $scope.emergencyOff = function () {
-    statusService.setSending(false);
-    logService.consoleLog('emergencyOff called');
-    sendAndReceiveService.sendEmergency();
+    logService.consoleLog('emergency reset called');
+    emergencyService.reset();
   };
 
   //
@@ -289,30 +289,30 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   //TODO refactor sendwithRetry, sendSettings, etc to sendAndReceiveService
 
-  self.sendWithRetry = $async(function* (str) {
-    try {
-      let res;
-      for (let i = 0; i < 5; i++) {
-        console.log('try: '+i+', command: '+str);
-        res = yield sendAndReceiveService.writeAsync(str);
-        console.log('res in sendWithretry: '+res);
-        if (i === 4)
-          return new Promise((resolve, reject) => {
-            reject('exceeded num of tries');
-          });
-        else if (res === 'OK')
-          return new Promise((resolve, reject) => {
-            console.log('resolve value: '+res);
-            resolve('resolve value: '+res);
-          });
-      }
-    }
-    catch (err) {
-      return new Promise((resolve, reject) => {
-        reject(err);
-      })
-    }
-  });
+  // self.sendWithRetry = $async(function* (str) {
+  //   try {
+  //     let res;
+  //     for (let i = 0; i < 5; i++) {
+  //       console.log('try: '+i+', command: '+str);
+  //       res = yield sendAndReceiveService.writeAsync(str);
+  //       console.log('res in sendWithretry: '+res);
+  //       if (i === 4)
+  //         return new Promise((resolve, reject) => {
+  //           reject('exceeded num of tries');
+  //         });
+  //       else if (res === 'OK')
+  //         return new Promise((resolve, reject) => {
+  //           console.log('resolve value: '+res);
+  //           resolve('resolve value: '+res);
+  //         });
+  //     }
+  //   }
+  //   catch (err) {
+  //     return new Promise((resolve, reject) => {
+  //       reject(err);
+  //     })
+  //   }
+  // });
 
 
   //user clicks button front end, sendSettingsData() called
@@ -326,7 +326,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
           for (let i = 0; i < commands.length; i++){
             console.log('going to await for command reply to command: '+commands[i]);
-            let res = yield self.sendWithRetry(commands[i]);
+            let res = yield sendAndReceiveService.sendWithRetry(commands[i]);
             console.log('awaited reply for command: '+commands[i]+', i='+i+', response: '+res );
 
             //On last command, start check if settings have been sent correctly
@@ -344,7 +344,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       addToLog('Error: '+err, true);
       addToLog('Cancelling current tasks');
       emergencyService.on();
-      emergencyService.off();
+      // emergencyService.off();
     }
   });
 
@@ -423,11 +423,11 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
           statusService.setSending(true);
           done = false;
           setButtons({'showSpinner':true, 'showProgress': true});
-          yield self.sendWithRetry('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>');
+          yield sendAndReceiveService.sendWithRetry('<q'+$scope.movements[$scope.movementsNum].steps+stepMotorNum+'>');
           checkDone();
         }
         else {
-          addToLog('Please wait untill this step is finished', true, 'warning');
+          addToLog('Please wait until this step is finished', true, 'warning');
         }
       }
       else {

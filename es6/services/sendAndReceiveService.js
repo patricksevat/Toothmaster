@@ -14,15 +14,28 @@ module.exports = sendAndReceiveService;
     sendAndReceive.write = write;
     sendAndReceive.expectedResponse = expectedResponse;
     sendAndReceive.emitResponse = emitResponse;
-    sendAndReceive.sendEmergency = sendEmergency;
     sendAndReceive.createResetListener = createResetListener1;
-    sendAndReceive.subscribeEmergency = subscribeEmergency;
     sendAndReceive.clearBuffer = clearBuffer;
 
-    //emergency listener
-    $rootScope.$on('emergencyOn', function () {
-      bugout.bugout.log('emergencyOn received in sendAndReceiveService');
-      // sendAndReceive.sendEmergency();
+    //Immediately after emergency is on
+    $rootScope.$on("emergencyOn", function () {
+      //Unsubscribe from regular responses
+      sendAndReceive.unsubscribe();
+
+      //Subscribe to emergency responses
+      subscribeEmergency();
+
+      //Create listener for emergency command <y8:yX>
+      createResetListener1();
+
+      //Send <y8:yX>
+      sendEmergency();
+    });
+
+    //After emergency commands are good allow for resetting of emergency on button click
+    $rootScope.$on("resetEmergency", function () {
+      createResetListener2();
+      sendResetEmergency();
     });
 
     //service-scoped variables
@@ -45,24 +58,12 @@ module.exports = sendAndReceiveService;
       $window.bluetoothSerial.subscribe('#', function (receivedStr) {
         lastReceivedTime = Date.now();
         tempStr += receivedStr;
-        if (tempStr.search(';') > -1 && tempStr.search('#') > -1) {
-          bugout.bugout.log('\ntemp in subscribe: \n'+tempStr);
-          $rootScope.$emit('response', tempStr);
-          sendAndReceive.emitResponse(tempStr);
-          tempStr = '';
-        }
-      });
-    }
-
-    function subscribeEmergency() {
-      logService.consoleLog('subscribed emergency');
-      $window.bluetoothSerial.subscribe('>', function (data) {
-        lastReceivedTime = Date.now();
-        if (data.search('<8:y>') > -1) {
-          $rootScope.$emit('emergencyReset1', data);
-        }
-        if (data.search('11:') > -1) {
-          $rootScope.$emit('emergencyReset2', data)
+        if (tempStr.search('<') > -1 && tempStr.search('>') > -1 && 
+          tempStr.search(';') > -1 && tempStr.search('#') > -1) {
+            bugout.bugout.log('\ntemp in subscribe: \n'+tempStr);
+            $rootScope.$emit('response', tempStr);
+            sendAndReceive.emitResponse(tempStr);
+            tempStr = '';
         }
       });
     }
@@ -90,8 +91,10 @@ module.exports = sendAndReceiveService;
 
         //If no reply within 3s, reject
         $timeout(() => {
-          if (!resReceived)
+          if (!resReceived) {
+            listener();
             reject('Response not in time');
+          }
         }, 3000);
 
 
@@ -163,6 +166,9 @@ module.exports = sendAndReceiveService;
 
     sendAndReceive.writeAsync = $async(function* (str) {
       try {
+        if (statusService.getEmergency() === true)
+          throw new Error('Cannot write, emergency is on');
+
         yield sendAndReceive.write(str);
         let expectedResponseShouldContain = sendAndReceive.expectedResponse(str[1]);
         bugout.bugout.log('expectedResponseShouldContain: ');
@@ -186,10 +192,9 @@ module.exports = sendAndReceiveService;
         if (statusService.getEmergency() === false) {
 
           //append string with cyclic redundancy check
-          const uint8Arr = crcService.appendCRC(str);
-          $window.bluetoothSerial.write(uint8Arr, function () {
-            bugout.bugout.log('sent: '+str+'uint8Arr: '+uint8Arr);
-            bugout.bugout.log('uint8Arr instanceof Uint8Array: '+ uint8Arr instanceof Uint8Array);
+          const strWithCrc = crcService.appendCRC(str);
+          $window.bluetoothSerial.write(strWithCrc, function () {
+            bugout.bugout.log('sent: '+str);
             lastCommandTime = Date.now();
             resolve();
           }, function () {
@@ -271,6 +276,7 @@ module.exports = sendAndReceiveService;
       //   $rootScope.$emit('sendKfault', res);
       // }
       else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
+        //TODO fix this function
         faultyResponse(res);
       }
       else if (res.search('wydone:') > -1) {
@@ -287,10 +293,10 @@ module.exports = sendAndReceiveService;
 
     function sendEmergency() {
       logService.consoleLog('\n\nsendAndReceiveService.sendEmergency called');
-      sendAndReceive.subscribeEmergency();
-      createResetListener1();
       stepMotorNum = shareSettings.getObj().stepMotorNum;
+      stepMotorNum = typeof stepMotorNum === 'undefined' ? '0' : stepMotorNum;
       const resetCommand1 = crcService.appendCRC('<y8:y'+stepMotorNum+'>');
+      console.log('written resetCommand1: '+resetCommand1);
       $window.bluetoothSerial.write(resetCommand1, function () {
         logService.addOne('Program reset command1 sent: '+resetCommand1);
       }, function (err) {
@@ -298,23 +304,38 @@ module.exports = sendAndReceiveService;
       });
     }
 
-    function createResetListener1() {
-      let emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
-        bugout.bugout.log('res in emergencyListener: '+res);
-        if (res.search('8:y') > -1) {
-          createResetListener2();
-          stepMotorNum = shareSettings.getObj().stepMotorNum;
-          const resetCommand2 = crcService.appendCRC('<f0'+stepMotorNum+'>');
-          $window.bluetoothSerial.write(resetCommand2, function () {
-            logService.addOne('Program reset command2 sent: '+resetCommand2);
-            emergencyResponse();
-          }, function (err) {
-            logService.addOne('Error: Program reset command could not be sent. '+err, true);
-          });
-
+    function subscribeEmergency() {
+      logService.consoleLog('subscribed emergency');
+      $window.bluetoothSerial.subscribe('>', function (data) {
+        if (data.search('<8:y>') > -1) {
+          $rootScope.$emit('emergencyReset1', data);
+        }
+        if (data.search('11:') > -1) {
+          $rootScope.$emit('emergencyReset2', data)
         }
       });
-      bugout.bugout.log('resetListeners created');
+    }
+
+    function createResetListener1() {
+      //TODO add timeout to call sendResetEmergency when answer is too late
+
+      let emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
+        bugout.bugout.log('res in emergencyListener: '+res);
+        //TODO allow reset button to be clicked
+        buttonService.setValues({showResetButton: true});
+        emergencyResponse();
+      });
+      bugout.bugout.log('resetListener1 created');
+    }
+
+    function sendResetEmergency() {
+      stepMotorNum = shareSettings.getObj().stepMotorNum;
+      const resetCommand2 = crcService.appendCRC('<f0'+stepMotorNum+'>');
+      $window.bluetoothSerial.write(resetCommand2, function () {
+        logService.addOne('Program reset command2 sent: '+resetCommand2);
+      }, function (err) {
+        logService.addOne('Error: Program reset command could not be sent. '+err, true);
+      });
     }
 
     function createResetListener2() {
@@ -323,11 +344,12 @@ module.exports = sendAndReceiveService;
         if (res.search('11:') > -1) {
           logService.addOne('Program succesfully reset');
           sendAndReceive.unsubscribe();
+          //TODO needs to call sendAndReceive.subscribe again?
           emergencyService.off();
           emergencyResponse();
         }
       });
-      bugout.bugout.log('resetListeners created');
+      bugout.bugout.log('resetListener2 created');
     }
 
     function clearBuffer() {

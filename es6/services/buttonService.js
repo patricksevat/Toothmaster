@@ -41,7 +41,7 @@ export default function (bugout) {
       showVersionButton : false,
       showMoveXMm : false,
       readyForData : false,
-      showResetButton: true,
+      showResetButton: false,
       showProgress: false
     });
   }

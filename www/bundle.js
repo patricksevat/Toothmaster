@@ -8282,7 +8282,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.31');
+	  bugout.bugout.log('version 0.9.10.35');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -9057,8 +9057,6 @@
 	  value: true
 	});
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-	
 	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, logModalService, modalService, $async, errorService) {
 	
 	  var self = this;
@@ -9207,6 +9205,7 @@
 	  });
 	
 	  $rootScope.$on('emergencyOff', function () {
+	    statusService.setSending(false);
 	    emergency = false;
 	    $scope.movements = [];
 	    $scope.movementsNum = 0;
@@ -9221,9 +9220,8 @@
 	  };
 	
 	  $scope.emergencyOff = function () {
-	    statusService.setSending(false);
-	    logService.consoleLog('emergencyOff called');
-	    sendAndReceiveService.sendEmergency();
+	    logService.consoleLog('emergency reset called');
+	    emergencyService.reset();
 	  };
 	
 	  //
@@ -9339,122 +9337,48 @@
 	
 	  //TODO refactor sendwithRetry, sendSettings, etc to sendAndReceiveService
 	
-	  self.sendWithRetry = $async(regeneratorRuntime.mark(function _callee2(str) {
-	    var _this = this;
+	  // self.sendWithRetry = $async(function* (str) {
+	  //   try {
+	  //     let res;
+	  //     for (let i = 0; i < 5; i++) {
+	  //       console.log('try: '+i+', command: '+str);
+	  //       res = yield sendAndReceiveService.writeAsync(str);
+	  //       console.log('res in sendWithretry: '+res);
+	  //       if (i === 4)
+	  //         return new Promise((resolve, reject) => {
+	  //           reject('exceeded num of tries');
+	  //         });
+	  //       else if (res === 'OK')
+	  //         return new Promise((resolve, reject) => {
+	  //           console.log('resolve value: '+res);
+	  //           resolve('resolve value: '+res);
+	  //         });
+	  //     }
+	  //   }
+	  //   catch (err) {
+	  //     return new Promise((resolve, reject) => {
+	  //       reject(err);
+	  //     })
+	  //   }
+	  // });
 	
-	    var _ret;
-	
-	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-	      while (1) {
-	        switch (_context2.prev = _context2.next) {
-	          case 0:
-	            _context2.prev = 0;
-	            return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
-	              var res, i;
-	              return regeneratorRuntime.wrap(function _callee$(_context) {
-	                while (1) {
-	                  switch (_context.prev = _context.next) {
-	                    case 0:
-	                      res = void 0;
-	                      i = 0;
-	
-	                    case 2:
-	                      if (!(i < 5)) {
-	                        _context.next = 17;
-	                        break;
-	                      }
-	
-	                      console.log('try: ' + i + ', command: ' + str);
-	                      _context.next = 6;
-	                      return sendAndReceiveService.writeAsync(str);
-	
-	                    case 6:
-	                      res = _context.sent;
-	
-	                      console.log('res in sendWithretry: ' + res);
-	
-	                      if (!(i === 4)) {
-	                        _context.next = 12;
-	                        break;
-	                      }
-	
-	                      return _context.abrupt('return', {
-	                        v: new Promise(function (resolve, reject) {
-	                          reject('exceeded num of tries');
-	                        })
-	                      });
-	
-	                    case 12:
-	                      if (!(res === 'OK')) {
-	                        _context.next = 14;
-	                        break;
-	                      }
-	
-	                      return _context.abrupt('return', {
-	                        v: new Promise(function (resolve, reject) {
-	                          console.log('resolve value: ' + res);
-	                          resolve('resolve value: ' + res);
-	                        })
-	                      });
-	
-	                    case 14:
-	                      i++;
-	                      _context.next = 2;
-	                      break;
-	
-	                    case 17:
-	                    case 'end':
-	                      return _context.stop();
-	                  }
-	                }
-	              }, _callee, _this);
-	            })(), 't0', 2);
-	
-	          case 2:
-	            _ret = _context2.t0;
-	
-	            if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-	              _context2.next = 5;
-	              break;
-	            }
-	
-	            return _context2.abrupt('return', _ret.v);
-	
-	          case 5:
-	            _context2.next = 10;
-	            break;
-	
-	          case 7:
-	            _context2.prev = 7;
-	            _context2.t1 = _context2['catch'](0);
-	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
-	              reject(_context2.t1);
-	            }));
-	
-	          case 10:
-	          case 'end':
-	            return _context2.stop();
-	        }
-	      }
-	    }, _callee2, this, [[0, 7]]);
-	  }));
 	
 	  //user clicks button front end, sendSettingsData() called
-	  $scope.sendSettingsData = $async(regeneratorRuntime.mark(function _callee3() {
+	  $scope.sendSettingsData = $async(regeneratorRuntime.mark(function _callee() {
 	    var i, res;
-	    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+	    return regeneratorRuntime.wrap(function _callee$(_context) {
 	      while (1) {
-	        switch (_context3.prev = _context3.next) {
+	        switch (_context.prev = _context.next) {
 	          case 0:
-	            _context3.prev = 0;
+	            _context.prev = 0;
 	
 	            if (!(statusService.getEmergency() === false)) {
-	              _context3.next = 19;
+	              _context.next = 19;
 	              break;
 	            }
 	
 	            if (!(statusService.getSending() === false)) {
-	              _context3.next = 17;
+	              _context.next = 17;
 	              break;
 	            }
 	
@@ -9466,16 +9390,16 @@
 	
 	          case 7:
 	            if (!(i < commands.length)) {
-	              _context3.next = 17;
+	              _context.next = 17;
 	              break;
 	            }
 	
 	            console.log('going to await for command reply to command: ' + commands[i]);
-	            _context3.next = 11;
-	            return self.sendWithRetry(commands[i]);
+	            _context.next = 11;
+	            return sendAndReceiveService.sendWithRetry(commands[i]);
 	
 	          case 11:
-	            res = _context3.sent;
+	            res = _context.sent;
 	
 	            console.log('awaited reply for command: ' + commands[i] + ', i=' + i + ', response: ' + res);
 	
@@ -9486,35 +9410,35 @@
 	
 	          case 14:
 	            i++;
-	            _context3.next = 7;
+	            _context.next = 7;
 	            break;
 	
 	          case 17:
-	            _context3.next = 20;
+	            _context.next = 20;
 	            break;
 	
 	          case 19:
 	            addToLog('Emergency on, will not continue sending settings data');
 	
 	          case 20:
-	            _context3.next = 28;
+	            _context.next = 27;
 	            break;
 	
 	          case 22:
-	            _context3.prev = 22;
-	            _context3.t0 = _context3['catch'](0);
+	            _context.prev = 22;
+	            _context.t0 = _context['catch'](0);
 	
-	            addToLog('Error: ' + _context3.t0, true);
+	            addToLog('Error: ' + _context.t0, true);
 	            addToLog('Cancelling current tasks');
 	            emergencyService.on();
-	            emergencyService.off();
+	            // emergencyService.off();
 	
-	          case 28:
+	          case 27:
 	          case 'end':
-	            return _context3.stop();
+	            return _context.stop();
 	        }
 	      }
-	    }, _callee3, this, [[0, 22]]);
+	    }, _callee, this, [[0, 22]]);
 	  }));
 	
 	  function updateProgress(res) {
@@ -9580,12 +9504,12 @@
 	  //SECTION: startMoving \ take steps logic
 	  //
 	
-	  $scope.startMoving = $async(regeneratorRuntime.mark(function _callee4() {
-	    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+	  $scope.startMoving = $async(regeneratorRuntime.mark(function _callee2() {
+	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
 	      while (1) {
-	        switch (_context4.prev = _context4.next) {
+	        switch (_context2.prev = _context2.next) {
 	          case 0:
-	            _context4.prev = 0;
+	            _context2.prev = 0;
 	
 	            logService.consoleLog('$scope.movements in startMoving:');
 	            logService.consoleLog($scope.movements);
@@ -9593,55 +9517,55 @@
 	            logService.consoleLog($scope.movementsNum);
 	
 	            if (!(statusService.getEmergency() === false)) {
-	              _context4.next = 18;
+	              _context2.next = 18;
 	              break;
 	            }
 	
 	            if (!done) {
-	              _context4.next = 15;
+	              _context2.next = 15;
 	              break;
 	            }
 	
 	            statusService.setSending(true);
 	            done = false;
 	            setButtons({ 'showSpinner': true, 'showProgress': true });
-	            _context4.next = 12;
-	            return self.sendWithRetry('<q' + $scope.movements[$scope.movementsNum].steps + stepMotorNum + '>');
+	            _context2.next = 12;
+	            return sendAndReceiveService.sendWithRetry('<q' + $scope.movements[$scope.movementsNum].steps + stepMotorNum + '>');
 	
 	          case 12:
 	            checkDone();
-	            _context4.next = 16;
+	            _context2.next = 16;
 	            break;
 	
 	          case 15:
-	            addToLog('Please wait untill this step is finished', true, 'warning');
+	            addToLog('Please wait until this step is finished', true, 'warning');
 	
 	          case 16:
-	            _context4.next = 19;
+	            _context2.next = 19;
 	            break;
 	
 	          case 18:
 	            addToLog('Emergency on, will not continue with movement', true);
 	
 	          case 19:
-	            _context4.next = 27;
+	            _context2.next = 27;
 	            break;
 	
 	          case 21:
-	            _context4.prev = 21;
-	            _context4.t0 = _context4['catch'](0);
+	            _context2.prev = 21;
+	            _context2.t0 = _context2['catch'](0);
 	
-	            addToLog('Error: ' + _context4.t0, true);
+	            addToLog('Error: ' + _context2.t0, true);
 	            addToLog('Cancelling current tasks');
 	            emergencyService.on();
 	            emergencyService.off();
 	
 	          case 27:
 	          case 'end':
-	            return _context4.stop();
+	            return _context2.stop();
 	        }
 	      }
-	    }, _callee4, this, [[0, 21]]);
+	    }, _callee2, this, [[0, 21]]);
 	  }));
 	
 	  //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
@@ -10097,18 +10021,11 @@
 	
 	exports.default = function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, modalService, $async) {
 	
-	  $scope.$on('$ionicView.unloaded', function () {
-	    logService.consoleLog('\nUNLOADED\n');
-	  });
-	
 	  $scope.$on('$ionicView.beforeLeave', function () {
-	    logService.consoleLog('BEFORE LEAVE');
 	    sendAndReceiveService.unsubscribe();
 	  });
 	
 	  $scope.$on('$ionicView.afterEnter', function () {
-	    console.log('After enter');
-	    logService.consoleLog('AFTER ENTER');
 	    sendAndReceiveService.subscribe();
 	  });
 	
@@ -10192,11 +10109,15 @@
 	    $scope.testRunning = false;
 	  };
 	
+	  //This actually calls reset
 	  $scope.emergencyOff = function () {
-	    logService.consoleLog('emergencyOff called');
+	    logService.consoleLog('emergencyReset called');
 	    // emergencyService.off();
-	    sendAndReceiveService.sendEmergency();
+	    emergencyService.reset();
 	  };
+	
+	  $rootScope.$on("emergencyOff", function () {});
+	
 	  //
 	  //SECTION: stressTest && move X mm logic
 	  //
@@ -10297,7 +10218,8 @@
 	    }, _callee, this, [[0, 21]]);
 	  }));
 	
-	  //TODO find out why <w>'s are sending when calling emergencyOff
+	  //TODO find out why <w>'s are sending when calling emergencyOff => added unsubscribe call to
+	  //TODO do not allow to start with undefined stepmotornum
 	
 	  function checkWydone(type) {
 	    console.log('checkWydone');
@@ -10839,7 +10761,7 @@
 /* 311 */
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
@@ -10858,15 +10780,28 @@
 	  sendAndReceive.write = write;
 	  sendAndReceive.expectedResponse = expectedResponse;
 	  sendAndReceive.emitResponse = emitResponse;
-	  sendAndReceive.sendEmergency = sendEmergency;
 	  sendAndReceive.createResetListener = createResetListener1;
-	  sendAndReceive.subscribeEmergency = subscribeEmergency;
 	  sendAndReceive.clearBuffer = clearBuffer;
 	
-	  //emergency listener
-	  $rootScope.$on('emergencyOn', function () {
-	    bugout.bugout.log('emergencyOn received in sendAndReceiveService');
-	    // sendAndReceive.sendEmergency();
+	  //Immediately after emergency is on
+	  $rootScope.$on("emergencyOn", function () {
+	    //Unsubscribe from regular responses
+	    sendAndReceive.unsubscribe();
+	
+	    //Subscribe to emergency responses
+	    subscribeEmergency();
+	
+	    //Create listener for emergency command <y8:yX>
+	    createResetListener1();
+	
+	    //Send <y8:yX>
+	    sendEmergency();
+	  });
+	
+	  //After emergency commands are good allow for resetting of emergency on button click
+	  $rootScope.$on("resetEmergency", function () {
+	    createResetListener2();
+	    sendResetEmergency();
 	  });
 	
 	  //service-scoped variables
@@ -10889,24 +10824,11 @@
 	    $window.bluetoothSerial.subscribe('#', function (receivedStr) {
 	      lastReceivedTime = Date.now();
 	      tempStr += receivedStr;
-	      if (tempStr.search(';') > -1 && tempStr.search('#') > -1) {
+	      if (tempStr.search('<') > -1 && tempStr.search('>') > -1 && tempStr.search(';') > -1 && tempStr.search('#') > -1) {
 	        bugout.bugout.log('\ntemp in subscribe: \n' + tempStr);
 	        $rootScope.$emit('response', tempStr);
 	        sendAndReceive.emitResponse(tempStr);
 	        tempStr = '';
-	      }
-	    });
-	  }
-	
-	  function subscribeEmergency() {
-	    logService.consoleLog('subscribed emergency');
-	    $window.bluetoothSerial.subscribe('>', function (data) {
-	      lastReceivedTime = Date.now();
-	      if (data.search('<8:y>') > -1) {
-	        $rootScope.$emit('emergencyReset1', data);
-	      }
-	      if (data.search('11:') > -1) {
-	        $rootScope.$emit('emergencyReset2', data);
 	      }
 	    });
 	  }
@@ -10934,7 +10856,10 @@
 	
 	      //If no reply within 3s, reject
 	      $timeout(function () {
-	        if (!resReceived) reject('Response not in time');
+	        if (!resReceived) {
+	          listener();
+	          reject('Response not in time');
+	        }
 	      }, 3000);
 	
 	      //response received
@@ -11013,7 +10938,7 @@
 	                        break;
 	                      }
 	
-	                      return _context.abrupt('return', {
+	                      return _context.abrupt("return", {
 	                        v: new Promise(function (resolve, reject) {
 	                          reject('exceeded num of tries, error: ' + res);
 	                        })
@@ -11025,7 +10950,7 @@
 	                        break;
 	                      }
 	
-	                      return _context.abrupt('return', {
+	                      return _context.abrupt("return", {
 	                        v: new Promise(function (resolve, reject) {
 	                          console.log('resolve value: ' + res);
 	                          resolve('resolve value: ' + res);
@@ -11038,22 +10963,22 @@
 	                      break;
 	
 	                    case 17:
-	                    case 'end':
+	                    case "end":
 	                      return _context.stop();
 	                  }
 	                }
 	              }, _callee, _this);
-	            })(), 't0', 2);
+	            })(), "t0", 2);
 	
 	          case 2:
 	            _ret = _context2.t0;
 	
-	            if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
+	            if (!((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object")) {
 	              _context2.next = 5;
 	              break;
 	            }
 	
-	            return _context2.abrupt('return', _ret.v);
+	            return _context2.abrupt("return", _ret.v);
 	
 	          case 5:
 	            _context2.next = 10;
@@ -11061,13 +10986,13 @@
 	
 	          case 7:
 	            _context2.prev = 7;
-	            _context2.t1 = _context2['catch'](0);
-	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
+	            _context2.t1 = _context2["catch"](0);
+	            return _context2.abrupt("return", new Promise(function (resolve, reject) {
 	              reject(_context2.t1);
 	            }));
 	
 	          case 10:
-	          case 'end':
+	          case "end":
 	            return _context2.stop();
 	        }
 	      }
@@ -11090,46 +11015,54 @@
 	                while (1) {
 	                  switch (_context3.prev = _context3.next) {
 	                    case 0:
-	                      _context3.next = 2;
-	                      return sendAndReceive.write(str);
+	                      if (!(statusService.getEmergency() === true)) {
+	                        _context3.next = 2;
+	                        break;
+	                      }
+	
+	                      throw new Error('Cannot write, emergency is on');
 	
 	                    case 2:
+	                      _context3.next = 4;
+	                      return sendAndReceive.write(str);
+	
+	                    case 4:
 	                      expectedResponseShouldContain = sendAndReceive.expectedResponse(str[1]);
 	
 	                      bugout.bugout.log('expectedResponseShouldContain: ');
 	                      bugout.bugout.log(expectedResponseShouldContain);
-	                      _context3.next = 7;
+	                      _context3.next = 9;
 	                      return responseListener(expectedResponseShouldContain);
 	
-	                    case 7:
+	                    case 9:
 	                      resolveValue = _context3.sent;
 	
 	                      expectedResponseShouldContain = null;
 	
-	                      return _context3.abrupt('return', {
+	                      return _context3.abrupt("return", {
 	                        v: new Promise(function (resolve, reject) {
 	                          bugout.bugout.log('resolve with resolveValue: ' + resolveValue);
 	                          resolve(resolveValue);
 	                        })
 	                      });
 	
-	                    case 10:
-	                    case 'end':
+	                    case 12:
+	                    case "end":
 	                      return _context3.stop();
 	                  }
 	                }
 	              }, _callee3, _this2);
-	            })(), 't0', 2);
+	            })(), "t0", 2);
 	
 	          case 2:
 	            _ret2 = _context4.t0;
 	
-	            if (!((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object")) {
+	            if (!((typeof _ret2 === "undefined" ? "undefined" : _typeof(_ret2)) === "object")) {
 	              _context4.next = 5;
 	              break;
 	            }
 	
-	            return _context4.abrupt('return', _ret2.v);
+	            return _context4.abrupt("return", _ret2.v);
 	
 	          case 5:
 	            _context4.next = 11;
@@ -11137,15 +11070,15 @@
 	
 	          case 7:
 	            _context4.prev = 7;
-	            _context4.t1 = _context4['catch'](0);
+	            _context4.t1 = _context4["catch"](0);
 	
 	            bugout.bugout.log('ERR: ' + _context4.t1);
-	            return _context4.abrupt('return', new Promise(function (resolve, reject) {
+	            return _context4.abrupt("return", new Promise(function (resolve, reject) {
 	              return resolve(_context4.t1);
 	            }));
 	
 	          case 11:
-	          case 'end':
+	          case "end":
 	            return _context4.stop();
 	        }
 	      }
@@ -11155,20 +11088,17 @@
 	  function write(str) {
 	    return new Promise(function (resolve, reject) {
 	      if (statusService.getEmergency() === false) {
-	        (function () {
 	
-	          //append string with cyclic redundancy check
-	          var uint8Arr = crcService.appendCRC(str);
-	          $window.bluetoothSerial.write(uint8Arr, function () {
-	            bugout.bugout.log('sent: ' + str + 'uint8Arr: ' + uint8Arr);
-	            bugout.bugout.log('uint8Arr instanceof Uint8Array: ' + uint8Arr instanceof Uint8Array);
-	            lastCommandTime = Date.now();
-	            resolve();
-	          }, function () {
-	            bugout.bugout.log('ERROR: could not send command ' + str);
-	            reject('Could not send command');
-	          });
-	        })();
+	        //append string with cyclic redundancy check
+	        var strWithCrc = crcService.appendCRC(str);
+	        $window.bluetoothSerial.write(strWithCrc, function () {
+	          bugout.bugout.log('sent: ' + str);
+	          lastCommandTime = Date.now();
+	          resolve();
+	        }, function () {
+	          bugout.bugout.log('ERROR: could not send command ' + str);
+	          reject('Could not send command');
+	        });
 	      }
 	    });
 	  }
@@ -11244,6 +11174,7 @@
 	      //   $rootScope.$emit('sendKfault', res);
 	      // }
 	      else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
+	          //TODO fix this function
 	          faultyResponse(res);
 	        } else if (res.search('wydone:') > -1) {
 	          //Added a timeout so we can wait for some promises to finish before the wydone listener is initialised
@@ -11257,10 +11188,10 @@
 	
 	  function sendEmergency() {
 	    logService.consoleLog('\n\nsendAndReceiveService.sendEmergency called');
-	    sendAndReceive.subscribeEmergency();
-	    createResetListener1();
 	    stepMotorNum = shareSettings.getObj().stepMotorNum;
+	    stepMotorNum = typeof stepMotorNum === 'undefined' ? '0' : stepMotorNum;
 	    var resetCommand1 = crcService.appendCRC('<y8:y' + stepMotorNum + '>');
+	    console.log('written resetCommand1: ' + resetCommand1);
 	    $window.bluetoothSerial.write(resetCommand1, function () {
 	      logService.addOne('Program reset command1 sent: ' + resetCommand1);
 	    }, function (err) {
@@ -11268,24 +11199,38 @@
 	    });
 	  }
 	
-	  function createResetListener1() {
-	    var emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
-	      bugout.bugout.log('res in emergencyListener: ' + res);
-	      if (res.search('8:y') > -1) {
-	        (function () {
-	          createResetListener2();
-	          stepMotorNum = shareSettings.getObj().stepMotorNum;
-	          var resetCommand2 = crcService.appendCRC('<f0' + stepMotorNum + '>');
-	          $window.bluetoothSerial.write(resetCommand2, function () {
-	            logService.addOne('Program reset command2 sent: ' + resetCommand2);
-	            emergencyResponse();
-	          }, function (err) {
-	            logService.addOne('Error: Program reset command could not be sent. ' + err, true);
-	          });
-	        })();
+	  function subscribeEmergency() {
+	    logService.consoleLog('subscribed emergency');
+	    $window.bluetoothSerial.subscribe('>', function (data) {
+	      if (data.search('<8:y>') > -1) {
+	        $rootScope.$emit('emergencyReset1', data);
+	      }
+	      if (data.search('11:') > -1) {
+	        $rootScope.$emit('emergencyReset2', data);
 	      }
 	    });
-	    bugout.bugout.log('resetListeners created');
+	  }
+	
+	  function createResetListener1() {
+	    //TODO add timeout to call sendResetEmergency when answer is too late
+	
+	    var emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
+	      bugout.bugout.log('res in emergencyListener: ' + res);
+	      //TODO allow reset button to be clicked
+	      buttonService.setValues({ showResetButton: true });
+	      emergencyResponse();
+	    });
+	    bugout.bugout.log('resetListener1 created');
+	  }
+	
+	  function sendResetEmergency() {
+	    stepMotorNum = shareSettings.getObj().stepMotorNum;
+	    var resetCommand2 = crcService.appendCRC('<f0' + stepMotorNum + '>');
+	    $window.bluetoothSerial.write(resetCommand2, function () {
+	      logService.addOne('Program reset command2 sent: ' + resetCommand2);
+	    }, function (err) {
+	      logService.addOne('Error: Program reset command could not be sent. ' + err, true);
+	    });
 	  }
 	
 	  function createResetListener2() {
@@ -11294,11 +11239,12 @@
 	      if (res.search('11:') > -1) {
 	        logService.addOne('Program succesfully reset');
 	        sendAndReceive.unsubscribe();
+	        //TODO needs to call sendAndReceive.subscribe again?
 	        emergencyService.off();
 	        emergencyResponse();
 	      }
 	    });
-	    bugout.bugout.log('resetListeners created');
+	    bugout.bugout.log('resetListener2 created');
 	  }
 	
 	  function clearBuffer() {
@@ -11474,7 +11420,7 @@
 	      showVersionButton: false,
 	      showMoveXMm: false,
 	      readyForData: false,
-	      showResetButton: true,
+	      showResetButton: false,
 	      showProgress: false
 	    });
 	  }
@@ -11494,6 +11440,7 @@
 	  var emergency = this;
 	  emergency.on = emergencyOn;
 	  emergency.off = emergencyOff;
+	  emergency.reset = reset;
 	
 	  function emergencyOn(cb) {
 	    bugout.bugout.log('emergencyService.on called');
@@ -11522,6 +11469,10 @@
 	      readyForData: false
 	    });
 	    if (cb) cb();
+	  }
+	
+	  function reset() {
+	    $rootScope.$emit("resetEmergency");
 	  }
 	};
 
@@ -12234,18 +12185,10 @@
 	
 	  crcService.appendCRC = function (str) {
 	    var crc = (0, _crc2.default)(str);
-	    var intArr = [];
+	    var high = crc.Uint8High === 0 ? 1 : crc.Uint8High;
+	    var low = crc.Uint8Low === 0 ? 1 : crc.Uint8Low;
 	
-	    for (var i = 0; i < str.length; i++) {
-	      intArr.push(str.charCodeAt(i));
-	    }
-	
-	    intArr.push(crc.Uint8High);
-	    intArr.push(crc.Uint8Low);
-	
-	    var uint8arr = new Uint8Array(intArr);
-	    // str += String.fromCharCode(crc.Uint8High) + String.fromCharCode(crc.Uint8Low) ;
-	    return uint8arr;
+	    return str + String.fromCharCode(high) + String.fromCharCode(low);
 	  };
 	}
 

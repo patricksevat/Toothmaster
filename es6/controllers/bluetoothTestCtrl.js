@@ -3,18 +3,11 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
                          calculateVarsService, sendAndReceiveService, statusService,
                          modalService, $async) {
 
-  $scope.$on('$ionicView.unloaded', function () {
-    logService.consoleLog('\nUNLOADED\n');
-  });
-
   $scope.$on('$ionicView.beforeLeave', function () {
-    logService.consoleLog('BEFORE LEAVE');
     sendAndReceiveService.unsubscribe();
   });
 
   $scope.$on('$ionicView.afterEnter', function () {
-    console.log('After enter');
-    logService.consoleLog('AFTER ENTER');
     sendAndReceiveService.subscribe();
   });
 
@@ -99,11 +92,17 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     $scope.testRunning = false;
   };
 
+  //This actually calls reset
   $scope.emergencyOff = function () {
-    logService.consoleLog('emergencyOff called');
+    logService.consoleLog('emergencyReset called');
     // emergencyService.off();
-    sendAndReceiveService.sendEmergency();
+    emergencyService.reset();
   };
+
+  $rootScope.$on("emergencyOff", () => {
+
+  });
+  
   //
   //SECTION: stressTest && move X mm logic
   //
@@ -160,7 +159,8 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     }
   });
 
-  //TODO find out why <w>'s are sending when calling emergencyOff
+  //TODO find out why <w>'s are sending when calling emergencyOff => added unsubscribe call to
+  //TODO do not allow to start with undefined stepmotornum
 
   function checkWydone(type) {
     console.log('checkWydone');
