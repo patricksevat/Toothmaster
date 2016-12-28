@@ -86,7 +86,8 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
 
   $scope.emergencyOff = function () {
     logService.consoleLog('emergencyOff called');
-    emergencyService.off();
+    // emergencyService.off();
+    sendAndReceiveService.sendEmergency();
   };
 
   //
@@ -150,6 +151,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     console.log('checkWydone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
+      console.log('checkWydone Homing')
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {

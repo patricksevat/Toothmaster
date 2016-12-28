@@ -8184,69 +8184,69 @@
 	
 	var _controllers2 = _interopRequireDefault(_controllers);
 	
-	var _sendAndReceiveService = __webpack_require__(310);
+	var _sendAndReceiveService = __webpack_require__(311);
 	
 	var _sendAndReceiveService2 = _interopRequireDefault(_sendAndReceiveService);
 	
-	var _shareSettingsService = __webpack_require__(311);
+	var _shareSettingsService = __webpack_require__(312);
 	
 	var _shareSettingsService2 = _interopRequireDefault(_shareSettingsService);
 	
-	var _shareProgramService = __webpack_require__(312);
+	var _shareProgramService = __webpack_require__(313);
 	
 	var _shareProgramService2 = _interopRequireDefault(_shareProgramService);
 	
-	var _skipService = __webpack_require__(313);
+	var _skipService = __webpack_require__(314);
 	
 	var _skipService2 = _interopRequireDefault(_skipService);
 	
-	var _buttonService = __webpack_require__(314);
+	var _buttonService = __webpack_require__(315);
 	
 	var _buttonService2 = _interopRequireDefault(_buttonService);
 	
-	var _emergencyService = __webpack_require__(315);
+	var _emergencyService = __webpack_require__(316);
 	
 	var _emergencyService2 = _interopRequireDefault(_emergencyService);
 	
-	var _bluetoothService = __webpack_require__(316);
+	var _bluetoothService = __webpack_require__(317);
 	
-	var _logService = __webpack_require__(317);
+	var _logService = __webpack_require__(318);
 	
 	var _logService2 = _interopRequireDefault(_logService);
 	
-	var _calculateVarsService = __webpack_require__(318);
+	var _calculateVarsService = __webpack_require__(319);
 	
 	var _calculateVarsService2 = _interopRequireDefault(_calculateVarsService);
 	
-	var _logModalService = __webpack_require__(319);
+	var _logModalService = __webpack_require__(320);
 	
 	var _logModalService2 = _interopRequireDefault(_logModalService);
 	
-	var _modalService = __webpack_require__(320);
+	var _modalService = __webpack_require__(321);
 	
 	var _modalService2 = _interopRequireDefault(_modalService);
 	
-	var _statusService = __webpack_require__(321);
+	var _statusService = __webpack_require__(322);
 	
 	var _statusService2 = _interopRequireDefault(_statusService);
 	
-	var _pauseService = __webpack_require__(322);
+	var _pauseService = __webpack_require__(323);
 	
 	var _pauseService2 = _interopRequireDefault(_pauseService);
 	
-	var _crcService = __webpack_require__(323);
+	var _crcService = __webpack_require__(324);
 	
 	var _crcService2 = _interopRequireDefault(_crcService);
 	
-	var _errorService = __webpack_require__(325);
+	var _errorService = __webpack_require__(326);
 	
 	var _errorService2 = _interopRequireDefault(_errorService);
 	
-	var _errorDirective = __webpack_require__(326);
+	var _errorDirective = __webpack_require__(327);
 	
 	var _errorDirective2 = _interopRequireDefault(_errorDirective);
 	
-	var _modalDirective = __webpack_require__(327);
+	var _modalDirective = __webpack_require__(328);
 	
 	var _modalDirective2 = _interopRequireDefault(_modalDirective);
 	
@@ -8254,7 +8254,7 @@
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _router = __webpack_require__(328);
+	var _router = __webpack_require__(329);
 	
 	var _router2 = _interopRequireDefault(_router);
 	
@@ -8282,7 +8282,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.24');
+	  bugout.bugout.log('version 0.9.10.31');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8376,8 +8376,13 @@
 	
 	var _modalCtrl2 = _interopRequireDefault(_modalCtrl);
 	
+	var _crcTestCtrl = __webpack_require__(310);
+	
+	var _crcTestCtrl2 = _interopRequireDefault(_crcTestCtrl);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	//controllers
 	module.exports = angular.module('toothmasterControllers', [_ngAsync2.default.name])
 	/*
 	* $rootScope emits:
@@ -8388,9 +8393,7 @@
 	* $rootScope.$on('bluetoothResponse', response)
 	* */
 	
-	.controller('SafetySlides', _safetySlides2.default).controller('ProgramController', _programCtrl2.default).controller('SettingsCtrl', _settingsCtrl2.default).controller('runBluetoothCtrl', _runBluetoothCtrl2.default).controller('homingCtrl', _homingCtrl2.default).controller('testCtrl', _bluetoothTestCtrl2.default).controller('bluetoothConnectionCtrl', _bluetoothConnectionCtrl2.default).controller('errorController', _errorController2.default).controller('modalCtrl', _modalCtrl2.default);
-	
-	//controllers
+	.controller('SafetySlides', _safetySlides2.default).controller('ProgramController', _programCtrl2.default).controller('SettingsCtrl', _settingsCtrl2.default).controller('runBluetoothCtrl', _runBluetoothCtrl2.default).controller('homingCtrl', _homingCtrl2.default).controller('testCtrl', _bluetoothTestCtrl2.default).controller('bluetoothConnectionCtrl', _bluetoothConnectionCtrl2.default).controller('errorController', _errorController2.default).controller('crcTestCtrl', _crcTestCtrl2.default).controller('modalCtrl', _modalCtrl2.default);
 
 /***/ },
 /* 300 */
@@ -8724,6 +8727,7 @@
 	    });
 	  };
 	
+	  //TODO check if its better to move these modals also to modalCtrl
 	  $ionicModal.fromTemplateUrl('load-modal.html', {
 	    id: 1,
 	    scope: $scope,
@@ -8867,7 +8871,7 @@
 	          logService.consoleLog('settings are not filled in correctly');
 	          var templateText = '<p>Stepmotor: ' + $scope.settings.stepMotorNum + '</p>' + '<p>Maximum frequency: ' + $scope.settings.maxFreq + '</p>' + '<p>Step motor dipswitch: ' + $scope.settings.dipswitch + '</p>' + '<p>Spindle advancement: ' + $scope.settings.spindleAdvancement + '</p>' + '<p>Time to maximum frequency: ' + $scope.settings.time + '</p>' + '<p>Encoder enabled: ' + $scope.settings.encoder.enable + '</p>';
 	          if ($scope.settings.encoder.enable) {
-	            templateText += '<p>Encoder steps per RPM: ' + $scope.settings.encoder.stepsPerRPM + '</p>' + '<p>Max allowable missed steps: ' + $scope.settings.encoder.stepsToMiss + '</p>' + '<p>Encoder directtion: ' + $scope.settings.encoder.stepsToMiss + '</p>';
+	            templateText += '<p>Encoder steps per RPM: ' + $scope.settings.encoder.stepsPerRPM + '</p>' + '<p>Max allowable missed steps: ' + $scope.settings.encoder.stepsToMiss + '</p>' + '<p>Encoder directtion: ' + $scope.settings.encoder.direction + '</p>';
 	          }
 	          $ionicPopup.alert({
 	            title: 'Please make sure your settings are filled in correctly',
@@ -8883,6 +8887,27 @@
 	          return false;
 	        }
 	  };
+	
+	  function createWrongSettingsHTML(settingsObj) {
+	    for (var setting in settingsObj) {
+	      if (settingsObj.hasOwnProperty(setting)) {}
+	    }
+	
+	    var humanReadable = {
+	      stepMotorNum: 'Stepmotor',
+	      maxFreq: 'Maximum frequency',
+	      dipswitch: 'Stepmotor dipswitch',
+	      spindleAdvancement: 'Spindle advancement',
+	      time: 'Time to maximum frequency',
+	      encoder: {
+	        enable: 'Encoder enabled',
+	        stepsPerRPM: 'Encoder steps per RPM',
+	        stepsToMiss: 'Max allowable missed steps',
+	        direction: 'Encoder direction'
+	      }
+	    };
+	    if (value != null) return value;else return '<span style="color: red">' + value + '</span>';
+	  }
 	};
 
 /***/ },
@@ -9198,7 +9223,7 @@
 	  $scope.emergencyOff = function () {
 	    statusService.setSending(false);
 	    logService.consoleLog('emergencyOff called');
-	    emergencyService.off();
+	    sendAndReceiveService.sendEmergency();
 	  };
 	
 	  //
@@ -9504,6 +9529,7 @@
 	    console.log('checkWydone');
 	    var timer = $interval(function () {
 	      sendAndReceiveService.writeAsync('<w' + stepMotorNum + '>');
+	      console.log('checkWyDone runBluetooth');
 	    }, 250);
 	
 	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
@@ -9519,6 +9545,8 @@
 	
 	    $rootScope.$on('emergencyOn', function () {
 	      $interval.cancel(timer);
+	      bluetoothResponseListener();
+	      wydoneListener();
 	    });
 	  }
 	
@@ -9621,6 +9649,7 @@
 	    console.log('checkDone');
 	    var timer = $interval(function () {
 	      sendAndReceiveService.writeAsync('<w' + stepMotorNum + '>');
+	      console.log('checkDone runBluetooth');
 	    }, 250);
 	
 	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
@@ -9637,6 +9666,8 @@
 	
 	    $rootScope.$on('emergencyOn', function () {
 	      $interval.cancel(timer);
+	      bluetoothResponseListener();
+	      wydoneListener();
 	    });
 	  }
 	
@@ -9865,7 +9896,8 @@
 	
 	  $scope.emergencyOff = function () {
 	    logService.consoleLog('emergencyOff called');
-	    emergencyService.off();
+	    // emergencyService.off();
+	    sendAndReceiveService.sendEmergency();
 	  };
 	
 	  //
@@ -10011,6 +10043,7 @@
 	    console.log('checkWydone');
 	    var timer = $interval(function () {
 	      sendAndReceiveService.writeAsync('<w' + stepMotorNum + '>');
+	      console.log('checkWydone Homing');
 	    }, 250);
 	
 	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
@@ -10078,6 +10111,8 @@
 	    logService.consoleLog('AFTER ENTER');
 	    sendAndReceiveService.subscribe();
 	  });
+	
+	  //  TODO write check for stepmotornum = null!
 	
 	  //other vars/commands
 	  var commands;
@@ -10159,7 +10194,8 @@
 	
 	  $scope.emergencyOff = function () {
 	    logService.consoleLog('emergencyOff called');
-	    emergencyService.off();
+	    // emergencyService.off();
+	    sendAndReceiveService.sendEmergency();
 	  };
 	  //
 	  //SECTION: stressTest && move X mm logic
@@ -10261,10 +10297,13 @@
 	    }, _callee, this, [[0, 21]]);
 	  }));
 	
+	  //TODO find out why <w>'s are sending when calling emergencyOff
+	
 	  function checkWydone(type) {
 	    console.log('checkWydone');
 	    var timer = $interval(function () {
 	      sendAndReceiveService.writeAsync('<w' + stepMotorNum + '>');
+	      console.log('checkWyDone( BluetoothtestCtrl');
 	    }, 250);
 	
 	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
@@ -10453,6 +10492,7 @@
 	  $scope.availableDevices = [];
 	  $scope.pairedDevices = [];
 	  $scope.bluetoothLog = logService.getLog();
+	  $scope.searchingForDevices = false;
 	  $scope.bluetoothOn = function () {
 	    bluetoothService.turnOnBluetooth(function () {
 	      bluetoothService.getBluetoothEnabledValue(function (val) {
@@ -10521,7 +10561,10 @@
 	  });
 	
 	  $scope.getAvailableDevices = function () {
+	    if ($scope.searchingForDevices === true) {}
+	
 	    console.log('getAvailableDevices Called');
+	    $scope.searchingForDevices = true;
 	    $scope.availableDevices = [];
 	    $scope.pairedDevices = [];
 	    bluetoothService.getConnectedValue(function (value) {
@@ -10556,6 +10599,7 @@
 	        $scope.availableDevices.push(device);
 	        addToLog('Unpaired Bluetooth device found');
 	      });
+	      $scope.searchingForDevices = false;
 	    }, function () {
 	      addToLog('Cannot find unpaired Bluetooth devices', true);
 	    });
@@ -10571,6 +10615,8 @@
 	    });
 	  }
 	
+	  //TODO update tests for this controller with $scope.searchingForDevices
+	
 	  function getiOSDevices() {
 	    $cordovaBluetoothSerial.list().then(function (devices) {
 	      addToLog('Searching for Bluetooth devices');
@@ -10578,6 +10624,7 @@
 	        addToLog('Bluetooth device found');
 	        $scope.availableDevices.push(device);
 	      });
+	      $scope.searchingForDevices = false;
 	    }, function () {
 	      addToLog('No devices found', true);
 	    });
@@ -10765,6 +10812,35 @@
 
 	'use strict';
 	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($scope, sendAndReceiveService) {
+	  $scope.input = '';
+	
+	  $scope.$on('$ionicView.enter', function () {
+	    sendAndReceiveService.subscribe();
+	    sendAndReceiveService.subscribeRawData();
+	  });
+	
+	  $scope.$on('$ionicView.leave', function () {
+	    sendAndReceiveService.unsubscribe();
+	    sendAndReceiveService.unsubscribeRawData();
+	  });
+	
+	  $scope.send = function () {
+	    console.log('Sending: ' + $scope.input);
+	    sendAndReceiveService.sendWithRetry($scope.input).then(function (resValue) {}, function (err) {});
+	  };
+	};
+
+/***/ },
+/* 311 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	/**
@@ -10778,18 +10854,19 @@
 	  sendAndReceive.subscribe = subscribe;
 	  sendAndReceive.subscribeRawData = subscribeRawData;
 	  sendAndReceive.unsubscribe = unsubscribe;
+	  //Also available: sendAndReceive.writeAsync
 	  sendAndReceive.write = write;
 	  sendAndReceive.expectedResponse = expectedResponse;
 	  sendAndReceive.emitResponse = emitResponse;
 	  sendAndReceive.sendEmergency = sendEmergency;
-	  sendAndReceive.createResetListener = createResetListener;
+	  sendAndReceive.createResetListener = createResetListener1;
 	  sendAndReceive.subscribeEmergency = subscribeEmergency;
 	  sendAndReceive.clearBuffer = clearBuffer;
 	
 	  //emergency listener
 	  $rootScope.$on('emergencyOn', function () {
 	    bugout.bugout.log('emergencyOn received in sendAndReceiveService');
-	    sendAndReceive.sendEmergency();
+	    // sendAndReceive.sendEmergency();
 	  });
 	
 	  //service-scoped variables
@@ -10826,7 +10903,10 @@
 	    $window.bluetoothSerial.subscribe('>', function (data) {
 	      lastReceivedTime = Date.now();
 	      if (data.search('<8:y>') > -1) {
-	        $rootScope.$emit('emergencyReset', data);
+	        $rootScope.$emit('emergencyReset1', data);
+	      }
+	      if (data.search('11:') > -1) {
+	        $rootScope.$emit('emergencyReset2', data);
 	      }
 	    });
 	  }
@@ -11078,9 +11158,10 @@
 	        (function () {
 	
 	          //append string with cyclic redundancy check
-	          var commandWithCRC = crcService.appendCRC(str);
-	          $window.bluetoothSerial.write(commandWithCRC, function () {
-	            bugout.bugout.log('sent: ' + commandWithCRC);
+	          var uint8Arr = crcService.appendCRC(str);
+	          $window.bluetoothSerial.write(uint8Arr, function () {
+	            bugout.bugout.log('sent: ' + str + 'uint8Arr: ' + uint8Arr);
+	            bugout.bugout.log('uint8Arr instanceof Uint8Array: ' + uint8Arr instanceof Uint8Array);
 	            lastCommandTime = Date.now();
 	            resolve();
 	          }, function () {
@@ -11175,28 +11256,49 @@
 	  }
 	
 	  function sendEmergency() {
-	    logService.consoleLog('sendAndReceiveService.sendEmergency called');
+	    logService.consoleLog('\n\nsendAndReceiveService.sendEmergency called');
 	    sendAndReceive.subscribeEmergency();
-	    createResetListener();
+	    createResetListener1();
 	    stepMotorNum = shareSettings.getObj().stepMotorNum;
-	    var resetCommand = crcService.appendCRC('<y8:y' + stepMotorNum + '>');
-	    $window.bluetoothSerial.write(resetCommand, function () {
-	      logService.addOne('Program reset command sent: ' + resetCommand);
+	    var resetCommand1 = crcService.appendCRC('<y8:y' + stepMotorNum + '>');
+	    $window.bluetoothSerial.write(resetCommand1, function () {
+	      logService.addOne('Program reset command1 sent: ' + resetCommand1);
 	    }, function (err) {
 	      logService.addOne('Error: Program reset command could not be sent. ' + err, true);
 	    });
 	  }
 	
-	  function createResetListener() {
-	    var emergencyResponse = $rootScope.$on('emergencyReset', function (event, res) {
+	  function createResetListener1() {
+	    var emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
 	      bugout.bugout.log('res in emergencyListener: ' + res);
 	      if (res.search('8:y') > -1) {
+	        (function () {
+	          createResetListener2();
+	          stepMotorNum = shareSettings.getObj().stepMotorNum;
+	          var resetCommand2 = crcService.appendCRC('<f0' + stepMotorNum + '>');
+	          $window.bluetoothSerial.write(resetCommand2, function () {
+	            logService.addOne('Program reset command2 sent: ' + resetCommand2);
+	            emergencyResponse();
+	          }, function (err) {
+	            logService.addOne('Error: Program reset command could not be sent. ' + err, true);
+	          });
+	        })();
+	      }
+	    });
+	    bugout.bugout.log('resetListeners created');
+	  }
+	
+	  function createResetListener2() {
+	    var emergencyResponse = $rootScope.$on('emergencyReset2', function (event, res) {
+	      bugout.bugout.log('res in emergencyListener: ' + res);
+	      if (res.search('11:') > -1) {
 	        logService.addOne('Program succesfully reset');
 	        sendAndReceive.unsubscribe();
+	        emergencyService.off();
 	        emergencyResponse();
 	      }
 	    });
-	    bugout.bugout.log('resetListener created');
+	    bugout.bugout.log('resetListeners created');
 	  }
 	
 	  function clearBuffer() {
@@ -11232,7 +11334,7 @@
 	}
 
 /***/ },
-/* 311 */
+/* 312 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11265,7 +11367,7 @@
 	}
 
 /***/ },
-/* 312 */
+/* 313 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11297,7 +11399,7 @@
 	};
 
 /***/ },
-/* 313 */
+/* 314 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11322,7 +11424,7 @@
 	};
 
 /***/ },
-/* 314 */
+/* 315 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11379,7 +11481,7 @@
 	};
 
 /***/ },
-/* 315 */
+/* 316 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11424,7 +11526,7 @@
 	};
 
 /***/ },
-/* 316 */
+/* 317 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11739,7 +11841,7 @@
 	exports.bluetoothService = bluetoothService;
 
 /***/ },
-/* 317 */
+/* 318 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11824,7 +11926,7 @@
 	exports.default = logService;
 
 /***/ },
-/* 318 */
+/* 319 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11902,7 +12004,7 @@
 	}
 
 /***/ },
-/* 319 */
+/* 320 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11961,7 +12063,7 @@
 	}
 
 /***/ },
-/* 320 */
+/* 321 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12003,7 +12105,7 @@
 	}
 
 /***/ },
-/* 321 */
+/* 322 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12054,7 +12156,7 @@
 	}
 
 /***/ },
-/* 322 */
+/* 323 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12111,7 +12213,7 @@
 	};
 
 /***/ },
-/* 323 */
+/* 324 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12121,7 +12223,7 @@
 	});
 	exports.default = crcService;
 	
-	var _crc = __webpack_require__(324);
+	var _crc = __webpack_require__(325);
 	
 	var _crc2 = _interopRequireDefault(_crc);
 	
@@ -12132,13 +12234,23 @@
 	
 	  crcService.appendCRC = function (str) {
 	    var crc = (0, _crc2.default)(str);
-	    str += String.fromCharCode(crc.Uint8High) + String.fromCharCode(crc.Uint8Low);
-	    return str;
+	    var intArr = [];
+	
+	    for (var i = 0; i < str.length; i++) {
+	      intArr.push(str.charCodeAt(i));
+	    }
+	
+	    intArr.push(crc.Uint8High);
+	    intArr.push(crc.Uint8Low);
+	
+	    var uint8arr = new Uint8Array(intArr);
+	    // str += String.fromCharCode(crc.Uint8High) + String.fromCharCode(crc.Uint8Low) ;
+	    return uint8arr;
 	  };
 	}
 
 /***/ },
-/* 324 */
+/* 325 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12178,7 +12290,7 @@
 	module.exports = crc16;
 
 /***/ },
-/* 325 */
+/* 326 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12229,7 +12341,7 @@
 	};
 
 /***/ },
-/* 326 */
+/* 327 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12248,7 +12360,7 @@
 	};
 
 /***/ },
-/* 327 */
+/* 328 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12267,7 +12379,7 @@
 	};
 
 /***/ },
-/* 328 */
+/* 329 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12374,6 +12486,16 @@
 	        templateUrl: './templates/asyncTest.html',
 	        controller: 'asyncCtrl',
 	        controllerAs: 'async'
+	      }
+	    }
+	  }).state('app.crcTest', {
+	    name: 'crcTest',
+	    url: '/crcTest',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/crctest.html',
+	        controller: 'crcTestCtrl',
+	        controllerAs: 'crc'
 	      }
 	    }
 	  });

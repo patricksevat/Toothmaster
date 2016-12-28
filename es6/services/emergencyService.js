@@ -12,7 +12,7 @@ export default function (buttonService, statusService, $rootScope, bugout) {
     $rootScope.$emit('emergencyOn');
     if (cb) cb();
   }
-
+  
   function emergencyOff(cb) {
     bugout.bugout.log('emergencyService.off called');
     statusService.setEmergency(false);

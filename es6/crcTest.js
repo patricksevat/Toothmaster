@@ -1,19 +1,15 @@
-let input = '<f02>';
+let inputArr = ['<f02>', '<q50381>', '<q32641>'];
 let output = '<f02>™M';
 
 let crc16 = require('./crc16');
 
-function test() {
-  let res = crc16(input);
-
-  console.log(res);
-  let high = res.Uint8High;
-  let low = res.Uint8Low;
-
-  console.log(String.fromCodePoint(high, low));
+function test(commands) {
+  commands.map((command) => {
+    let res = crc16(command);
+    let output = command+String.fromCharCode(res.Uint8High)+String.fromCharCode(res.Uint8Low);
+    console.log('Input: '+command+', output: '+output+', high: '+res.Uint8High+', low: '+res.Uint8Low);
+  });
 }
 
-test();
-
-console.log(output);
+test(inputArr);
 

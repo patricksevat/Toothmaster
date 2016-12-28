@@ -5,7 +5,9 @@ export default function crcService() {
 
   crcService.appendCRC = function (str) {
     let crc = crc16(str);
-    str += String.fromCharCode(crc.Uint8High) + String.fromCharCode(crc.Uint8Low) ;
-    return str;
+    let high = crc.Uint8High === 0 ? 1 : crc.Uint8High;
+    let low = crc.Uint8Low === 0 ? 1 : crc.Uint8Low;
+    
+    return String.fromCharCode(high) + String.fromCharCode(low) ;
   }
 }

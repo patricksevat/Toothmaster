@@ -168,7 +168,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   $scope.emergencyOff = function () {
     statusService.setSending(false);
     logService.consoleLog('emergencyOff called');
-    emergencyService.off();
+    sendAndReceiveService.sendEmergency();
   };
 
   //
@@ -360,6 +360,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     console.log('checkWydone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
+      console.log('checkWyDone runBluetooth')
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
@@ -375,6 +376,8 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
     $rootScope.$on('emergencyOn', () => {
       $interval.cancel(timer);
+      bluetoothResponseListener();
+      wydoneListener();
     })
   }
 
@@ -444,6 +447,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     console.log('checkDone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
+      console.log('checkDone runBluetooth')
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
@@ -460,7 +464,9 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
     $rootScope.$on('emergencyOn', () => {
       $interval.cancel(timer);
-    })    
+      bluetoothResponseListener();
+      wydoneListener();
+    })
   }
 
   function checkDoneReceivedWydone() {

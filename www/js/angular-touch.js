@@ -564,7 +564,7 @@ var ngTouchClickDirectiveFactory = ['$parse', '$timeout', '$rootElement',
       resetState();
     });
 
-    // Hack for iOS Safari's benefit. It goes searching for onclick handlers and is liable to click
+    // Hack for iOS Safari's benefit. It goes searchingForDevices for onclick handlers and is liable to click
     // something else nearby.
     element.onclick = function(event) { };
 

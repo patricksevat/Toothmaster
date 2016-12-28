@@ -1,5 +1,5 @@
-export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, 
-                         buttonService, emergencyService, bluetoothService, logService, 
+export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings,
+                         buttonService, emergencyService, bluetoothService, logService,
                          calculateVarsService, sendAndReceiveService, statusService,
                          modalService, $async) {
 
@@ -17,6 +17,8 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     logService.consoleLog('AFTER ENTER');
     sendAndReceiveService.subscribe();
   });
+
+//  TODO write check for stepmotornum = null!
 
 //other vars/commands
   var commands;
@@ -99,8 +101,8 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
 
   $scope.emergencyOff = function () {
     logService.consoleLog('emergencyOff called');
-    emergencyService.off();
-
+    // emergencyService.off();
+    sendAndReceiveService.sendEmergency();
   };
   //
   //SECTION: stressTest && move X mm logic
@@ -158,10 +160,13 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     }
   });
 
+  //TODO find out why <w>'s are sending when calling emergencyOff
+
   function checkWydone(type) {
     console.log('checkWydone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
+      console.log('checkWyDone( BluetoothtestCtrl');
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
@@ -274,7 +279,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     logService.consoleLog('completed tests: '+$scope.completedTest+' number of tests: '+$scope.numberOfTests.tests+' sent tests: '+testsSent);
     sentSettingsForTest = false;
     statusService.setSending(false);
-  } 
+  }
 
   $scope.getVersion = function() {
     if (statusService.getEmergency() === false && statusService.getSending() === false){
@@ -305,7 +310,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
         modal.show();
       })
   };
-  
+
   $scope.showFullLog = function () {
     $scope.fullLog = $scope.bluetoothLog.slice(0,19);
     modalService

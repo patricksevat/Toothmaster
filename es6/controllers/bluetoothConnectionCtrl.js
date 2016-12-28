@@ -6,6 +6,7 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
   $scope.availableDevices = [];
   $scope.pairedDevices = [];
   $scope.bluetoothLog = logService.getLog();
+  $scope.searchingForDevices = false;
   $scope.bluetoothOn = function () {
     bluetoothService.turnOnBluetooth(function () {
       bluetoothService.getBluetoothEnabledValue(function (val) {
@@ -75,7 +76,11 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
   });
 
   $scope.getAvailableDevices = function () {
+    if ($scope.searchingForDevices === true) {
+    }
+
     console.log('getAvailableDevices Called');
+    $scope.searchingForDevices = true;
     $scope.availableDevices = [];
     $scope.pairedDevices = [];
     bluetoothService.getConnectedValue(function (value) {
@@ -110,8 +115,9 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
       devices.forEach(function (device) {
           $scope.availableDevices.push(device);
           addToLog('Unpaired Bluetooth device found');
-        }
-      )}, function () {
+        });
+      $scope.searchingForDevices = false;
+    }, function () {
       addToLog('Cannot find unpaired Bluetooth devices', true);
     });
     //discover paired
@@ -126,13 +132,16 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
     })
   }
 
+  //TODO update tests for this controller with $scope.searchingForDevices
+
   function getiOSDevices() {
     $cordovaBluetoothSerial.list().then(function (devices) {
       addToLog('Searching for Bluetooth devices');
       devices.forEach(function (device) {
         addToLog('Bluetooth device found');
         $scope.availableDevices.push(device);
-      })
+      });
+      $scope.searchingForDevices = false;
     }, function () {
       addToLog('No devices found', true);
     })
@@ -213,5 +222,5 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
         modal.show();
       })
   };
-  
+
 }

@@ -152,6 +152,7 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
     )
   };
 
+  //TODO check if its better to move these modals also to modalCtrl
   $ionicModal.fromTemplateUrl('load-modal.html', {
     id: 1,
     scope: $scope,
@@ -327,7 +328,7 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
         '<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+
         '<p>Time to maximum frequency: '+$scope.settings.time+'</p>'+'<p>Encoder enabled: '+$scope.settings.encoder.enable+'</p>';
       if ($scope.settings.encoder.enable) {
-        templateText += '<p>Encoder steps per RPM: '+$scope.settings.encoder.stepsPerRPM+'</p>'+'<p>Max allowable missed steps: '+$scope.settings.encoder.stepsToMiss+'</p>'+'<p>Encoder directtion: '+$scope.settings.encoder.stepsToMiss+'</p>';
+        templateText += '<p>Encoder steps per RPM: '+$scope.settings.encoder.stepsPerRPM+'</p>'+'<p>Max allowable missed steps: '+$scope.settings.encoder.stepsToMiss+'</p>'+'<p>Encoder directtion: '+$scope.settings.encoder.direction+'</p>';
       }
       $ionicPopup.alert(
         {
@@ -344,4 +345,31 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
       return false;
     }
   };
+
+  function createWrongSettingsHTML(settingsObj) {
+    for (let setting in settingsObj) {
+      if (settingsObj.hasOwnProperty(setting)) {
+
+      }
+    }
+
+    const humanReadable = {
+      stepMotorNum: 'Stepmotor',
+      maxFreq: 'Maximum frequency',
+      dipswitch: 'Stepmotor dipswitch',
+      spindleAdvancement: 'Spindle advancement',
+      time: 'Time to maximum frequency',
+      encoder: {
+        enable: 'Encoder enabled',
+        stepsPerRPM: 'Encoder steps per RPM',
+        stepsToMiss: 'Max allowable missed steps',
+        direction: 'Encoder direction'
+      }
+    }
+    if (value != null)
+      return value;
+    else
+      return '<span style="color: red">'+value+'</span>';
+
+  }
 }

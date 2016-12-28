@@ -121,6 +121,18 @@ function router($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
       }
     }
   })
+
+    .state('app.crcTest', {
+      name: 'crcTest',
+      url: '/crcTest',
+      views: {
+        'menuContent': {
+          templateUrl: './templates/crctest.html',
+          controller: 'crcTestCtrl',
+          controllerAs: 'crc'
+        }
+      }
+    })
   ;
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/program');

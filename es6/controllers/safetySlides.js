@@ -1,6 +1,9 @@
 /**
  * Created by Patrick on 04/12/2016.
  */
+
+//TODO picture and text of goodlife => jointmaster.eu
+
 export default function($scope, $ionicModal, logService) {
   $scope.i = 0;
   $scope.hidePrev = false;

@@ -51,8 +51,10 @@ module.exports = {
             data = stringToArrayBuffer(data);
         } else if (data instanceof Array) {
             // assuming array of interger
+            console.log('bluetoothSerial.js converting array to buffer');
             data = new Uint8Array(data).buffer;
         } else if (data instanceof Uint8Array) {
+            console.log('bluetoothSerial.js converting Uint8Array to buffer');
             data = data.buffer;
         }
 
