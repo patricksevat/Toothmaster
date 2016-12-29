@@ -85,9 +85,8 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   };
 
   $scope.emergencyOff = function () {
-    logService.consoleLog('emergencyOff called');
-    // emergencyService.off();
-    sendAndReceiveService.sendEmergency();
+    logService.consoleLog('emergency reset called');
+    emergencyService.reset();
   };
 
   //
@@ -115,7 +114,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   $scope.homing = $async(function* () {
     if (statusService.getEmergency() === false) {
       logService.consoleLog('homingStopswitch = '+homingStopswitchInt);
-      if (statusService.getSending() === false){
+      if (statusService.getSending() === false && shareSettings.checkStepMotor()){
         setButtons({'showSpinner':true,'showEmergency':true,'showHoming':false});
         statusService.setSending(true);
 

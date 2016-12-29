@@ -3,8 +3,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
                         bluetoothService, logService, calculateVarsService, sendAndReceiveService,
                         statusService, logModalService, modalService, $async, errorService){
 
-  const self = this;
-
   $scope.bluetoothLog = logService.getLog();
   $scope.bluetoothEnabled = null;
   $scope.isConnected = null;
@@ -12,7 +10,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //TODO retrieve variables where needed
   var sending = statusService.getSending();
   var program = shareProgram.getObj();
-  var emergency = statusService.getEmergency();
 
   $scope.progress = 0;
   $scope.settings = shareSettings.getObj();
@@ -97,12 +94,13 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     sendAndReceiveService.unsubscribe();
   });
 
+  //TODO check this emergency sequence
   $scope.$on('$ionicView.leave',function () {
     logService.consoleLog('ionicView.leave called');
     if (statusService.getSending() === true ) {
       addToLog('Cancelling current tasks');
       emergencyService.on(function () {
-        emergencyService.off();
+        emergencyService.reset();
       });
     }
     else {
@@ -147,13 +145,11 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //
 
   $rootScope.$on('emergencyOn', function () {
-    emergency = true;
     addToLog('Emergency is on');
   });
 
   $rootScope.$on('emergencyOff', function () {
     statusService.setSending(false);
-    emergency = false;
     $scope.movements = [];
     $scope.movementsNum = 0;
     done = true;
@@ -186,102 +182,79 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //calculate movement sequence
   $scope.calcSteps = function() {
     program = shareProgram.getObj();
+    console.log('program in calcSteps:');
+    console.log(program);
     $scope.settings = shareSettings.getObj();
     $scope.movements = [];
     //call function to calculate steps for cuts, subcuts and pins, log $scope.movements, callback to inform user of movements
-    if (program.sawWidth === undefined || program.cutWidth === undefined
-      || program.pinWidth === undefined || program.numberOfCuts === undefined) {
-      $ionicPopup.alert({
-        title: 'Please fill in your Program before continuing',
-        buttons: [{
-          text: 'Go to program',
-          type: 'button-calm',
-          onTap: function () {
-            $state.go('app.program');
-          }
-        }]
+
+    if (shareProgram.checkProgram()) {
+      cutsAndPins();
+      logService.consoleLog('Movements to take:');
+      $scope.movements.map(function (item, index) {
+        logService.consoleLog('Movement '+index+':'+' steps'+item.steps+', description: '+item.description);
       });
-    }
-    else if (program.sawWidth > program.cutWidth) {
-      $ionicPopup.alert({
-        title: 'Your saw width cannot be wider than your cut width',
-        template: 'Please adjust your program',
-        buttons: [{
-          text: 'Go to program',
-          type: 'button-positive',
-          onTap: function () {
-            $state.go('app.program');
-          }
-        }]
+      setButtons({
+        'showCalcButton': false,
+        'readyForData': true
       });
-    }
-    else {
-      cutsAndPins(function() {
-        logService.consoleLog('Movements to take:');
-        var count= 1;
-        $scope.movements.forEach(function (item) {
-          logService.consoleLog('Movement '+count+':'+' steps'+item.steps+', description: '+item.description);
-          count +=1;
-        })
-      });
-
-      function cutsAndPins(callback) {
-        //do this for number of cuts
-        for (var i = 1; i <= program.numberOfCuts; i++) {
-          logService.consoleLog('var i ='+i);
-
-          //if cut width is wider than saw width, calculate subcuts (multiple subcuts needed to complete one cut)
-          if (program.cutWidth > program.sawWidth){
-
-            //how many subcuts do we need for this cut to complete
-            var subCuts = program.cutWidth / program.sawWidth;
-            var cutsRoundedUp = Math.ceil(subCuts);
-
-            // calculate remaining subcut steps, start at 2 because first subcut is already added after moving to past pin
-            for (var j=2; j<= cutsRoundedUp; j++){
-              logService.consoleLog('Var j'+j);
-              if (j<cutsRoundedUp){
-                var stepsPerSawWidth = program.sawWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-                addMovement(stepsPerSawWidth, 'Make subcut '+j+'/'+cutsRoundedUp)
-              }
-
-              //calculate remaining mm & steps, based on number of subcuts already taken
-              else if (j===cutsRoundedUp) {
-                var remainingMM = program.cutWidth-((j-1)*program.sawWidth);
-                logService.consoleLog('remaining mm: '+remainingMM);
-                var remainingSteps = remainingMM / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-                addMovement(remainingSteps, 'Make subcut '+j+'/'+cutsRoundedUp);
-              }
-            }
-          }
-
-          //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
-          if (i<program.numberOfCuts) {
-            logService.consoleLog('Calculating pin');
-            var pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-            if (program.cutWidth > program.sawWidth) {
-              addMovement(pinSteps, 'Make subcut 1/'+cutsRoundedUp);
-            }
-            else if (program.cutWidth === program.sawWidth) {
-              addMovement(pinSteps, 'Make the cut');
-            }
-
-          }
-          if (i=== program.numberOfCuts){
-            logService.consoleLog('i === numberofcuts');
-            addToLog('Done calculating movements');
-            logService.consoleLog('$scope.movements:');
-            logService.consoleLog($scope.movements);
-            if (callback) callback();
-            setButtons({
-              'showCalcButton': false,
-              'readyForData': true
-            })
-          }
-        }
-      }
     }
   };
+
+  function cutsAndPins() {
+    //do this for number of cuts
+    for (let i = 1; i <= program.numberOfCuts; i++) {
+      logService.consoleLog('let i ='+i);
+
+      //how many subcuts do we need for this cut to complete
+      const subCuts = program.cutWidth / program.sawWidth;
+      const cutsRoundedUp = Math.ceil(subCuts);
+      //if cut width is wider than saw width, calculate subcuts (multiple subcuts needed to complete one cut)
+      if (program.cutWidth > program.sawWidth){
+        calculateSubCuts(subCuts, cutsRoundedUp);
+      }
+
+      //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
+      if (i<program.numberOfCuts) {
+        logService.consoleLog('Calculating pin');
+        const pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+        if (program.cutWidth > program.sawWidth) {
+          addMovement(pinSteps, 'Make subcut 1/'+cutsRoundedUp);
+        }
+        else if (program.cutWidth === program.sawWidth) {
+          addMovement(pinSteps, 'Make the cut');
+        }
+      }
+      if (i=== program.numberOfCuts){
+        logService.consoleLog('i === numberofcuts');
+        addToLog('Done calculating movements');
+        logService.consoleLog('$scope.movements:');
+        logService.consoleLog($scope.movements);
+      }
+    }
+  }
+
+  function calculateSubCuts(subCuts, cutsRoundedUp) {
+
+
+    // calculate remaining subcut steps, start at 2 because first subcut is already added after moving to past pin
+    for (var j=2; j<= cutsRoundedUp; j++){
+      logService.consoleLog('Var j'+j);
+      if (j<cutsRoundedUp){
+        var stepsPerSawWidth = program.sawWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+        addMovement(stepsPerSawWidth, 'Make subcut '+j+'/'+cutsRoundedUp)
+      }
+
+      //calculate remaining mm & steps, based on number of subcuts already taken
+      else if (j===cutsRoundedUp) {
+        var remainingMM = program.cutWidth-((j-1)*program.sawWidth);
+        logService.consoleLog('remaining mm: '+remainingMM);
+        var remainingSteps = remainingMM / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+        addMovement(remainingSteps, 'Make subcut '+j+'/'+cutsRoundedUp);
+      }
+    }
+  }
+
 
   //
   //SECTION: send settings before homing, test and makeMovement logic
@@ -289,37 +262,11 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   //TODO refactor sendwithRetry, sendSettings, etc to sendAndReceiveService
 
-  // self.sendWithRetry = $async(function* (str) {
-  //   try {
-  //     let res;
-  //     for (let i = 0; i < 5; i++) {
-  //       console.log('try: '+i+', command: '+str);
-  //       res = yield sendAndReceiveService.writeAsync(str);
-  //       console.log('res in sendWithretry: '+res);
-  //       if (i === 4)
-  //         return new Promise((resolve, reject) => {
-  //           reject('exceeded num of tries');
-  //         });
-  //       else if (res === 'OK')
-  //         return new Promise((resolve, reject) => {
-  //           console.log('resolve value: '+res);
-  //           resolve('resolve value: '+res);
-  //         });
-  //     }
-  //   }
-  //   catch (err) {
-  //     return new Promise((resolve, reject) => {
-  //       reject(err);
-  //     })
-  //   }
-  // });
-
-
   //user clicks button front end, sendSettingsData() called
   $scope.sendSettingsData = $async(function* () {
     try {
       if (statusService.getEmergency() === false) {
-        if (statusService.getSending() === false){
+        if (statusService.getSending() === false && shareSettings.checkSettings()){
           setButtons({'showSpinner':true,'showEmergency':true, 'readyForData':false, 'showProgress': true});
           statusService.setSending(true);
           settingsDone = false;
@@ -344,12 +291,11 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       addToLog('Error: '+err, true);
       addToLog('Cancelling current tasks');
       emergencyService.on();
-      // emergencyService.off();
     }
   });
 
   function updateProgress(res) {
-    //  <w1>-9999;90#
+    // Example: <w1>-9999;90#
     if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
       $scope.progress = res.slice(res.search(';')+1, res.search('#'));
       console.log('progress: '+$scope.progress);
@@ -562,20 +508,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
         modal.show();
       })
   };
-  //
-  // $scope.show = null;
-  //
-  // $scope.showAnswer = function(obj) {
-  //   $scope.show = $scope.show === obj ? null : obj;
-  // };
-  //
-  // $scope.QAList = [];
-  // for (var i=1; i<11; i++) {
-  //   $scope.QAList.push({
-  //     question: 'Question '+i,
-  //     answer: 'Lorem ipsum'
-  //   })
-  // }
 
   $scope.showFullLog = function () {
     // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
@@ -585,29 +517,4 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
         modal.show();
       })
   };
-  //
-  // $scope.emailFullLog = function () {
-  //   logModalService.emailFullLog();
-  // } ;
-  //
-  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-  //
-  // $scope.fullLogPage = 0;
-  //
-  // $scope.getFullLogExtract = function(start, end) {
-  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
-  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-  // };
-  //
-  // $scope.previousFullLogPage = function () {
-  //   logService.consoleLog('prevFullLogPage');
-  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-  //   $scope.fullLogPage -= 1;
-  // };
-  //
-  // $scope.nextFullLogPage = function () {
-  //   logService.consoleLog('nextFullLogPage');
-  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-  //   $scope.fullLogPage += 1;
-  // };
 }

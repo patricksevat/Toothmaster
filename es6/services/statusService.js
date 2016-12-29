@@ -22,6 +22,7 @@ export default function statusService(bugout) {
   }
 
   function getEmergency() {
+    //TODO add popup when emergency is on
     return statusService.emergency
   }
 

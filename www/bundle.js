@@ -8281,8 +8281,8 @@
 	angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', 'ngTouch', _ngAsync2.default.name]).service('bugout', function () {
 	  var bugout = new debugout();
 	  this.bugout = bugout;
-	}).service('shareSettings', [_shareSettingsService2.default]).service('shareProgram', ['bugout', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.35');
+	}).service('shareSettings', ['$ionicPopup', 'logService', '$state', _shareSettingsService2.default]).service('shareProgram', ['bugout', '$ionicPopup', '$state', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
+	  bugout.bugout.log('version 0.9.10.57');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8797,27 +8797,36 @@
 	
 	  //On run program button, make sure that program and settings are filled in correctly
 	  $scope.runProgram = function () {
-	    if ($scope.currentProgram.sawWidth > $scope.currentProgram.cutWidth) {
-	      $ionicPopup.alert({
-	        title: 'Saw width cannot be wider than cut width',
-	        template: 'Please make sure that your saw width and cut width are entered correctly'
-	      });
-	    } else if ($scope.currentProgram.numberOfCuts % 1 !== 0) {
-	      $ionicPopup.alert({
-	        title: 'Number of cuts cannot be a floating point',
-	        template: 'Please make sure that the number of cuts is a whole number. "2" is correct, "2.2" is incorrect.'
-	      });
-	    } else if ($scope.currentProgram.sawWidth > 0 && $scope.currentProgram.cutWidth > 0 && $scope.currentProgram.pinWidth > 0 && $scope.currentProgram.numberOfCuts > 0 && $scope.currentProgram.startPosition >= 0 && $scope.checkSettings()) {
+	    // if ($scope.currentProgram.sawWidth > $scope.currentProgram.cutWidth){
+	    //   $ionicPopup.alert(
+	    //     {
+	    //       title: 'Saw width cannot be wider than cut width',
+	    //       template: 'Please make sure that your saw width and cut width are entered correctly'
+	    //     }
+	    //   )
+	    // }
+	    // else if ($scope.currentProgram.numberOfCuts % 1 !== 0) {
+	    //   $ionicPopup.alert(
+	    //     {
+	    //       title: 'Number of cuts cannot be a floating point',
+	    //       template: 'Please make sure that the number of cuts is a whole number. "2" is correct, "2.2" is incorrect.'
+	    //     }
+	    //   )
+	    // }
+	    shareProgram.setObj($scope.currentProgram);
+	    if (shareProgram.checkProgram() && shareSettings.checkSettings()) {
 	      logService.consoleLog('all fields filled in');
-	      shareProgram.setObj($scope.currentProgram);
 	      window.localStorage['lastUsedProgram'] = JSON.stringify($scope.currentProgram);
 	      $scope.confirmProgram();
-	    } else {
-	      $ionicPopup.alert({
-	        title: 'Not all fields are filled in',
-	        template: 'Please fill in all Program fields before running the program'
-	      });
 	    }
+	    // else {
+	    //   $ionicPopup.alert(
+	    //     {
+	    //       title: 'Not all fields are filled in',
+	    //       template: 'Please fill in all Program fields before running the program'
+	    //     }
+	    //   )
+	    // }
 	  };
 	
 	  $scope.confirmProgram = function () {
@@ -8836,78 +8845,6 @@
 	      }]
 	    });
 	  };
-	
-	  $scope.settings = shareSettings.getObj();
-	
-	  $scope.checkSettings = function () {
-	    $scope.settings = shareSettings.getObj();
-	    logService.consoleLog($scope.settings);
-	    if ($scope.settings === undefined) {
-	      logService.consoleLog('settings are not filled in correctly');
-	      $ionicPopup.alert({
-	        title: 'Please make sure your settings are filled in correctly',
-	        template: 'Use the buttons to go to settings',
-	        buttons: [{
-	          text: 'Edit settings',
-	          type: 'button-calm',
-	          onTap: function onTap() {
-	            $state.go('app.settings');
-	          }
-	        }]
-	      });
-	      return false;
-	    }
-	    //Pass the check without encoder enabled
-	    else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.stepMotorNum !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === false) {
-	        logService.consoleLog('checkSettings passed');
-	        return true;
-	      }
-	      //  Pass the check with encoder enabled
-	      else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null && $scope.settings.stepMotorNum !== null && $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === true && $scope.settings.encoder.stepsPerRPM !== 0 && $scope.settings.encoder.stepsToMiss > 0) {
-	          logService.consoleLog('checkSettings passed');
-	          return true;
-	        } else {
-	          //TODO build a nicer warning template, with css style if null
-	          logService.consoleLog('settings are not filled in correctly');
-	          var templateText = '<p>Stepmotor: ' + $scope.settings.stepMotorNum + '</p>' + '<p>Maximum frequency: ' + $scope.settings.maxFreq + '</p>' + '<p>Step motor dipswitch: ' + $scope.settings.dipswitch + '</p>' + '<p>Spindle advancement: ' + $scope.settings.spindleAdvancement + '</p>' + '<p>Time to maximum frequency: ' + $scope.settings.time + '</p>' + '<p>Encoder enabled: ' + $scope.settings.encoder.enable + '</p>';
-	          if ($scope.settings.encoder.enable) {
-	            templateText += '<p>Encoder steps per RPM: ' + $scope.settings.encoder.stepsPerRPM + '</p>' + '<p>Max allowable missed steps: ' + $scope.settings.encoder.stepsToMiss + '</p>' + '<p>Encoder directtion: ' + $scope.settings.encoder.direction + '</p>';
-	          }
-	          $ionicPopup.alert({
-	            title: 'Please make sure your settings are filled in correctly',
-	            template: templateText,
-	            buttons: [{
-	              text: 'Edit settings',
-	              type: 'button-calm',
-	              onTap: function onTap() {
-	                $state.go('app.settings');
-	              }
-	            }]
-	          });
-	          return false;
-	        }
-	  };
-	
-	  function createWrongSettingsHTML(settingsObj) {
-	    for (var setting in settingsObj) {
-	      if (settingsObj.hasOwnProperty(setting)) {}
-	    }
-	
-	    var humanReadable = {
-	      stepMotorNum: 'Stepmotor',
-	      maxFreq: 'Maximum frequency',
-	      dipswitch: 'Stepmotor dipswitch',
-	      spindleAdvancement: 'Spindle advancement',
-	      time: 'Time to maximum frequency',
-	      encoder: {
-	        enable: 'Encoder enabled',
-	        stepsPerRPM: 'Encoder steps per RPM',
-	        stepsToMiss: 'Max allowable missed steps',
-	        direction: 'Encoder direction'
-	      }
-	    };
-	    if (value != null) return value;else return '<span style="color: red">' + value + '</span>';
-	  }
 	};
 
 /***/ },
@@ -8930,13 +8867,18 @@
 	    homingStopswitch: false
 	  };
 	
+	  //
 	  //On leaving warn if settings are not saved
+	  //
 	  $scope.settingsChanged = false;
 	  $scope.skipCheck = false;
 	
+	  //settingsHaveChanged is called when user changes an input element in html
 	  $scope.settingsHaveChanged = function () {
 	    $scope.settingsChanged = true;
 	    console.log('settingsChanged: ' + $scope.settingsChanged);
+	    console.log('settings: ');
+	    console.log($scope.settings);
 	  };
 	
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
@@ -8954,7 +8896,7 @@
 	    }
 	
 	    //  Make sure all regular settings are filled in correctly
-	    else if ($scope.settings.stepMotorNum == null || $scope.settings.maxFreq == null || $scope.settings.dipswitch == null || $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
+	    else if ($scope.settings.stepMotorNum == null || $scope.settings.maxFreq == null || $scope.settings.dipswitch == null || $scope.settings.spindleAdvancement == null || $scope.settings.time == null) {
 	        $scope.showAlertSettings();
 	      }
 	
@@ -8966,12 +8908,12 @@
 	        //  Save settings as JSON to localStorage
 	        else {
 	            $scope.settingsChanged = false;
+	            $scope.skipCheck = true;
 	
 	            var settingsJSON = JSON.stringify($scope.settings);
 	            logService.consoleLog(settingsJSON);
 	            window.localStorage['settings'] = settingsJSON;
 	
-	            //call shareSettings service so that settings can be used in programCtrl & runBluetoothCtrl
 	            shareSettings.setObj($scope.settings);
 	            $scope.showAlertSaved();
 	          }
@@ -8983,8 +8925,6 @@
 	      $scope.settings = JSON.parse(window.localStorage['settings']);
 	    }
 	  };
-	
-	  // $scope.loadSettings();
 	
 	  //Load settings on enter
 	  $scope.$on('$ionicView.afterEnter', function () {
@@ -8999,8 +8939,6 @@
 	  //
 	
 	  $scope.showAlertUnsavedChanges = function (toState) {
-	    console.log('toState in alert unsaved changes');
-	    console.log(toState);
 	    $ionicPopup.alert({
 	      title: 'You have unsaved changes',
 	      template: 'Do you want to save your changes before leaving?',
@@ -9008,8 +8946,6 @@
 	        text: 'Yes',
 	        type: 'button-positive',
 	        onTap: function onTap() {
-	          console.log('toState in alert unsaved changes onTap');
-	          console.log(toState);
 	          $scope.saveSettings();
 	          $state.go(toState.name);
 	        }
@@ -9029,7 +8965,7 @@
 	  $scope.showAlertMaxFreq = function () {
 	    $ionicPopup.alert({
 	      title: 'Maximum frequency invalid',
-	      template: 'Please make sure that maximum frequency is set to 1000 or lower'
+	      template: 'Please make sure that maximum frequency is set to 20.000 or lower'
 	    });
 	  };
 	
@@ -9059,8 +8995,6 @@
 	
 	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, logModalService, modalService, $async, errorService) {
 	
-	  var self = this;
-	
 	  $scope.bluetoothLog = logService.getLog();
 	  $scope.bluetoothEnabled = null;
 	  $scope.isConnected = null;
@@ -9068,7 +9002,6 @@
 	  //TODO retrieve variables where needed
 	  var sending = statusService.getSending();
 	  var program = shareProgram.getObj();
-	  var emergency = statusService.getEmergency();
 	
 	  $scope.progress = 0;
 	  $scope.settings = shareSettings.getObj();
@@ -9152,12 +9085,13 @@
 	    sendAndReceiveService.unsubscribe();
 	  });
 	
+	  //TODO check this emergency sequence
 	  $scope.$on('$ionicView.leave', function () {
 	    logService.consoleLog('ionicView.leave called');
 	    if (statusService.getSending() === true) {
 	      addToLog('Cancelling current tasks');
 	      emergencyService.on(function () {
-	        emergencyService.off();
+	        emergencyService.reset();
 	      });
 	    } else {
 	      sendAndReceiveService.clearBuffer();
@@ -9200,13 +9134,11 @@
 	  //
 	
 	  $rootScope.$on('emergencyOn', function () {
-	    emergency = true;
 	    addToLog('Emergency is on');
 	  });
 	
 	  $rootScope.$on('emergencyOff', function () {
 	    statusService.setSending(false);
-	    emergency = false;
 	    $scope.movements = [];
 	    $scope.movementsNum = 0;
 	    done = true;
@@ -9239,129 +9171,82 @@
 	  //calculate movement sequence
 	  $scope.calcSteps = function () {
 	    program = shareProgram.getObj();
+	    console.log('program in calcSteps:');
+	    console.log(program);
 	    $scope.settings = shareSettings.getObj();
 	    $scope.movements = [];
 	    //call function to calculate steps for cuts, subcuts and pins, log $scope.movements, callback to inform user of movements
-	    if (program.sawWidth === undefined || program.cutWidth === undefined || program.pinWidth === undefined || program.numberOfCuts === undefined) {
-	      $ionicPopup.alert({
-	        title: 'Please fill in your Program before continuing',
-	        buttons: [{
-	          text: 'Go to program',
-	          type: 'button-calm',
-	          onTap: function onTap() {
-	            $state.go('app.program');
-	          }
-	        }]
+	
+	    if (shareProgram.checkProgram()) {
+	      cutsAndPins();
+	      logService.consoleLog('Movements to take:');
+	      $scope.movements.map(function (item, index) {
+	        logService.consoleLog('Movement ' + index + ':' + ' steps' + item.steps + ', description: ' + item.description);
 	      });
-	    } else if (program.sawWidth > program.cutWidth) {
-	      $ionicPopup.alert({
-	        title: 'Your saw width cannot be wider than your cut width',
-	        template: 'Please adjust your program',
-	        buttons: [{
-	          text: 'Go to program',
-	          type: 'button-positive',
-	          onTap: function onTap() {
-	            $state.go('app.program');
-	          }
-	        }]
-	      });
-	    } else {
-	      var cutsAndPins = function cutsAndPins(callback) {
-	        //do this for number of cuts
-	        for (var i = 1; i <= program.numberOfCuts; i++) {
-	          logService.consoleLog('var i =' + i);
-	
-	          //if cut width is wider than saw width, calculate subcuts (multiple subcuts needed to complete one cut)
-	          if (program.cutWidth > program.sawWidth) {
-	
-	            //how many subcuts do we need for this cut to complete
-	            var subCuts = program.cutWidth / program.sawWidth;
-	            var cutsRoundedUp = Math.ceil(subCuts);
-	
-	            // calculate remaining subcut steps, start at 2 because first subcut is already added after moving to past pin
-	            for (var j = 2; j <= cutsRoundedUp; j++) {
-	              logService.consoleLog('Var j' + j);
-	              if (j < cutsRoundedUp) {
-	                var stepsPerSawWidth = program.sawWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-	                addMovement(stepsPerSawWidth, 'Make subcut ' + j + '/' + cutsRoundedUp);
-	              }
-	
-	              //calculate remaining mm & steps, based on number of subcuts already taken
-	              else if (j === cutsRoundedUp) {
-	                  var remainingMM = program.cutWidth - (j - 1) * program.sawWidth;
-	                  logService.consoleLog('remaining mm: ' + remainingMM);
-	                  var remainingSteps = remainingMM / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-	                  addMovement(remainingSteps, 'Make subcut ' + j + '/' + cutsRoundedUp);
-	                }
-	            }
-	          }
-	
-	          //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
-	          if (i < program.numberOfCuts) {
-	            logService.consoleLog('Calculating pin');
-	            var pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-	            if (program.cutWidth > program.sawWidth) {
-	              addMovement(pinSteps, 'Make subcut 1/' + cutsRoundedUp);
-	            } else if (program.cutWidth === program.sawWidth) {
-	              addMovement(pinSteps, 'Make the cut');
-	            }
-	          }
-	          if (i === program.numberOfCuts) {
-	            logService.consoleLog('i === numberofcuts');
-	            addToLog('Done calculating movements');
-	            logService.consoleLog('$scope.movements:');
-	            logService.consoleLog($scope.movements);
-	            if (callback) callback();
-	            setButtons({
-	              'showCalcButton': false,
-	              'readyForData': true
-	            });
-	          }
-	        }
-	      };
-	
-	      cutsAndPins(function () {
-	        logService.consoleLog('Movements to take:');
-	        var count = 1;
-	        $scope.movements.forEach(function (item) {
-	          logService.consoleLog('Movement ' + count + ':' + ' steps' + item.steps + ', description: ' + item.description);
-	          count += 1;
-	        });
+	      setButtons({
+	        'showCalcButton': false,
+	        'readyForData': true
 	      });
 	    }
 	  };
+	
+	  function cutsAndPins() {
+	    //do this for number of cuts
+	    for (var i = 1; i <= program.numberOfCuts; i++) {
+	      logService.consoleLog('let i =' + i);
+	
+	      //how many subcuts do we need for this cut to complete
+	      var subCuts = program.cutWidth / program.sawWidth;
+	      var cutsRoundedUp = Math.ceil(subCuts);
+	      //if cut width is wider than saw width, calculate subcuts (multiple subcuts needed to complete one cut)
+	      if (program.cutWidth > program.sawWidth) {
+	        calculateSubCuts(subCuts, cutsRoundedUp);
+	      }
+	
+	      //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
+	      if (i < program.numberOfCuts) {
+	        logService.consoleLog('Calculating pin');
+	        var pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+	        if (program.cutWidth > program.sawWidth) {
+	          addMovement(pinSteps, 'Make subcut 1/' + cutsRoundedUp);
+	        } else if (program.cutWidth === program.sawWidth) {
+	          addMovement(pinSteps, 'Make the cut');
+	        }
+	      }
+	      if (i === program.numberOfCuts) {
+	        logService.consoleLog('i === numberofcuts');
+	        addToLog('Done calculating movements');
+	        logService.consoleLog('$scope.movements:');
+	        logService.consoleLog($scope.movements);
+	      }
+	    }
+	  }
+	
+	  function calculateSubCuts(subCuts, cutsRoundedUp) {
+	
+	    // calculate remaining subcut steps, start at 2 because first subcut is already added after moving to past pin
+	    for (var j = 2; j <= cutsRoundedUp; j++) {
+	      logService.consoleLog('Var j' + j);
+	      if (j < cutsRoundedUp) {
+	        var stepsPerSawWidth = program.sawWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+	        addMovement(stepsPerSawWidth, 'Make subcut ' + j + '/' + cutsRoundedUp);
+	      }
+	
+	      //calculate remaining mm & steps, based on number of subcuts already taken
+	      else if (j === cutsRoundedUp) {
+	          var remainingMM = program.cutWidth - (j - 1) * program.sawWidth;
+	          logService.consoleLog('remaining mm: ' + remainingMM);
+	          var remainingSteps = remainingMM / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+	          addMovement(remainingSteps, 'Make subcut ' + j + '/' + cutsRoundedUp);
+	        }
+	    }
+	  }
 	
 	  //
 	  //SECTION: send settings before homing, test and makeMovement logic
 	  //
 	
 	  //TODO refactor sendwithRetry, sendSettings, etc to sendAndReceiveService
-	
-	  // self.sendWithRetry = $async(function* (str) {
-	  //   try {
-	  //     let res;
-	  //     for (let i = 0; i < 5; i++) {
-	  //       console.log('try: '+i+', command: '+str);
-	  //       res = yield sendAndReceiveService.writeAsync(str);
-	  //       console.log('res in sendWithretry: '+res);
-	  //       if (i === 4)
-	  //         return new Promise((resolve, reject) => {
-	  //           reject('exceeded num of tries');
-	  //         });
-	  //       else if (res === 'OK')
-	  //         return new Promise((resolve, reject) => {
-	  //           console.log('resolve value: '+res);
-	  //           resolve('resolve value: '+res);
-	  //         });
-	  //     }
-	  //   }
-	  //   catch (err) {
-	  //     return new Promise((resolve, reject) => {
-	  //       reject(err);
-	  //     })
-	  //   }
-	  // });
-	
 	
 	  //user clicks button front end, sendSettingsData() called
 	  $scope.sendSettingsData = $async(regeneratorRuntime.mark(function _callee() {
@@ -9377,7 +9262,7 @@
 	              break;
 	            }
 	
-	            if (!(statusService.getSending() === false)) {
+	            if (!(statusService.getSending() === false && shareSettings.checkSettings())) {
 	              _context.next = 17;
 	              break;
 	            }
@@ -9431,7 +9316,6 @@
 	            addToLog('Error: ' + _context.t0, true);
 	            addToLog('Cancelling current tasks');
 	            emergencyService.on();
-	            // emergencyService.off();
 	
 	          case 27:
 	          case 'end':
@@ -9442,7 +9326,7 @@
 	  }));
 	
 	  function updateProgress(res) {
-	    //  <w1>-9999;90#
+	    // Example: <w1>-9999;90#
 	    if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
 	      $scope.progress = res.slice(res.search(';') + 1, res.search('#'));
 	      console.log('progress: ' + $scope.progress);
@@ -9678,20 +9562,6 @@
 	      modal.show();
 	    });
 	  };
-	  //
-	  // $scope.show = null;
-	  //
-	  // $scope.showAnswer = function(obj) {
-	  //   $scope.show = $scope.show === obj ? null : obj;
-	  // };
-	  //
-	  // $scope.QAList = [];
-	  // for (var i=1; i<11; i++) {
-	  //   $scope.QAList.push({
-	  //     question: 'Question '+i,
-	  //     answer: 'Lorem ipsum'
-	  //   })
-	  // }
 	
 	  $scope.showFullLog = function () {
 	    // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
@@ -9699,31 +9569,6 @@
 	      modal.show();
 	    });
 	  };
-	  //
-	  // $scope.emailFullLog = function () {
-	  //   logModalService.emailFullLog();
-	  // } ;
-	  //
-	  // $scope.fullLog = $scope.bluetoothLog.slice(0,19);
-	  //
-	  // $scope.fullLogPage = 0;
-	  //
-	  // $scope.getFullLogExtract = function(start, end) {
-	  //   logService.consoleLog('getFullLogExtract, start: '+start+' end: '+end);
-	  //   $scope.fullLog = $scope.bluetoothLog.slice(start, end)
-	  // };
-	  //
-	  // $scope.previousFullLogPage = function () {
-	  //   logService.consoleLog('prevFullLogPage');
-	  //   $scope.getFullLogExtract((($scope.fullLogPage-1)*10),(($scope.fullLogPage-1)*10)+9);
-	  //   $scope.fullLogPage -= 1;
-	  // };
-	  //
-	  // $scope.nextFullLogPage = function () {
-	  //   logService.consoleLog('nextFullLogPage');
-	  //   $scope.getFullLogExtract((($scope.fullLogPage+1)*10),(($scope.fullLogPage+1)*10)+9);
-	  //   $scope.fullLogPage += 1;
-	  // };
 	};
 
 /***/ },
@@ -9819,9 +9664,8 @@
 	  };
 	
 	  $scope.emergencyOff = function () {
-	    logService.consoleLog('emergencyOff called');
-	    // emergencyService.off();
-	    sendAndReceiveService.sendEmergency();
+	    logService.consoleLog('emergency reset called');
+	    emergencyService.reset();
 	  };
 	
 	  //
@@ -9898,7 +9742,7 @@
 	
 	            logService.consoleLog('homingStopswitch = ' + homingStopswitchInt);
 	
-	            if (!(statusService.getSending() === false)) {
+	            if (!(statusService.getSending() === false && shareSettings.checkStepMotor())) {
 	              _context2.next = 18;
 	              break;
 	            }
@@ -10022,14 +9866,16 @@
 	exports.default = function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, modalService, $async) {
 	
 	  $scope.$on('$ionicView.beforeLeave', function () {
+	    console.log('beforeLeave');
 	    sendAndReceiveService.unsubscribe();
 	  });
 	
 	  $scope.$on('$ionicView.afterEnter', function () {
+	    console.log('afterEnter');
 	    sendAndReceiveService.subscribe();
 	  });
 	
-	  //  TODO write check for stepmotornum = null!
+	  //  TODO on pause fucks up the sending procedure
 	
 	  //other vars/commands
 	  var commands;
@@ -10112,18 +9958,15 @@
 	  //This actually calls reset
 	  $scope.emergencyOff = function () {
 	    logService.consoleLog('emergencyReset called');
-	    // emergencyService.off();
 	    emergencyService.reset();
 	  };
-	
-	  $rootScope.$on("emergencyOff", function () {});
 	
 	  //
 	  //SECTION: stressTest && move X mm logic
 	  //
 	
 	  $scope.moveXMm = function () {
-	    if (statusService.getEmergency() === false && statusService.getSending() === false) {
+	    if (statusService.getEmergency() === false && statusService.getSending() === false && shareSettings.checkSettings()) {
 	      if ($scope.numberOfTests.mm === undefined) {
 	        $ionicPopup.alert({
 	          title: 'Please fill in "Move X mm"'
@@ -10155,7 +9998,7 @@
 	              break;
 	            }
 	
-	            if (!(statusService.getSending() === false)) {
+	            if (!(statusService.getSending() === false && shareSettings.checkSettings())) {
 	              _context.next = 16;
 	              break;
 	            }
@@ -10218,9 +10061,6 @@
 	    }, _callee, this, [[0, 21]]);
 	  }));
 	
-	  //TODO find out why <w>'s are sending when calling emergencyOff => added unsubscribe call to
-	  //TODO do not allow to start with undefined stepmotornum
-	
 	  function checkWydone(type) {
 	    console.log('checkWydone');
 	    var timer = $interval(function () {
@@ -10262,6 +10102,7 @@
 	    });
 	
 	    $rootScope.$on('emergencyOn', function () {
+	      bluetoothResponseListener();
 	      $interval.cancel(timer);
 	    });
 	  }
@@ -10296,8 +10137,10 @@
 	                }
 	              } else {
 	                if (statusService.getEmergency() === false) {
+	
 	                  statusService.setSending(true);
 	                  setButtons({ 'showProgress': true });
+	
 	                  if (testsSent < $scope.numberOfTests.tests) {
 	                    sendTestCommand();
 	                  } else allTestsSent();
@@ -10315,14 +10158,13 @@
 	    }, _callee2, this);
 	  }));
 	
-	  //TODO debug this
 	  var sendTestCommand = $async(regeneratorRuntime.mark(function _callee3() {
 	    var command;
 	    return regeneratorRuntime.wrap(function _callee3$(_context3) {
 	      while (1) {
 	        switch (_context3.prev = _context3.next) {
 	          case 0:
-	            command = '<q' + Math.floor(Math.random() * 5000 + 1000) + stepMotorNum + '>';
+	            command = '<q' + Math.floor(Math.random() * 500 + 100) + stepMotorNum + '>';
 	            _context3.prev = 1;
 	
 	            testsSent += 1;
@@ -10355,7 +10197,7 @@
 	      title: 'Tests completed',
 	      template: 'Completed ' + $scope.completedTest + ' out of ' + $scope.numberOfTests.tests
 	    });
-	    setButtons({ 'showEmergency': false, 'showSpinner': false, 'showStressTest': true, 'showVersionButton': true, 'showMoveXMm': true });
+	    setButtons({ 'showEmergency': false, 'showSpinner': false, 'showProgress': false, 'showStressTest': true, 'showVersionButton': true, 'showMoveXMm': true });
 	    $scope.testRunning = false;
 	    addToLog('Tests completed');
 	    logService.consoleLog('completed tests: ' + $scope.completedTest + ' number of tests: ' + $scope.numberOfTests.tests + ' sent tests: ' + testsSent);
@@ -10367,7 +10209,7 @@
 	    if (statusService.getEmergency() === false && statusService.getSending() === false) {
 	      sendAndReceiveService.write('<y8:y' + stepMotorNum + '>');
 	      sendAndReceiveService.write(softwareVersionCommand, function () {
-	        listen = $rootScope.$on('bluetoothResponse', function (event, res) {
+	        var listen = $rootScope.$on('bluetoothResponse', function (event, res) {
 	          if (res.search('<14:') > -1) {
 	            $ionicPopup.alert({
 	              title: 'Version number',
@@ -10844,6 +10686,7 @@
 	    $window.bluetoothSerial.unsubscribe(function () {
 	      logService.consoleLog('Succesfully unsubscribed');
 	      statusService.setSubscribed(false);
+	      emergencySubscribed = false;
 	    }, function () {
 	      logService.consoleLog('ERROR: could not unsubscribe');
 	    });
@@ -11199,8 +11042,11 @@
 	    });
 	  }
 	
+	  var emergencySubscribed = false;
+	
 	  function subscribeEmergency() {
 	    logService.consoleLog('subscribed emergency');
+	    emergencySubscribed = true;
 	    $window.bluetoothSerial.subscribe('>', function (data) {
 	      if (data.search('<8:y>') > -1) {
 	        $rootScope.$emit('emergencyReset1', data);
@@ -11216,7 +11062,6 @@
 	
 	    var emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
 	      bugout.bugout.log('res in emergencyListener: ' + res);
-	      //TODO allow reset button to be clicked
 	      buttonService.setValues({ showResetButton: true });
 	      emergencyResponse();
 	    });
@@ -11224,6 +11069,8 @@
 	  }
 	
 	  function sendResetEmergency() {
+	    if (!emergencySubscribed) subscribeEmergency();
+	
 	    stepMotorNum = shareSettings.getObj().stepMotorNum;
 	    var resetCommand2 = crcService.appendCRC('<f0' + stepMotorNum + '>');
 	    $window.bluetoothSerial.write(resetCommand2, function () {
@@ -11254,6 +11101,7 @@
 	      logService.consoleLog('Error: could not clear receive buffer');
 	    });
 	  }
+	
 	  //
 	  //  Helper functions
 	  //
@@ -11292,10 +11140,12 @@
 	/**
 	 * Created by Patrick on 26/11/2016.
 	 */
-	function shareSettings() {
+	function shareSettings($ionicPopup, logService, $state) {
 	  var shareSettings = this;
 	  shareSettings.getObj = getObj;
 	  shareSettings.setObj = setObj;
+	  shareSettings.checkSettings = checkSettings;
+	  shareSettings.checkStepMotor = checkStepMotor;
 	
 	  shareSettings.obj = {};
 	
@@ -11310,37 +11160,174 @@
 	  function getObj() {
 	    return shareSettings.obj.settings;
 	  }
+	
+	  function checkStepMotor() {
+	    if (shareSettings.obj.settings.stepMotorNum !== null) return true;else {
+	      stepMotorAlert();
+	      return false;
+	    }
+	  }
+	
+	  function checkSettings() {
+	    // shareSettings.obj = shareSettings.getObj();
+	    logService.consoleLog(shareSettings.obj.settings);
+	    if (shareSettings.obj.settings === undefined) {
+	      logService.consoleLog('settings are not filled in correctly');
+	      settingsAlert();
+	      return false;
+	    }
+	
+	    //Pass the check with encoder disabled
+	    else if (shareSettings.obj.settings.maxFreq !== null && shareSettings.obj.settings.dipswitch !== null && shareSettings.obj.settings.spindleAdvancement !== null && shareSettings.obj.settings.time !== null && shareSettings.obj.settings.stepMotorNum !== null && shareSettings.obj.settings.homingStopswitch !== null && shareSettings.obj.settings.encoder.enable === false) {
+	        logService.consoleLog('checkSettings passed');
+	        return true;
+	      }
+	      //  Pass the check with encoder enabled
+	      else if (shareSettings.obj.settings.maxFreq !== null && shareSettings.obj.settings.dipswitch !== null && shareSettings.obj.settings.stepMotorNum !== null && shareSettings.obj.settings.spindleAdvancement !== null && shareSettings.obj.settings.time !== null && shareSettings.obj.settings.homingStopswitch !== null && shareSettings.obj.settings.encoder.enable === true && shareSettings.obj.settings.encoder.stepsPerRPM !== 0 && shareSettings.obj.settings.encoder.stepsToMiss > 0) {
+	          logService.consoleLog('checkSettings passed');
+	          return true;
+	        } else {
+	          logService.consoleLog('settings are not filled in correctly');
+	          settingsAlert();
+	          return false;
+	        }
+	  }
+	
+	  //Helper functions
+	
+	  var humanReadable = {
+	    stepMotorNum: 'Stepmotor number',
+	    maxFreq: 'Maximum frequency',
+	    dipswitch: 'Stepmotor dipswitch',
+	    spindleAdvancement: 'Spindle advancement',
+	    time: 'Time to maximum frequency',
+	    homingStopswitch: 'Homing stopswitch inverted',
+	    direction: 'Reversed direction',
+	    encoder: {
+	      enable: 'Encoder enabled',
+	      stepsPerRPM: 'Encoder steps per RPM',
+	      stepsToMiss: 'Max allowable missed steps',
+	      direction: 'Encoder direction'
+	    }
+	  };
+	
+	  function createWrongSettingsTemplate(settingsObj) {
+	    var templateText = '';
+	    for (var setting in settingsObj) {
+	      if (settingsObj.hasOwnProperty(setting)) {
+	        //iterate over encoder object if encoder is enabled
+	        if (angular.isObject(settingsObj[setting])) {
+	          if (settingsObj.encoder.enable) {
+	            console.log('object setting, should be encoder: ');
+	            console.log(setting);
+	            for (var encoderSetting in settingsObj.encoder) {
+	              if (settingsObj.encoder.hasOwnProperty(encoderSetting)) {
+	                templateText += '<p>' + humanReadable.encoder[encoderSetting] + ': ' + validateValue(settingsObj.encoder[encoderSetting]) + '</p>';
+	              }
+	            }
+	          } else templateText += '<p>Encoder enabled: false</p>';
+	        } else {
+	          templateText += '<p>' + humanReadable[setting] + ': ' + validateValue(settingsObj[setting]) + '</p>';
+	        }
+	      }
+	    }
+	
+	    return templateText;
+	  }
+	
+	  function validateValue(value) {
+	    if (value != null) return value;else return '<span class="redText">' + value + '</span>';
+	  }
+	
+	  //
+	  //Alerts
+	  //
+	
+	  function stepMotorAlert() {
+	    $ionicPopup.alert({
+	      title: 'Please define your stepmotor number',
+	      template: 'Use the button to go to settings',
+	      buttons: [{
+	        text: 'Edit settings',
+	        type: 'button-calm',
+	        onTap: function onTap() {
+	          $state.go('app.settings');
+	        }
+	      }]
+	    });
+	  }
+	
+	  function settingsAlert(customTemplate) {
+	    $ionicPopup.alert({
+	      title: 'Please make sure your settings are filled in correctly',
+	      template: customTemplate ? createWrongSettingsTemplate(shareSettings.obj.settings) : 'Use the buttons to go to settings',
+	      buttons: [{
+	        text: 'Edit settings',
+	        type: 'button-calm',
+	        onTap: function onTap() {
+	          $state.go('app.settings');
+	        }
+	      }]
+	    });
+	  }
 	}
 
 /***/ },
 /* 313 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 	
-	exports.default = function (bugout) {
+	exports.default = function (bugout, $ionicPopup, $state) {
 	  var shareProgram = this;
 	  shareProgram.getObj = getObj;
 	  shareProgram.setObj = setObj;
+	  shareProgram.checkProgram = checkProgram;
 	
-	  shareProgram.obj = {
-	    "program": {}
-	  };
+	  shareProgram.program = {};
 	
 	  function getObj() {
-	    if (shareProgram.obj.program.startPosition === undefined) {
-	      bugout.bugout.log('shareProgram.obj.program is undefined, setting start position to nill');
-	      shareProgram.obj.program.startPosition = 0;
+	    if (shareProgram.program.startPosition === undefined) {
+	      bugout.bugout.log('shareProgram.program is undefined, setting start position to nill');
+	      shareProgram.program.startPosition = 0;
 	    }
-	    return shareProgram.obj.program;
+	    return shareProgram.program;
 	  }
 	
 	  function setObj(value) {
-	    shareProgram.obj.program = value;
+	    shareProgram.program = value;
+	  }
+	
+	  var redirect = [{
+	    text: 'Go to program',
+	    type: 'button-calm',
+	    onTap: function onTap() {
+	      $state.go('app.program');
+	    }
+	  }];
+	
+	  function checkProgram(redirectToProgram) {
+	    if (shareProgram.program.sawWidth === undefined || shareProgram.program.cutWidth === undefined || shareProgram.program.pinWidth === undefined || shareProgram.program.numberOfCuts === undefined) {
+	      $ionicPopup.alert({
+	        title: 'Please fill in your Program before continuing',
+	        buttons: redirectToProgram ? redirect : []
+	      });
+	    } else if (shareProgram.program.sawWidth > shareProgram.program.cutWidth) {
+	      $ionicPopup.alert({
+	        title: 'Your saw width cannot be wider than your cut width',
+	        template: 'Please adjust your program',
+	        buttons: redirectToProgram ? redirect : []
+	      });
+	    } else if (shareProgram.program.numberOfCuts % 1 !== 0) {
+	      $ionicPopup.alert({
+	        title: 'Number of cuts cannot be a floating point',
+	        template: 'Please make sure that the number of cuts is a whole number. "2" is correct, "2.2" is incorrect.'
+	      });
+	    } else if (shareProgram.program.sawWidth > 0 && shareProgram.program.cutWidth > 0 && shareProgram.program.pinWidth > 0 && shareProgram.program.numberOfCuts > 0 && shareProgram.program.startPosition >= 0) return true;
 	  }
 	};
 
@@ -11471,6 +11458,7 @@
 	    if (cb) cb();
 	  }
 	
+	  //TODO check why sometimes resetEmergency wont reset after disconnect button
 	  function reset() {
 	    $rootScope.$emit("resetEmergency");
 	  }
@@ -11720,6 +11708,8 @@
 	
 	  function disconnect() {
 	    var stepMotorNum = shareSettings.getObj().stepMotorNum;
+	    stepMotorNum = stepMotorNum === null ? '0' : stepMotorNum;
+	
 	    cancelConnectionAliveInterval();
 	    $cordovaBluetoothSerial.write('<y8:y' + stepMotorNum + '>').then(function () {
 	      $cordovaBluetoothSerial.disconnect(function () {
@@ -12089,6 +12079,7 @@
 	  }
 	
 	  function getEmergency() {
+	    //TODO add popup when emergency is on
 	    return statusService.emergency;
 	  }
 	

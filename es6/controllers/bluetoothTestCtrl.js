@@ -4,14 +4,16 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
                          modalService, $async) {
 
   $scope.$on('$ionicView.beforeLeave', function () {
+    console.log('beforeLeave');
     sendAndReceiveService.unsubscribe();
   });
 
   $scope.$on('$ionicView.afterEnter', function () {
+    console.log('afterEnter');
     sendAndReceiveService.subscribe();
   });
 
-//  TODO write check for stepmotornum = null!
+//  TODO on pause fucks up the sending procedure
 
 //other vars/commands
   var commands;
@@ -95,20 +97,15 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
   //This actually calls reset
   $scope.emergencyOff = function () {
     logService.consoleLog('emergencyReset called');
-    // emergencyService.off();
     emergencyService.reset();
   };
 
-  $rootScope.$on("emergencyOff", () => {
-
-  });
-  
   //
   //SECTION: stressTest && move X mm logic
   //
 
   $scope.moveXMm = function () {
-    if (statusService.getEmergency() === false && statusService.getSending() === false) {
+    if (statusService.getEmergency() === false && statusService.getSending() === false && shareSettings.checkSettings()) {
       if ($scope.numberOfTests.mm === undefined) {
         $ionicPopup.alert({
           title: 'Please fill in "Move X mm"'
@@ -131,7 +128,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
   const sendSettings = $async(function* (type) {
     try {
       if (statusService.getEmergency() === false) {
-        if (statusService.getSending() === false){
+        if (statusService.getSending() === false && shareSettings.checkSettings()){
           setButtons({'showSpinner':true,'showEmergency':true, 'readyForData':false, 'showProgress': type === 'moveXMm'});
           statusService.setSending(true);
 
@@ -158,9 +155,6 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       emergencyService.off();
     }
   });
-
-  //TODO find out why <w>'s are sending when calling emergencyOff => added unsubscribe call to
-  //TODO do not allow to start with undefined stepmotornum
 
   function checkWydone(type) {
     console.log('checkWydone');
@@ -205,6 +199,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     });
 
     $rootScope.$on('emergencyOn', () => {
+      bluetoothResponseListener();
       $interval.cancel(timer);
     })
   }
@@ -238,8 +233,10 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       }
       else {
         if (statusService.getEmergency() === false) {
+
           statusService.setSending(true);
           setButtons({'showProgress': true});
+
           if (testsSent < $scope.numberOfTests.tests) {
             sendTestCommand();
           }
@@ -252,10 +249,9 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       }
     }
   });
-
-  //TODO debug this
+  
   const sendTestCommand = $async(function* () {
-    const command = '<q'+Math.floor((Math.random()*5000)+1000) +stepMotorNum+'>';
+    const command = '<q'+Math.floor((Math.random()*500)+100) +stepMotorNum+'>';
     try {
       testsSent += 1;
       yield sendAndReceiveService.sendWithRetry(command);
@@ -273,7 +269,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       title: 'Tests completed',
       template: 'Completed '+$scope.completedTest+' out of '+$scope.numberOfTests.tests
     });
-    setButtons({'showEmergency':false, 'showSpinner': false, 'showStressTest':true, 'showVersionButton': true, 'showMoveXMm': true});
+    setButtons({'showEmergency':false, 'showSpinner': false, 'showProgress': false, 'showStressTest':true, 'showVersionButton': true, 'showMoveXMm': true});
     $scope.testRunning = false;
     addToLog('Tests completed');
     logService.consoleLog('completed tests: '+$scope.completedTest+' number of tests: '+$scope.numberOfTests.tests+' sent tests: '+testsSent);
@@ -285,7 +281,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     if (statusService.getEmergency() === false && statusService.getSending() === false){
       sendAndReceiveService.write('<y8:y'+stepMotorNum+'>');
       sendAndReceiveService.write(softwareVersionCommand, function () {
-        listen = $rootScope.$on('bluetoothResponse', function (event, res) {
+        let listen = $rootScope.$on('bluetoothResponse', function (event, res) {
           if (res.search('<14:') > -1) {
             $ionicPopup.alert({
               title: 'Version number',

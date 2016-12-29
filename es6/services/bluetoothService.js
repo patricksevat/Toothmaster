@@ -141,7 +141,9 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   }
 
   function disconnect() {
-    const stepMotorNum = shareSettings.getObj().stepMotorNum;
+    let stepMotorNum = shareSettings.getObj().stepMotorNum;
+    stepMotorNum = stepMotorNum === null ? '0' : stepMotorNum;
+    
     cancelConnectionAliveInterval();
     $cordovaBluetoothSerial.write('<y8:y'+stepMotorNum+'>').then(function () {
       $cordovaBluetoothSerial.disconnect(function () {
@@ -155,7 +157,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
       })
     });
   }
-  
+
   function openBluetoothSettings() {
     $cordovaBluetoothSerial.showBluetoothSettings();
   }

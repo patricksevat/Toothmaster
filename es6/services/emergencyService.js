@@ -47,6 +47,7 @@ export default function (buttonService, statusService, $rootScope, bugout) {
     if (cb) cb();
   }
   
+  //TODO check why sometimes resetEmergency wont reset after disconnect button
   function reset() {
     $rootScope.$emit("resetEmergency");
   }

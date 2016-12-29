@@ -43,8 +43,8 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
     const bugout = new debugout();
     this.bugout = bugout;
   })
-  .service('shareSettings', [shareSettingsService])
-  .service('shareProgram', ['bugout', shareProgramService])
+  .service('shareSettings', ['$ionicPopup', 'logService', '$state', shareSettingsService])
+  .service('shareProgram', ['bugout', '$ionicPopup', '$state', shareProgramService])
   .service('skipService', skipService)
   .service('buttonService', ['bugout', buttonService])
   .service('emergencyService',['buttonService', 'statusService', '$rootScope', 'bugout', emergencyService])
@@ -66,7 +66,7 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .directive('modals', [modalDirective])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-    bugout.bugout.log('version 0.9.10.35');
+    bugout.bugout.log('version 0.9.10.57');
     console.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){

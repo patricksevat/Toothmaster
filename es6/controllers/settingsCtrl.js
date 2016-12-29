@@ -8,13 +8,18 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
     homingStopswitch: false
   };
 
+  //
   //On leaving warn if settings are not saved
+  //
   $scope.settingsChanged = false;
   $scope.skipCheck = false;
 
+  //settingsHaveChanged is called when user changes an input element in html
   $scope.settingsHaveChanged = function () {
     $scope.settingsChanged = true;
     console.log('settingsChanged: '+$scope.settingsChanged);
+    console.log( 'settings: ');
+    console.log($scope.settings);
   };
 
   $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
@@ -32,8 +37,8 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
     }
 
     //  Make sure all regular settings are filled in correctly
-    else if ($scope.settings.stepMotorNum == null || $scope.settings.maxFreq == null || $scope.settings.dipswitch == null ||
-      $scope.settings.spindleAdvancement == null || $scope.settings.time == null || $scope.settings.stepMotorNum == null) {
+    else if ($scope.settings.stepMotorNum == null || $scope.settings.maxFreq == null 
+      || $scope.settings.dipswitch == null || $scope.settings.spindleAdvancement == null || $scope.settings.time == null) {
       $scope.showAlertSettings();
     }
 
@@ -45,12 +50,12 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
     //  Save settings as JSON to localStorage
     else {
       $scope.settingsChanged = false;
+      $scope.skipCheck = true;
 
       const settingsJSON = JSON.stringify($scope.settings);
       logService.consoleLog(settingsJSON);
       window.localStorage['settings'] = settingsJSON;
-
-      //call shareSettings service so that settings can be used in programCtrl & runBluetoothCtrl
+      
       shareSettings.setObj($scope.settings);
       $scope.showAlertSaved();
     }
@@ -67,8 +72,6 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
     }
   };
 
-  // $scope.loadSettings();
-
   //Load settings on enter
   $scope.$on('$ionicView.afterEnter', function () {
     logService.consoleLog('AFTER ENTER');
@@ -83,8 +86,6 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
   //
 
   $scope.showAlertUnsavedChanges = function(toState){
-    console.log('toState in alert unsaved changes');
-    console.log(toState);
     $ionicPopup.alert(
       {
         title: 'You have unsaved changes',
@@ -93,8 +94,6 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
           text: 'Yes',
           type: 'button-positive',
           onTap: () => {
-            console.log('toState in alert unsaved changes onTap');
-            console.log(toState);
             $scope.saveSettings();
             $state.go(toState.name);
           }
@@ -116,7 +115,7 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
     $ionicPopup.alert(
       {
         title: 'Maximum frequency invalid',
-        template: 'Please make sure that maximum frequency is set to 1000 or lower'
+        template: 'Please make sure that maximum frequency is set to 20.000 or lower'
       }
     )
   };

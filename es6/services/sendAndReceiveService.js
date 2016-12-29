@@ -58,7 +58,7 @@ module.exports = sendAndReceiveService;
       $window.bluetoothSerial.subscribe('#', function (receivedStr) {
         lastReceivedTime = Date.now();
         tempStr += receivedStr;
-        if (tempStr.search('<') > -1 && tempStr.search('>') > -1 && 
+        if (tempStr.search('<') > -1 && tempStr.search('>') > -1 &&
           tempStr.search(';') > -1 && tempStr.search('#') > -1) {
             bugout.bugout.log('\ntemp in subscribe: \n'+tempStr);
             $rootScope.$emit('response', tempStr);
@@ -79,6 +79,7 @@ module.exports = sendAndReceiveService;
       $window.bluetoothSerial.unsubscribe(function () {
         logService.consoleLog('Succesfully unsubscribed');
         statusService.setSubscribed(false);
+        emergencySubscribed = false;
       }, function () {
         logService.consoleLog('ERROR: could not unsubscribe');
       })
@@ -304,8 +305,11 @@ module.exports = sendAndReceiveService;
       });
     }
 
+    let emergencySubscribed = false;
+
     function subscribeEmergency() {
       logService.consoleLog('subscribed emergency');
+      emergencySubscribed = true;
       $window.bluetoothSerial.subscribe('>', function (data) {
         if (data.search('<8:y>') > -1) {
           $rootScope.$emit('emergencyReset1', data);
@@ -321,7 +325,6 @@ module.exports = sendAndReceiveService;
 
       let emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
         bugout.bugout.log('res in emergencyListener: '+res);
-        //TODO allow reset button to be clicked
         buttonService.setValues({showResetButton: true});
         emergencyResponse();
       });
@@ -329,6 +332,9 @@ module.exports = sendAndReceiveService;
     }
 
     function sendResetEmergency() {
+      if (!emergencySubscribed)
+        subscribeEmergency();
+
       stepMotorNum = shareSettings.getObj().stepMotorNum;
       const resetCommand2 = crcService.appendCRC('<f0'+stepMotorNum+'>');
       $window.bluetoothSerial.write(resetCommand2, function () {
@@ -359,6 +365,7 @@ module.exports = sendAndReceiveService;
         logService.consoleLog('Error: could not clear receive buffer');
       })
     }
+    
   //
   //  Helper functions
   //

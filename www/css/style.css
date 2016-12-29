@@ -102,6 +102,7 @@ label {
 .redText {
   color: white !important;
   background-color: rgba(255,0,0,0.7) !important;
+  width: inherit !important;
 }
 
 .output-button{

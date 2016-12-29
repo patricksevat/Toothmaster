@@ -185,7 +185,6 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
     else {
       $scope.modal2.hide();
     }
-
   };
 
   $scope.deleteUserProgram = function($index) {
@@ -231,38 +230,36 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
 
   //On run program button, make sure that program and settings are filled in correctly
   $scope.runProgram = function() {
-    if ($scope.currentProgram.sawWidth > $scope.currentProgram.cutWidth){
-      $ionicPopup.alert(
-        {
-          title: 'Saw width cannot be wider than cut width',
-          template: 'Please make sure that your saw width and cut width are entered correctly'
-        }
-      )
-    }
-    else if ($scope.currentProgram.numberOfCuts % 1 !== 0) {
-      $ionicPopup.alert(
-        {
-          title: 'Number of cuts cannot be a floating point',
-          template: 'Please make sure that the number of cuts is a whole number. "2" is correct, "2.2" is incorrect.'
-        }
-      )
-    }
-    else if ($scope.currentProgram.sawWidth > 0 && $scope.currentProgram.cutWidth > 0
-      && $scope.currentProgram.pinWidth > 0 && $scope.currentProgram.numberOfCuts > 0
-      && $scope.currentProgram.startPosition >= 0 && $scope.checkSettings()) {
+    // if ($scope.currentProgram.sawWidth > $scope.currentProgram.cutWidth){
+    //   $ionicPopup.alert(
+    //     {
+    //       title: 'Saw width cannot be wider than cut width',
+    //       template: 'Please make sure that your saw width and cut width are entered correctly'
+    //     }
+    //   )
+    // }
+    // else if ($scope.currentProgram.numberOfCuts % 1 !== 0) {
+    //   $ionicPopup.alert(
+    //     {
+    //       title: 'Number of cuts cannot be a floating point',
+    //       template: 'Please make sure that the number of cuts is a whole number. "2" is correct, "2.2" is incorrect.'
+    //     }
+    //   )
+    // }
+    shareProgram.setObj($scope.currentProgram);
+    if (shareProgram.checkProgram() && shareSettings.checkSettings()) {
       logService.consoleLog('all fields filled in');
-      shareProgram.setObj($scope.currentProgram);
       window.localStorage['lastUsedProgram'] = JSON.stringify($scope.currentProgram);
       $scope.confirmProgram();
     }
-    else {
-      $ionicPopup.alert(
-        {
-          title: 'Not all fields are filled in',
-          template: 'Please fill in all Program fields before running the program'
-        }
-      )
-    }
+    // else {
+    //   $ionicPopup.alert(
+    //     {
+    //       title: 'Not all fields are filled in',
+    //       template: 'Please fill in all Program fields before running the program'
+    //     }
+    //   )
+    // }
   };
 
   $scope.confirmProgram = function(){
@@ -285,91 +282,4 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
       }
     )
   };
-
-  $scope.settings = shareSettings.getObj();
-
-  $scope.checkSettings = function() {
-    $scope.settings = shareSettings.getObj();
-    logService.consoleLog($scope.settings);
-    if ($scope.settings === undefined){
-      logService.consoleLog('settings are not filled in correctly');
-      $ionicPopup.alert(
-        {
-          title: 'Please make sure your settings are filled in correctly',
-          template: 'Use the buttons to go to settings',
-          buttons: [{
-            text: 'Edit settings',
-            type: 'button-calm',
-            onTap: function() {
-              $state.go('app.settings');
-            }
-          }]
-        });
-      return false;
-    }
-    //Pass the check without encoder enabled
-    else if ($scope.settings.maxFreq !== null && $scope.settings.dipswitch !== null &&
-      $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.stepMotorNum !== null &&
-      $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === false) {
-      logService.consoleLog('checkSettings passed');
-      return true;
-    }
-    //  Pass the check with encoder enabled
-    else if ($scope.settings.maxFreq !== null  && $scope.settings.dipswitch !== null && $scope.settings.stepMotorNum !== null &&
-      $scope.settings.spindleAdvancement !== null && $scope.settings.time !== null && $scope.settings.homingStopswitch !== null && $scope.settings.encoder.enable === true &&
-      $scope.settings.encoder.stepsPerRPM !== 0 && $scope.settings.encoder.stepsToMiss > 0) {
-      logService.consoleLog('checkSettings passed');
-      return true;
-    }
-    else {
-      //TODO build a nicer warning template, with css style if null
-      logService.consoleLog('settings are not filled in correctly');
-      var templateText = '<p>Stepmotor: '+$scope.settings.stepMotorNum+'</p>'+'<p>Maximum frequency: '+$scope.settings.maxFreq+'</p>'+
-        '<p>Step motor dipswitch: '+$scope.settings.dipswitch+'</p>'+'<p>Spindle advancement: '+$scope.settings.spindleAdvancement+'</p>'+
-        '<p>Time to maximum frequency: '+$scope.settings.time+'</p>'+'<p>Encoder enabled: '+$scope.settings.encoder.enable+'</p>';
-      if ($scope.settings.encoder.enable) {
-        templateText += '<p>Encoder steps per RPM: '+$scope.settings.encoder.stepsPerRPM+'</p>'+'<p>Max allowable missed steps: '+$scope.settings.encoder.stepsToMiss+'</p>'+'<p>Encoder directtion: '+$scope.settings.encoder.direction+'</p>';
-      }
-      $ionicPopup.alert(
-        {
-          title: 'Please make sure your settings are filled in correctly',
-          template: templateText,
-          buttons: [{
-            text: 'Edit settings',
-            type: 'button-calm',
-            onTap: function() {
-              $state.go('app.settings');
-            }
-          }]
-        });
-      return false;
-    }
-  };
-
-  function createWrongSettingsHTML(settingsObj) {
-    for (let setting in settingsObj) {
-      if (settingsObj.hasOwnProperty(setting)) {
-
-      }
-    }
-
-    const humanReadable = {
-      stepMotorNum: 'Stepmotor',
-      maxFreq: 'Maximum frequency',
-      dipswitch: 'Stepmotor dipswitch',
-      spindleAdvancement: 'Spindle advancement',
-      time: 'Time to maximum frequency',
-      encoder: {
-        enable: 'Encoder enabled',
-        stepsPerRPM: 'Encoder steps per RPM',
-        stepsToMiss: 'Max allowable missed steps',
-        direction: 'Encoder direction'
-      }
-    }
-    if (value != null)
-      return value;
-    else
-      return '<span style="color: red">'+value+'</span>';
-
-  }
 }
