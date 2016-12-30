@@ -15,7 +15,7 @@ export default function ($scope, modalService, logService, logModalService) {
   $scope.QAList = [
     {
       question: 'Something went wrong! Can you help?',
-      answer: "We're very sorry to hear that. Please send us a bug report.<br>You can do that by going to \"Test Connection\" and clicking on \"Show full log\", then click on \"Email bug report\". Possibly a request to see your files will appear. Please click accept. We only use this to retrieve and attach the logfile. You email client shouwld now open and you only have to click send."
+      answer: "We're very sorry to hear that. Please send us a bug report. You can do that by going to \"Test Connection\" and clicking on \"Show full log\", then click on \"Email bug report\". Possibly a request to see your files will appear. Please click accept. We only use this to retrieve and attach the logfile. You email client shouwld now open and you only have to click send."
     },
     {
       question: 'How do I determine my step motor number?',
