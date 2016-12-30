@@ -8282,7 +8282,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', ['$ionicPopup', 'logService', '$state', _shareSettingsService2.default]).service('shareProgram', ['bugout', '$ionicPopup', '$state', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', 'statusService', 'emergencyService', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.71');
+	  bugout.bugout.log('version 0.9.10.74');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8858,6 +8858,7 @@
 	  //settingsHaveChanged is called when user changes an input element in html
 	  $scope.settingsHaveChanged = function () {
 	    $scope.settingsChanged = true;
+	    $scope.skipCheck = false;
 	    console.log('settingsChanged: ' + $scope.settingsChanged);
 	    console.log('settings: ');
 	    console.log($scope.settings);
@@ -9911,7 +9912,7 @@
 	  value: true
 	});
 	
-	exports.default = function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, modalService, $async, $state) {
+	exports.default = function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, modalService, $async, $state, bugout) {
 	
 	  $scope.$on('$ionicView.beforeLeave', function () {
 	    bugout.bugout.log('beforeLeave');
@@ -10632,8 +10633,14 @@
 	    $scope.show = $scope.show === obj ? null : obj;
 	  };
 	
-	  $scope.QAList = [];
-	  for (var i = 1; i < 11; i++) {
+	  $scope.QAList = [{
+	    question: 'Something went wrong! Can you help?',
+	    answer: "We're very sorry to hear that. Please send us a bug report.<br>You can do that by going to \"Test Connection\" and clicking on \"Show full log\", then click on \"Email bug report\". Possibly a request to see your files will appear. Please click accept. We only use this to retrieve and attach the logfile. You email client shouwld now open and you only have to click send."
+	  }, {
+	    question: 'How do I determine my step motor number?',
+	    answer: "Your stepmotor number depends on your stepmotor driver. Your stepmotor driver has multiple out ports. Check the port on your stepmotor driver and enter the number in Settings"
+	  }];
+	  for (var i = 3; i < 11; i++) {
 	    $scope.QAList.push({
 	      question: 'Question ' + i,
 	      answer: 'Lorem ipsum'

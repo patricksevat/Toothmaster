@@ -1,7 +1,7 @@
 export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings,
                          buttonService, emergencyService, bluetoothService, logService,
                          calculateVarsService, sendAndReceiveService, statusService,
-                         modalService, $async, $state) {
+                         modalService, $async, $state, bugout) {
 
   $scope.$on('$ionicView.beforeLeave', function () {
     bugout.bugout.log('beforeLeave');

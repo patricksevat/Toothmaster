@@ -222,6 +222,11 @@ iframe {
   float: right
 }
 
+/* modals.html */
+.QA-item {
+  white-space: normal;
+}
+
 /*errorHeader.html*/
 #error-header-wrapper {
   position: initial !important;

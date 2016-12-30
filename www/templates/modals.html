@@ -41,8 +41,13 @@
       </ion-header-bar>
       <ion-content class="padding">
         <ion-list>
-          <div ng-repeat="QA in QAList">
-            <ion-item on-tap="showAnswer(QA)" class="item-divider">
+          <div
+            class="QA-list"
+            ng-repeat="QA in QAList"
+          >
+            <ion-item
+              on-tap="showAnswer(QA)"
+              class="item-divider QA-item">
               {{QA.question}}
             </ion-item>
             <ion-item ng-show="show === QA" class="animate-show">
