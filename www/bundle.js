@@ -8902,10 +8902,11 @@
 	  };
 	
 	  $scope.loadSettings = function () {
-	    logService.consoleLog('settings: ' + window.localStorage['settings']);
 	    if (window.localStorage['settings'] === '' || window.localStorage['settings'] === undefined) {} else {
 	      $scope.settings = JSON.parse(window.localStorage['settings']);
 	    }
+	    logService.consoleLog('settings: ');
+	    logService.consoleLog($scope.settings);
 	  };
 	
 	  //Load settings on enter

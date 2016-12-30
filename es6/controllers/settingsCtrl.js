@@ -17,6 +17,7 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
   //settingsHaveChanged is called when user changes an input element in html
   $scope.settingsHaveChanged = function () {
     $scope.settingsChanged = true;
+    $scope.skipCheck = false;
     console.log('settingsChanged: '+$scope.settingsChanged);
     console.log( 'settings: ');
     console.log($scope.settings);
@@ -37,7 +38,7 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
     }
 
     //  Make sure all regular settings are filled in correctly
-    else if ($scope.settings.stepMotorNum == null || $scope.settings.maxFreq == null 
+    else if ($scope.settings.stepMotorNum == null || $scope.settings.maxFreq == null
       || $scope.settings.dipswitch == null || $scope.settings.spindleAdvancement == null || $scope.settings.time == null) {
       $scope.showAlertSettings();
     }
@@ -55,7 +56,7 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
       const settingsJSON = JSON.stringify($scope.settings);
       logService.consoleLog(settingsJSON);
       window.localStorage['settings'] = settingsJSON;
-      
+
       shareSettings.setObj($scope.settings);
       $scope.showAlertSaved();
     }
@@ -63,13 +64,14 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
   };
 
   $scope.loadSettings = function() {
-    logService.consoleLog('settings: '+window.localStorage['settings']);
     if (window.localStorage['settings'] === '' || window.localStorage['settings'] === undefined) {
 
     }
     else {
       $scope.settings = JSON.parse(window.localStorage['settings']);
     }
+    logService.consoleLog('settings: ');
+    logService.consoleLog($scope.settings);
   };
 
   //Load settings on enter
