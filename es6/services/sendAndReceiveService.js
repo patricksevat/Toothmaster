@@ -45,6 +45,7 @@ module.exports = sendAndReceiveService;
     let lastCommandTime;
     let lastReceivedTime;
     let subscribed = statusService.getSubscribed();
+    let emergencySubscribed = false;
 
     //method functions
     function subscribe() {
@@ -76,10 +77,10 @@ module.exports = sendAndReceiveService;
     }
 
     function unsubscribe() {
+      emergencySubscribed = false;
       $window.bluetoothSerial.unsubscribe(function () {
         logService.consoleLog('Succesfully unsubscribed');
         statusService.setSubscribed(false);
-        emergencySubscribed = false;
       }, function () {
         logService.consoleLog('ERROR: could not unsubscribe');
       })
@@ -305,8 +306,6 @@ module.exports = sendAndReceiveService;
       });
     }
 
-    let emergencySubscribed = false;
-
     function subscribeEmergency() {
       logService.consoleLog('subscribed emergency');
       emergencySubscribed = true;
@@ -321,7 +320,7 @@ module.exports = sendAndReceiveService;
     }
 
     function createResetListener1() {
-      //TODO add timeout to call sendResetEmergency when answer is too late
+      //TODO add timeout to call sendEmergency when answer is too late
 
       let emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
         bugout.bugout.log('res in emergencyListener: '+res);
@@ -332,8 +331,7 @@ module.exports = sendAndReceiveService;
     }
 
     function sendResetEmergency() {
-      if (!emergencySubscribed)
-        subscribeEmergency();
+      subscribeEmergency();
 
       stepMotorNum = shareSettings.getObj().stepMotorNum;
       const resetCommand2 = crcService.appendCRC('<f0'+stepMotorNum+'>');
@@ -379,6 +377,7 @@ module.exports = sendAndReceiveService;
     }
 
     function exceededMaximumNumberOfStepsToMiss(res) {
+      const settings = shareSettings.getObj();
       const splicedStr = res.slice(res.lastIndexOf('@'));
       const missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
       const maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : 'unknown';

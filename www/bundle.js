@@ -8282,7 +8282,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', ['$ionicPopup', 'logService', '$state', _shareSettingsService2.default]).service('shareProgram', ['bugout', '$ionicPopup', '$state', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', 'statusService', 'emergencyService', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.60');
+	  bugout.bugout.log('version 0.9.10.63');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -9066,14 +9066,16 @@
 	    logService.consoleLog('ionicView.leave called');
 	    if (statusService.getSending() === true) {
 	      addToLog('Cancelling current tasks');
-	      emergencyService.on(function () {
-	        emergencyService.reset();
-	      });
+	      emergencyService.on();
 	    } else {
 	      sendAndReceiveService.clearBuffer();
 	    }
 	    logService.setBulk($scope.bluetoothLog);
 	  });
+	
+	  function leaveWhileSendingWarning() {
+	    $ionicPopup.alert({});
+	  }
 	
 	  $scope.userDisconnect = function () {
 	    bluetoothService.disconnect();
@@ -9874,8 +9876,6 @@
 	    sendAndReceiveService.subscribe();
 	  });
 	
-	  //  TODO on pause fucks up the sending procedure
-	
 	  //other vars/commands
 	  var commands;
 	  $scope.settings = shareSettings.getObj();
@@ -9959,6 +9959,10 @@
 	    logService.consoleLog('emergencyReset called');
 	    emergencyService.reset();
 	  };
+	
+	  $rootScope.$on('connectionLost', function () {
+	    $scope.isConnected = false;
+	  });
 	
 	  //
 	  //SECTION: stressTest && move X mm logic
@@ -10073,7 +10077,6 @@
 	    });
 	
 	    var wydoneListener = $rootScope.$on('wydone', function (event, res) {
-	      statusService.setSending(false);
 	      $interval.cancel(timer);
 	      bluetoothResponseListener();
 	      wydoneListener();
@@ -10098,6 +10101,7 @@
 	    $ionicPopup.alert({
 	      title: 'Moved ' + $scope.numberOfTests.mm + ' mm'
 	    });
+	    statusService.setSending(false);
 	    setButtons({ 'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false, 'showProgress': false });
 	    $scope.progress = 0;
 	    calculateVarsService.getVars('test', function (obj) {
@@ -10672,6 +10676,7 @@
 	  var lastCommandTime = void 0;
 	  var lastReceivedTime = void 0;
 	  var subscribed = statusService.getSubscribed();
+	  var emergencySubscribed = false;
 	
 	  //method functions
 	  function subscribe() {
@@ -10702,10 +10707,10 @@
 	  }
 	
 	  function unsubscribe() {
+	    emergencySubscribed = false;
 	    $window.bluetoothSerial.unsubscribe(function () {
 	      logService.consoleLog('Succesfully unsubscribed');
 	      statusService.setSubscribed(false);
-	      emergencySubscribed = false;
 	    }, function () {
 	      logService.consoleLog('ERROR: could not unsubscribe');
 	    });
@@ -11061,8 +11066,6 @@
 	    });
 	  }
 	
-	  var emergencySubscribed = false;
-	
 	  function subscribeEmergency() {
 	    logService.consoleLog('subscribed emergency');
 	    emergencySubscribed = true;
@@ -11077,7 +11080,7 @@
 	  }
 	
 	  function createResetListener1() {
-	    //TODO add timeout to call sendResetEmergency when answer is too late
+	    //TODO add timeout to call sendEmergency when answer is too late
 	
 	    var emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
 	      bugout.bugout.log('res in emergencyListener: ' + res);
@@ -11088,7 +11091,7 @@
 	  }
 	
 	  function sendResetEmergency() {
-	    if (!emergencySubscribed) subscribeEmergency();
+	    subscribeEmergency();
 	
 	    stepMotorNum = shareSettings.getObj().stepMotorNum;
 	    var resetCommand2 = crcService.appendCRC('<f0' + stepMotorNum + '>');
@@ -11134,6 +11137,7 @@
 	  }
 	
 	  function exceededMaximumNumberOfStepsToMiss(res) {
+	    var settings = shareSettings.getObj();
 	    var splicedStr = res.slice(res.lastIndexOf('@'));
 	    var missedSteps = splicedStr.slice(2, splicedStr.indexOf(';'));
 	    var maxAllowedMiss = settings.encoder.stepsToMiss ? settings.encoder.stepsToMiss : 'unknown';

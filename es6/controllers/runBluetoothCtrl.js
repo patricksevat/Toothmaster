@@ -99,9 +99,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     logService.consoleLog('ionicView.leave called');
     if (statusService.getSending() === true ) {
       addToLog('Cancelling current tasks');
-      emergencyService.on(function () {
-        emergencyService.reset();
-      });
+      emergencyService.on();
     }
     else {
       sendAndReceiveService.clearBuffer();
@@ -109,6 +107,12 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     }
     logService.setBulk($scope.bluetoothLog);
   });
+
+  function leaveWhileSendingWarning() {
+    $ionicPopup.alert({
+
+    })
+  }
 
   $scope.userDisconnect = function () {
     bluetoothService.disconnect();
@@ -170,7 +174,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   $rootScope.$on('connectionLost', () => {
     $scope.isConnected = false;
   });
-  
+
   //
   //SECTION: functions to determine movement steps
   //

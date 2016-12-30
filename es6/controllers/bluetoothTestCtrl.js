@@ -13,8 +13,6 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     sendAndReceiveService.subscribe();
   });
 
-//  TODO on pause fucks up the sending procedure
-
 //other vars/commands
   var commands;
   $scope.settings = shareSettings.getObj();
@@ -100,6 +98,10 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     emergencyService.reset();
   };
 
+  $rootScope.$on('connectionLost', () => {
+    $scope.isConnected = false;
+  });
+
   //
   //SECTION: stressTest && move X mm logic
   //
@@ -169,7 +171,6 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     });
 
     let wydoneListener = $rootScope.$on('wydone', (event, res) => {
-      statusService.setSending(false);
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();
@@ -200,6 +201,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     $ionicPopup.alert({
       title: 'Moved '+$scope.numberOfTests.mm+' mm'
     });
+    statusService.setSending(false);
     setButtons({'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false, 'showProgress': false});
     $scope.progress = 0;
     calculateVarsService.getVars('test', function (obj) {
