@@ -169,6 +169,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     });
 
     let wydoneListener = $rootScope.$on('wydone', (event, res) => {
+      statusService.setSending(false);
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();

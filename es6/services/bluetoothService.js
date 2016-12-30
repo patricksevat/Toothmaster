@@ -186,6 +186,8 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
           $interval.cancel(connectionAlive);
           console.log('\nshould be null: connectionAlive: ');
           console.log(connectionAlive);
+          
+          //TODO check if emergencyOn when sending works correctly
           if (statusService.getSending() === true) {
             logService.addOne('Lost connecting while sending, turning on emergency', true);
             emergencyService.on();
