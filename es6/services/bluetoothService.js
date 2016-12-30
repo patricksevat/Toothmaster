@@ -1,5 +1,5 @@
 function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, shareSettings, buttonService,
-                          $rootScope, $interval, $async) {
+                          $rootScope, $interval, $async, statusService, emergencyService) {
   const self = this;
 
   //
@@ -143,7 +143,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   function disconnect() {
     let stepMotorNum = shareSettings.getObj().stepMotorNum;
     stepMotorNum = stepMotorNum === null ? '0' : stepMotorNum;
-    
+
     cancelConnectionAliveInterval();
     $cordovaBluetoothSerial.write('<y8:y'+stepMotorNum+'>').then(function () {
       $cordovaBluetoothSerial.disconnect(function () {
@@ -186,6 +186,10 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
           $interval.cancel(connectionAlive);
           console.log('\nshould be null: connectionAlive: ');
           console.log(connectionAlive);
+          if (statusService.getSending() === true) {
+            logService.addOne('Lost connecting while sending, turning on emergency', true);
+            emergencyService.on();
+          }
         }
       })
     }, 1000);

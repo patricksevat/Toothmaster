@@ -8281,7 +8281,7 @@
 	angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', 'ngTouch', _ngAsync2.default.name]).service('bugout', function () {
 	  var bugout = new debugout();
 	  this.bugout = bugout;
-	}).service('shareSettings', ['$ionicPopup', 'logService', '$state', _shareSettingsService2.default]).service('shareProgram', ['bugout', '$ionicPopup', '$state', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
+	}).service('shareSettings', ['$ionicPopup', 'logService', '$state', _shareSettingsService2.default]).service('shareProgram', ['bugout', '$ionicPopup', '$state', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', 'statusService', 'emergencyService', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
 	  bugout.bugout.log('version 0.9.10.59');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
@@ -11488,7 +11488,7 @@
 	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
-	function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, shareSettings, buttonService, $rootScope, $interval, $async) {
+	function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, shareSettings, buttonService, $rootScope, $interval, $async, statusService, emergencyService) {
 	  var self = this;
 	
 	  //
@@ -11764,6 +11764,10 @@
 	          $interval.cancel(connectionAlive);
 	          console.log('\nshould be null: connectionAlive: ');
 	          console.log(connectionAlive);
+	          if (statusService.getSending() === true) {
+	            logService.addOne('Lost connecting while sending, turning on emergency', true);
+	            emergencyService.on();
+	          }
 	        }
 	      });
 	    }, 1000);

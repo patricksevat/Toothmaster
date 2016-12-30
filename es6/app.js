@@ -49,7 +49,7 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .service('buttonService', ['bugout', buttonService])
   .service('emergencyService',['buttonService', 'statusService', '$rootScope', 'bugout', emergencyService])
   .service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings',
-    'buttonService', '$rootScope', '$interval', '$async', bluetoothService])
+    'buttonService', '$rootScope', '$interval', '$async', 'statusService', 'emergencyService', bluetoothService])
   .service('logService', ['bugout', 'errorService', logService])
   .service('calculateVarsService',['shareProgram', 'shareSettings', calculateVarsService])
   .service('logModalService', ['bugout', logModalService])
