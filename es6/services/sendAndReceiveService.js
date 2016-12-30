@@ -196,7 +196,7 @@ module.exports = sendAndReceiveService;
           //append string with cyclic redundancy check
           const strWithCrc = crcService.appendCRC(str);
           $window.bluetoothSerial.write(strWithCrc, function () {
-            bugout.bugout.log('sent: '+str);
+            bugout.bugout.log('sent: '+strWithCrc);
             lastCommandTime = Date.now();
             resolve();
           }, function () {
@@ -320,7 +320,14 @@ module.exports = sendAndReceiveService;
     }
 
     function createResetListener1() {
-      //TODO add timeout to call sendEmergency when answer is too late
+      let responded = false;
+      $timeout(() => {
+        if (!responded) {
+          sendEmergency();
+          emergencyResponse();
+        }
+      }, 1000);
+
 
       let emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
         bugout.bugout.log('res in emergencyListener: '+res);

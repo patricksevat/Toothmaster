@@ -21,6 +21,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   logService.consoleLog('settings:');
   logService.consoleLog(JSON.stringify($scope.settings));
+  let skipLeaveCheck = false;
 
   //settings commands
   let commands;
@@ -65,6 +66,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     });
     $scope.deviceName= bluetoothService.getDeviceName();
     $scope.buttons = buttonService.getValues();
+    skipLeaveCheck = false;
     if (statusService.getEmergency() === true) {
       logService.consoleLog('set resetbutton true');
       setButtons({'showResetButton': true});
@@ -89,28 +91,40 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     sendAndReceiveService.subscribe();
   });
 
-  $scope.$on('$ionicView.beforeLeave', function () {
+  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
     logService.consoleLog('BEFORE LEAVE');
-    sendAndReceiveService.unsubscribe();
+    if (statusService.getSending() === true && !skipLeaveCheck ) {
+      event.preventDefault();
+      leaveWhileSendingWarning(toState);
+    }
   });
 
   //TODO check this emergency sequence
   $scope.$on('$ionicView.leave',function () {
     logService.consoleLog('ionicView.leave called');
-    if (statusService.getSending() === true ) {
-      addToLog('Cancelling current tasks');
-      emergencyService.on();
-    }
-    else {
-      sendAndReceiveService.clearBuffer();
-
-    }
+    sendAndReceiveService.unsubscribe();
+    sendAndReceiveService.clearBuffer();
     logService.setBulk($scope.bluetoothLog);
   });
 
-  function leaveWhileSendingWarning() {
+  function leaveWhileSendingWarning(toState) {
     $ionicPopup.alert({
-
+      title: 'Your program is still running, are you sure?',
+      template: 'Leaving now will abort your program and turn on emergency',
+      buttons: [{
+        text: 'Cancel',
+        type: 'button-positive'
+      },{
+        text: 'Leave',
+        type: 'button-assertive',
+        onTap: function () {
+          skipLeaveCheck = true;
+          addToLog('Cancelling current tasks');
+          statusService.setSending(false);
+          emergencyService.on();
+          $state.go(toState);
+        }
+      }]
     })
   }
 
@@ -398,7 +412,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       addToLog('Error: '+err, true);
       addToLog('Cancelling current tasks');
       emergencyService.on();
-      emergencyService.off();
     }
   });
 

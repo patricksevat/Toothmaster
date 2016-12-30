@@ -66,9 +66,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     logService.consoleLog('leaveView in bluetoothConnectionCtrl fired');
     if (statusService.getSending() === true ) {
       addToLog('Cancelling current tasks');
-      emergencyService.on(function () {
-        emergencyService.off();
-      });
+      emergencyService.on();
     }
     else {
       sendAndReceiveService.clearBuffer();

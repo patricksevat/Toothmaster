@@ -7,6 +7,8 @@ export default function(bugout, $ionicPopup, $state) {
   shareProgram.program = {};
 
   function getObj() {
+    //This is needed for test when no program is selected yet.
+    //Start position is needed for initial settings commands
     if (shareProgram.program.startPosition === undefined) {
       bugout.bugout.log('shareProgram.program is undefined, setting start position to nill');
       shareProgram.program.startPosition = 0;

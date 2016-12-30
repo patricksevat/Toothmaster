@@ -75,7 +75,6 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     if (statusService.getSending() === true ) {
       addToLog('Cancelling current tasks');
       emergencyService.on();
-      emergencyService.off();
     }
     else {
       sendAndReceiveService.clearBuffer();
@@ -154,7 +153,6 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       addToLog('Error: '+err, true);
       addToLog('Cancelling current tasks');
       emergencyService.on();
-      emergencyService.off();
     }
   });
 

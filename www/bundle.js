@@ -8282,7 +8282,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', ['$ionicPopup', 'logService', '$state', _shareSettingsService2.default]).service('shareProgram', ['bugout', '$ionicPopup', '$state', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', 'statusService', 'emergencyService', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.63');
+	  bugout.bugout.log('version 0.9.10.69');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8989,6 +8989,7 @@
 	
 	  logService.consoleLog('settings:');
 	  logService.consoleLog(JSON.stringify($scope.settings));
+	  var skipLeaveCheck = false;
 	
 	  //settings commands
 	  var commands = void 0;
@@ -9033,6 +9034,7 @@
 	    });
 	    $scope.deviceName = bluetoothService.getDeviceName();
 	    $scope.buttons = buttonService.getValues();
+	    skipLeaveCheck = false;
 	    if (statusService.getEmergency() === true) {
 	      logService.consoleLog('set resetbutton true');
 	      setButtons({ 'showResetButton': true });
@@ -9056,25 +9058,41 @@
 	    sendAndReceiveService.subscribe();
 	  });
 	
-	  $scope.$on('$ionicView.beforeLeave', function () {
+	  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
 	    logService.consoleLog('BEFORE LEAVE');
-	    sendAndReceiveService.unsubscribe();
+	    if (statusService.getSending() === true && !skipLeaveCheck) {
+	      event.preventDefault();
+	      leaveWhileSendingWarning(toState);
+	    }
 	  });
 	
 	  //TODO check this emergency sequence
 	  $scope.$on('$ionicView.leave', function () {
 	    logService.consoleLog('ionicView.leave called');
-	    if (statusService.getSending() === true) {
-	      addToLog('Cancelling current tasks');
-	      emergencyService.on();
-	    } else {
-	      sendAndReceiveService.clearBuffer();
-	    }
+	    sendAndReceiveService.unsubscribe();
+	    sendAndReceiveService.clearBuffer();
 	    logService.setBulk($scope.bluetoothLog);
 	  });
 	
-	  function leaveWhileSendingWarning() {
-	    $ionicPopup.alert({});
+	  function leaveWhileSendingWarning(toState) {
+	    $ionicPopup.alert({
+	      title: 'Your program is still running, are you sure?',
+	      template: 'Leaving now will abort your program and turn on emergency',
+	      buttons: [{
+	        text: 'Cancel',
+	        type: 'button-positive'
+	      }, {
+	        text: 'Leave',
+	        type: 'button-assertive',
+	        onTap: function onTap() {
+	          skipLeaveCheck = true;
+	          addToLog('Cancelling current tasks');
+	          statusService.setSending(false);
+	          emergencyService.on();
+	          $state.go(toState);
+	        }
+	      }]
+	    });
 	  }
 	
 	  $scope.userDisconnect = function () {
@@ -9420,7 +9438,7 @@
 	            addToLog('Emergency on, will not continue with movement', true);
 	
 	          case 19:
-	            _context2.next = 27;
+	            _context2.next = 26;
 	            break;
 	
 	          case 21:
@@ -9430,9 +9448,8 @@
 	            addToLog('Error: ' + _context2.t0, true);
 	            addToLog('Cancelling current tasks');
 	            emergencyService.on();
-	            emergencyService.off();
 	
-	          case 27:
+	          case 26:
 	          case 'end':
 	            return _context2.stop();
 	        }
@@ -9640,9 +9657,7 @@
 	    logService.consoleLog('leaveView in bluetoothConnectionCtrl fired');
 	    if (statusService.getSending() === true) {
 	      addToLog('Cancelling current tasks');
-	      emergencyService.on(function () {
-	        emergencyService.off();
-	      });
+	      emergencyService.on();
 	    } else {
 	      sendAndReceiveService.clearBuffer();
 	    }
@@ -9938,7 +9953,6 @@
 	    if (statusService.getSending() === true) {
 	      addToLog('Cancelling current tasks');
 	      emergencyService.on();
-	      emergencyService.off();
 	    } else {
 	      sendAndReceiveService.clearBuffer();
 	    }
@@ -10044,7 +10058,7 @@
 	            addToLog('Emergency on, will not continue sending settings data');
 	
 	          case 19:
-	            _context.next = 27;
+	            _context.next = 26;
 	            break;
 	
 	          case 21:
@@ -10054,9 +10068,8 @@
 	            addToLog('Error: ' + _context.t0, true);
 	            addToLog('Cancelling current tasks');
 	            emergencyService.on();
-	            emergencyService.off();
 	
-	          case 27:
+	          case 26:
 	          case 'end':
 	            return _context.stop();
 	        }
@@ -10955,17 +10968,19 @@
 	  function write(str) {
 	    return new Promise(function (resolve, reject) {
 	      if (statusService.getEmergency() === false) {
+	        (function () {
 	
-	        //append string with cyclic redundancy check
-	        var strWithCrc = crcService.appendCRC(str);
-	        $window.bluetoothSerial.write(strWithCrc, function () {
-	          bugout.bugout.log('sent: ' + str);
-	          lastCommandTime = Date.now();
-	          resolve();
-	        }, function () {
-	          bugout.bugout.log('ERROR: could not send command ' + str);
-	          reject('Could not send command');
-	        });
+	          //append string with cyclic redundancy check
+	          var strWithCrc = crcService.appendCRC(str);
+	          $window.bluetoothSerial.write(strWithCrc, function () {
+	            bugout.bugout.log('sent: ' + strWithCrc);
+	            lastCommandTime = Date.now();
+	            resolve();
+	          }, function () {
+	            bugout.bugout.log('ERROR: could not send command ' + str);
+	            reject('Could not send command');
+	          });
+	        })();
 	      }
 	    });
 	  }
@@ -11080,7 +11095,13 @@
 	  }
 	
 	  function createResetListener1() {
-	    //TODO add timeout to call sendEmergency when answer is too late
+	    var responded = false;
+	    $timeout(function () {
+	      if (!responded) {
+	        sendEmergency();
+	        emergencyResponse();
+	      }
+	    }, 1000);
 	
 	    var emergencyResponse = $rootScope.$on('emergencyReset1', function (event, res) {
 	      bugout.bugout.log('res in emergencyListener: ' + res);
@@ -11313,6 +11334,8 @@
 	  shareProgram.program = {};
 	
 	  function getObj() {
+	    //This is needed for test when no program is selected yet.
+	    //Start position is needed for initial settings commands
 	    if (shareProgram.program.startPosition === undefined) {
 	      bugout.bugout.log('shareProgram.program is undefined, setting start position to nill');
 	      shareProgram.program.startPosition = 0;
