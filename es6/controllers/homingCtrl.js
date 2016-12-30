@@ -35,9 +35,6 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   function setButtons(obj) {
     buttonService.setValues(obj);
     $scope.buttons = buttonService.getValues();
-    // $scope.$apply(function () {
-    //   $scope.buttons = buttonService.getValues()
-    // });
     logService.consoleLog($scope.buttons);
   }
 
@@ -89,6 +86,10 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     emergencyService.reset();
   };
 
+  $rootScope.$on('connectionLost', () => {
+    $scope.isConnected = false;
+  });
+  
   //
   //SECTION: homing logic
   //

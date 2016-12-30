@@ -9132,6 +9132,10 @@
 	    emergencyService.reset();
 	  };
 	
+	  $rootScope.$on('connectionLost', function () {
+	    $scope.isConnected = false;
+	  });
+	
 	  //
 	  //SECTION: functions to determine movement steps
 	  //
@@ -9603,9 +9607,6 @@
 	  function setButtons(obj) {
 	    buttonService.setValues(obj);
 	    $scope.buttons = buttonService.getValues();
-	    // $scope.$apply(function () {
-	    //   $scope.buttons = buttonService.getValues()
-	    // });
 	    logService.consoleLog($scope.buttons);
 	  }
 	
@@ -9655,6 +9656,10 @@
 	    logService.consoleLog('emergency reset called');
 	    emergencyService.reset();
 	  };
+	
+	  $rootScope.$on('connectionLost', function () {
+	    $scope.isConnected = false;
+	  });
 	
 	  //
 	  //SECTION: homing logic
@@ -10330,6 +10335,10 @@
 	  $scope.$on('$ionicView.leave', function () {
 	    logService.consoleLog('leaveView in bluetoothConnectionCtrl fired');
 	    logService.setBulk($scope.bluetoothLog);
+	  });
+	
+	  $rootScope.$on('connectionLost', function () {
+	    $scope.isConnected = false;
 	  });
 	
 	  $scope.getAvailableDevices = function () {
@@ -11766,7 +11775,6 @@
 	          console.log('\nshould be null: connectionAlive: ');
 	          console.log(connectionAlive);
 	
-	          //TODO check if emergencyOn when sending works correctly
 	          if (statusService.getSending() === true) {
 	            logService.addOne('Lost connecting while sending, turning on emergency', true);
 	            emergencyService.on();

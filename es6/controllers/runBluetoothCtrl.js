@@ -167,6 +167,10 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     emergencyService.reset();
   };
 
+  $rootScope.$on('connectionLost', () => {
+    $scope.isConnected = false;
+  });
+  
   //
   //SECTION: functions to determine movement steps
   //

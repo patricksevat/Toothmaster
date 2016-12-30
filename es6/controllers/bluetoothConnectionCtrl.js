@@ -75,6 +75,10 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
     logService.setBulk($scope.bluetoothLog);
   });
 
+  $rootScope.$on('connectionLost', () => {
+    $scope.isConnected = false;
+  });
+
   $scope.getAvailableDevices = function () {
     if ($scope.searchingForDevices === true) {
     }
