@@ -173,35 +173,52 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       bluetoothResponseListener();
       wydoneListener();
 
-      if (type === 'moveXMm') {
-        $ionicPopup.alert({
-          title: 'Moved '+$scope.numberOfTests.mm+' mm'
-        });
-        setButtons({'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false, 'showProgress': false});
-        $scope.progress = 0;
-        calculateVarsService.getVars('test', function (obj) {
-          logService.consoleLog('resetting commands in testCtrl');
-          commands = obj.commands;
-        });
-        sentSettingsForTest = true;
-      }
-      else if (type === 'stressTest') {
-        addToLog('Executing tests');
-        sentSettingsForTest = true;
-        $scope.stressTest();
-      }
-      else if (type === 'stressTestCommand') {
-        $scope.completedTest += 1;
-        $timeout(() => {
-          $scope.stressTest();
-        }, 300);
-      }
+      if (type === 'moveXMm')
+        completedMoveXMm();
+      else if (type === 'stressTest')
+        startStressTest();
+      else if (type === 'stressTestCommand')
+        completedStressTestCommand();
+
     });
 
     $rootScope.$on('emergencyOn', () => {
       bluetoothResponseListener();
+      wydoneListener();
+      $interval.cancel(timer);
+    });
+
+    $rootScope.$on('$ionicView.leave', () => {
+      bluetoothResponseListener();
+      wydoneListener();
       $interval.cancel(timer);
     })
+  }
+
+  function completedMoveXMm() {
+    $ionicPopup.alert({
+      title: 'Moved '+$scope.numberOfTests.mm+' mm'
+    });
+    setButtons({'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false, 'showProgress': false});
+    $scope.progress = 0;
+    calculateVarsService.getVars('test', function (obj) {
+      logService.consoleLog('resetting commands in testCtrl');
+      commands = obj.commands;
+    });
+    sentSettingsForTest = true;
+  }
+
+  function completedStressTestCommand() {
+    $scope.completedTest += 1;
+    $timeout(() => {
+      $scope.stressTest();
+    }, 300);
+  }
+
+  function startStressTest() {
+    addToLog('Executing tests');
+    sentSettingsForTest = true;
+    $scope.stressTest();
   }
 
   function updateProgress(res) {
@@ -249,7 +266,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       }
     }
   });
-  
+
   const sendTestCommand = $async(function* () {
     const command = '<q'+Math.floor((Math.random()*500)+100) +stepMotorNum+'>';
     try {

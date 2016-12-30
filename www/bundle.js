@@ -8797,36 +8797,12 @@
 	
 	  //On run program button, make sure that program and settings are filled in correctly
 	  $scope.runProgram = function () {
-	    // if ($scope.currentProgram.sawWidth > $scope.currentProgram.cutWidth){
-	    //   $ionicPopup.alert(
-	    //     {
-	    //       title: 'Saw width cannot be wider than cut width',
-	    //       template: 'Please make sure that your saw width and cut width are entered correctly'
-	    //     }
-	    //   )
-	    // }
-	    // else if ($scope.currentProgram.numberOfCuts % 1 !== 0) {
-	    //   $ionicPopup.alert(
-	    //     {
-	    //       title: 'Number of cuts cannot be a floating point',
-	    //       template: 'Please make sure that the number of cuts is a whole number. "2" is correct, "2.2" is incorrect.'
-	    //     }
-	    //   )
-	    // }
 	    shareProgram.setObj($scope.currentProgram);
 	    if (shareProgram.checkProgram() && shareSettings.checkSettings()) {
 	      logService.consoleLog('all fields filled in');
 	      window.localStorage['lastUsedProgram'] = JSON.stringify($scope.currentProgram);
 	      $scope.confirmProgram();
 	    }
-	    // else {
-	    //   $ionicPopup.alert(
-	    //     {
-	    //       title: 'Not all fields are filled in',
-	    //       template: 'Please fill in all Program fields before running the program'
-	    //     }
-	    //   )
-	    // }
 	  };
 	
 	  $scope.confirmProgram = function () {
@@ -9356,6 +9332,12 @@
 	      bluetoothResponseListener();
 	      wydoneListener();
 	    });
+	
+	    $rootScope.$on('$ionicView.leave', function () {
+	      $interval.cancel(timer);
+	      bluetoothResponseListener();
+	      wydoneListener();
+	    });
 	  }
 	
 	  function movedToStartPosition() {
@@ -9473,6 +9455,12 @@
 	    });
 	
 	    $rootScope.$on('emergencyOn', function () {
+	      $interval.cancel(timer);
+	      bluetoothResponseListener();
+	      wydoneListener();
+	    });
+	
+	    $rootScope.$on('$ionicView.leave', function () {
 	      $interval.cancel(timer);
 	      bluetoothResponseListener();
 	      wydoneListener();
@@ -9832,6 +9820,12 @@
 	
 	    $rootScope.$on('emergencyOn', function () {
 	      $interval.cancel(timer);
+	      wydoneListener();
+	    });
+	
+	    $rootScope.$on('$ionicView.leave', function () {
+	      $interval.cancel(timer);
+	      wydoneListener();
 	    });
 	  }
 	
@@ -10078,33 +10072,46 @@
 	      bluetoothResponseListener();
 	      wydoneListener();
 	
-	      if (type === 'moveXMm') {
-	        $ionicPopup.alert({
-	          title: 'Moved ' + $scope.numberOfTests.mm + ' mm'
-	        });
-	        setButtons({ 'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false, 'showProgress': false });
-	        $scope.progress = 0;
-	        calculateVarsService.getVars('test', function (obj) {
-	          logService.consoleLog('resetting commands in testCtrl');
-	          commands = obj.commands;
-	        });
-	        sentSettingsForTest = true;
-	      } else if (type === 'stressTest') {
-	        addToLog('Executing tests');
-	        sentSettingsForTest = true;
-	        $scope.stressTest();
-	      } else if (type === 'stressTestCommand') {
-	        $scope.completedTest += 1;
-	        $timeout(function () {
-	          $scope.stressTest();
-	        }, 300);
-	      }
+	      if (type === 'moveXMm') completedMoveXMm();else if (type === 'stressTest') startStressTest();else if (type === 'stressTestCommand') completedStressTestCommand();
 	    });
 	
 	    $rootScope.$on('emergencyOn', function () {
 	      bluetoothResponseListener();
+	      wydoneListener();
 	      $interval.cancel(timer);
 	    });
+	
+	    $rootScope.$on('$ionicView.leave', function () {
+	      bluetoothResponseListener();
+	      wydoneListener();
+	      $interval.cancel(timer);
+	    });
+	  }
+	
+	  function completedMoveXMm() {
+	    $ionicPopup.alert({
+	      title: 'Moved ' + $scope.numberOfTests.mm + ' mm'
+	    });
+	    setButtons({ 'showStressTest': true, 'showVersionButton': true, 'showEmergency': false, 'showSpinner': false, 'showProgress': false });
+	    $scope.progress = 0;
+	    calculateVarsService.getVars('test', function (obj) {
+	      logService.consoleLog('resetting commands in testCtrl');
+	      commands = obj.commands;
+	    });
+	    sentSettingsForTest = true;
+	  }
+	
+	  function completedStressTestCommand() {
+	    $scope.completedTest += 1;
+	    $timeout(function () {
+	      $scope.stressTest();
+	    }, 300);
+	  }
+	
+	  function startStressTest() {
+	    addToLog('Executing tests');
+	    sentSettingsForTest = true;
+	    $scope.stressTest();
 	  }
 	
 	  function updateProgress(res) {
@@ -11086,7 +11093,6 @@
 	      if (res.search('11:') > -1) {
 	        logService.addOne('Program succesfully reset');
 	        sendAndReceive.unsubscribe();
-	        //TODO needs to call sendAndReceive.subscribe again?
 	        emergencyService.off();
 	        emergencyResponse();
 	      }
@@ -11108,7 +11114,7 @@
 	
 	  function stopSwitchHit(res) {
 	    var posStopswitch = res.lastIndexOf('@') - 3;
-	    logService.addOne('Stopswitch ' + res.charAt(posStopswitch) + ' has been hit. Aborting task and resetting program.', true);
+	    logService.addOne('Stopswitch ' + res.charAt(posStopswitch) + ' has been hit. Aborting task.', true);
 	    logService.consoleLog('Error: hit stopswitch ' + res.charAt(posStopswitch));
 	    //emergencyService.on sets correct buttons and sends resetcommand
 	    emergencyService.on();
@@ -11302,7 +11308,7 @@
 	    shareProgram.program = value;
 	  }
 	
-	  var redirect = [{
+	  var redirectButton = [{
 	    text: 'Go to program',
 	    type: 'button-calm',
 	    onTap: function onTap() {
@@ -11310,17 +11316,22 @@
 	    }
 	  }];
 	
+	  var okButton = [{
+	    text: 'Ok',
+	    type: 'button-calm'
+	  }];
+	
 	  function checkProgram(redirectToProgram) {
 	    if (shareProgram.program.sawWidth === undefined || shareProgram.program.cutWidth === undefined || shareProgram.program.pinWidth === undefined || shareProgram.program.numberOfCuts === undefined) {
 	      $ionicPopup.alert({
 	        title: 'Please fill in your Program before continuing',
-	        buttons: redirectToProgram ? redirect : []
+	        buttons: redirectToProgram ? redirectButton : okButton
 	      });
 	    } else if (shareProgram.program.sawWidth > shareProgram.program.cutWidth) {
 	      $ionicPopup.alert({
 	        title: 'Your saw width cannot be wider than your cut width',
 	        template: 'Please adjust your program',
-	        buttons: redirectToProgram ? redirect : []
+	        buttons: redirectToProgram ? redirectButton : okButton
 	      });
 	    } else if (shareProgram.program.numberOfCuts % 1 !== 0) {
 	      $ionicPopup.alert({
@@ -11458,7 +11469,6 @@
 	    if (cb) cb();
 	  }
 	
-	  //TODO check why sometimes resetEmergency wont reset after disconnect button
 	  function reset() {
 	    $rootScope.$emit("resetEmergency");
 	  }

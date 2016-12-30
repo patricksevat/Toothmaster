@@ -324,6 +324,12 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();
+    });
+
+    $rootScope.$on('$ionicView.leave', () => {
+      $interval.cancel(timer);
+      bluetoothResponseListener();
+      wydoneListener();
     })
   }
 
@@ -409,6 +415,12 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     });
 
     $rootScope.$on('emergencyOn', () => {
+      $interval.cancel(timer);
+      bluetoothResponseListener();
+      wydoneListener();
+    });
+
+    $rootScope.$on('$ionicView.leave', () => {
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();

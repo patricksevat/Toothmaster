@@ -171,6 +171,12 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
 
     $rootScope.$on('emergencyOn', () => {
       $interval.cancel(timer);
+      wydoneListener();
+    });
+    
+    $rootScope.$on('$ionicView.leave', () => {
+      $interval.cancel(timer);
+      wydoneListener();
     })
   }
 

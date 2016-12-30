@@ -3,7 +3,7 @@ export default function(bugout, $ionicPopup, $state) {
   shareProgram.getObj = getObj;
   shareProgram.setObj = setObj;
   shareProgram.checkProgram = checkProgram;
-  
+
   shareProgram.program = {};
 
   function getObj() {
@@ -13,32 +13,37 @@ export default function(bugout, $ionicPopup, $state) {
     }
     return shareProgram.program;
   }
-  
+
   function setObj(value) {
     shareProgram.program = value;
   }
-  
-  const redirect = [{
+
+  const redirectButton = [{
     text: 'Go to program',
     type: 'button-calm',
     onTap: function () {
       $state.go('app.program');
     }
   }];
-  
+
+  const okButton = [{
+    text: 'Ok',
+    type: 'button-calm'
+  }];
+
   function checkProgram(redirectToProgram) {
     if (shareProgram.program.sawWidth === undefined || shareProgram.program.cutWidth === undefined
       || shareProgram.program.pinWidth === undefined || shareProgram.program.numberOfCuts === undefined) {
       $ionicPopup.alert({
         title: 'Please fill in your Program before continuing',
-        buttons: redirectToProgram ? redirect : []
+        buttons: redirectToProgram ? redirectButton : okButton
       });
     }
     else if (shareProgram.program.sawWidth > shareProgram.program.cutWidth) {
       $ionicPopup.alert({
         title: 'Your saw width cannot be wider than your cut width',
         template: 'Please adjust your program',
-        buttons: redirectToProgram ? redirect : []
+        buttons: redirectToProgram ? redirectButton : okButton
       });
     }
     else if (shareProgram.program.numberOfCuts % 1 !== 0) {

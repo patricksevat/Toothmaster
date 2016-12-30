@@ -350,7 +350,6 @@ module.exports = sendAndReceiveService;
         if (res.search('11:') > -1) {
           logService.addOne('Program succesfully reset');
           sendAndReceive.unsubscribe();
-          //TODO needs to call sendAndReceive.subscribe again?
           emergencyService.off();
           emergencyResponse();
         }
@@ -365,14 +364,14 @@ module.exports = sendAndReceiveService;
         logService.consoleLog('Error: could not clear receive buffer');
       })
     }
-    
+
   //
   //  Helper functions
   //
 
     function stopSwitchHit(res) {
       const posStopswitch = res.lastIndexOf('@')-3;
-      logService.addOne('Stopswitch '+res.charAt(posStopswitch)+' has been hit. Aborting task and resetting program.', true);
+      logService.addOne('Stopswitch '+res.charAt(posStopswitch)+' has been hit. Aborting task.', true);
       logService.consoleLog('Error: hit stopswitch '+res.charAt(posStopswitch));
       //emergencyService.on sets correct buttons and sends resetcommand
       emergencyService.on();

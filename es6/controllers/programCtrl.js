@@ -230,36 +230,12 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
 
   //On run program button, make sure that program and settings are filled in correctly
   $scope.runProgram = function() {
-    // if ($scope.currentProgram.sawWidth > $scope.currentProgram.cutWidth){
-    //   $ionicPopup.alert(
-    //     {
-    //       title: 'Saw width cannot be wider than cut width',
-    //       template: 'Please make sure that your saw width and cut width are entered correctly'
-    //     }
-    //   )
-    // }
-    // else if ($scope.currentProgram.numberOfCuts % 1 !== 0) {
-    //   $ionicPopup.alert(
-    //     {
-    //       title: 'Number of cuts cannot be a floating point',
-    //       template: 'Please make sure that the number of cuts is a whole number. "2" is correct, "2.2" is incorrect.'
-    //     }
-    //   )
-    // }
     shareProgram.setObj($scope.currentProgram);
     if (shareProgram.checkProgram() && shareSettings.checkSettings()) {
       logService.consoleLog('all fields filled in');
       window.localStorage['lastUsedProgram'] = JSON.stringify($scope.currentProgram);
       $scope.confirmProgram();
     }
-    // else {
-    //   $ionicPopup.alert(
-    //     {
-    //       title: 'Not all fields are filled in',
-    //       template: 'Please fill in all Program fields before running the program'
-    //     }
-    //   )
-    // }
   };
 
   $scope.confirmProgram = function(){
