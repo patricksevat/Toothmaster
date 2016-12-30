@@ -155,7 +155,7 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
       bluetoothService.connectToSelectedDevice(deviceID, deviceName)
         .then(() => {
           addToLog('Your smartphone has succesfully connected with the selected Bluetooth device');
-          $scope.isConnected = bluetoothService.getConnectedValue();
+          bluetoothService.getConnectedPromise().then((res) => $scope.isConnected = res);
           $scope.deviceName = deviceName;
           hideLoading();
           showSavedDeviceAlert();
