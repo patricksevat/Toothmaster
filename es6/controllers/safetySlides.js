@@ -2,8 +2,6 @@
  * Created by Patrick on 04/12/2016.
  */
 
-//TODO picture and text of goodlife => jointmaster.eu
-
 export default function($scope, $ionicModal, logService) {
   $scope.i = 0;
   $scope.hidePrev = false;
@@ -79,12 +77,12 @@ export default function($scope, $ionicModal, logService) {
     $scope.modal.hide();
     window.screen.unlockOrientation();
   };
-  /*
+  
    //Cleanup the modal when we're done with it!
    $scope.$on('$ionicView.leave', function() {
-   $scope.modal.remove();
-   logService.consoleLog('cleaning up modal');
-   });*/
+     $scope.modal.remove();
+     logService.consoleLog('cleaning up modal');
+   });
 
   //on slide.id = 7, add read-safety-instruction button
   $scope.setLocalStorageSafety = function() {

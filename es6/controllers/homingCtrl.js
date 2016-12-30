@@ -1,6 +1,6 @@
 export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                          $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
-                         bluetoothService, logService, calculateVarsService, sendAndReceiveService,
+                         bluetoothService, logService, calculateVarsService, sendAndReceiveService, bugout,
                          statusService, $ionicHistory, logModalService, modalService, $async, errorService) {
   $scope.$on('$ionicView.unloaded', function () {
     logService.consoleLog('\nUNLOADED\n');
@@ -31,6 +31,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     })
   };
   $scope.homingDone = false;
+  let skipLeaveCheck = false;
 
   function setButtons(obj) {
     buttonService.setValues(obj);
@@ -60,21 +61,45 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     $scope.settings = shareSettings.getObj();
     stepMotorNum = $scope.settings.stepMotorNum;
     $scope.homingDone = false;
+    skipLeaveCheck = false;
   });
 
-  $scope.$on('$ionicView.leave', function () {
-    logService.consoleLog('leaveView in bluetoothConnectionCtrl fired');
-    if (statusService.getSending() === true ) {
-      addToLog('Cancelling current tasks');
-      emergencyService.on();
-    }
-    else {
-      sendAndReceiveService.clearBuffer();
-    }
-    //TODO perhaps create listeners in a var and cancel var on leave?
+  $scope.$on('$ionicView.leave',function () {
+    logService.consoleLog('ionicView.leave called');
+    sendAndReceiveService.unsubscribe();
+    sendAndReceiveService.clearBuffer();
     logService.setBulk($scope.bluetoothLog);
   });
 
+  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
+    logService.consoleLog('BEFORE LEAVE');
+    if (statusService.getSending() === true && !skipLeaveCheck ) {
+      event.preventDefault();
+      leaveWhileSendingWarning(toState);
+    }
+  });
+
+  function leaveWhileSendingWarning(toState) {
+    $ionicPopup.alert({
+      title: 'Your program is still running, are you sure?',
+      template: 'Leaving now will abort your program and turn on emergency',
+      buttons: [{
+        text: 'Cancel',
+        type: 'button-positive'
+      },{
+        text: 'Leave',
+        type: 'button-assertive',
+        onTap: function () {
+          skipLeaveCheck = true;
+          addToLog('Cancelling current tasks');
+          statusService.setSending(false);
+          emergencyService.on();
+          $state.go(toState);
+        }
+      }]
+    })
+  }
+  
   $scope.emergencyOn = function () {
     emergencyService.on();
   };
@@ -95,16 +120,16 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   $scope.sendWithRetry = $async(function* (str) {
     let res;
     for (let i = 0; i < 5; i++) {
-      console.log('try: '+i+', command: '+str);
+      bugout.bugout.log('try: '+i+', command: '+str);
       res = yield sendAndReceiveService.writeAsync(str);
-      console.log('res in sendWithretry: '+res);
+      bugout.bugout.log('res in sendWithretry: '+res);
       if (i === 4)
         return new Promise((resolve, reject) => {
           reject('exceeded num of tries');
         });
       else if (res === 'OK')
         return new Promise((resolve, reject) => {
-          console.log('resolve value: '+res);
+          bugout.bugout.log('resolve value: '+res);
           resolve('resolve value: '+res);
         });
     }
@@ -118,16 +143,16 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
         statusService.setSending(true);
 
         for (let i = 0; i < homingCommands.length; i++){
-          console.log('going to await for command reply to command: '+homingCommands[i]);
+          bugout.bugout.log('going to await for command reply to command: '+homingCommands[i]);
           let res = yield $scope.sendWithRetry(homingCommands[i]);
-          console.log('awaited reply for command: '+homingCommands[i]+', i='+i+', response: '+res );
+          bugout.bugout.log('awaited reply for command: '+homingCommands[i]+', i='+i+', response: '+res );
 
           if (i === homingCommands.length-1) {
-            console.log('commands');
-            console.log(homingCommands);
-            console.log('commands.length');
-            console.log(homingCommands.length);
-            console.log('last command of sendSettings is OK');
+            bugout.bugout.log('commands');
+            bugout.bugout.log(homingCommands);
+            bugout.bugout.log('commands.length');
+            bugout.bugout.log(homingCommands.length);
+            bugout.bugout.log('last command of sendSettings is OK');
             checkWydone();
           }
         }
@@ -146,14 +171,14 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   });
 
   function checkWydone() {
-    console.log('checkWydone');
+    bugout.bugout.log('checkWydone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
-      console.log('checkWydone Homing')
+      bugout.bugout.log('checkWydone Homing')
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
-      console.log('bluetoothResponseListener: '+res);
+      bugout.bugout.log('bluetoothResponseListener: '+res);
     });
 
     let wydoneListener = $rootScope.$on('wydone', (event, res) => {

@@ -229,7 +229,6 @@ iframe {
 }
 
 
-/*TODO leave some margin right for close icon in error message*/
 #error-message {
   position: initial;
   word-wrap: break-word;

@@ -145,16 +145,16 @@ module.exports = sendAndReceiveService;
       try {
         let res;
         for (let i = 0; i < 5; i++) {
-          console.log('try: '+i+', command: '+str);
+          bugout.bugout.log('try: '+i+', command: '+str);
           res = yield sendAndReceive.writeAsync(str);
-          console.log('res in sendWithretry: '+res);
+          bugout.bugout.log('res in sendWithretry: '+res);
           if (i === 4)
             return new Promise((resolve, reject) => {
               reject('exceeded num of tries, error: '+res);
             });
           else if (res === 'OK')
             return new Promise((resolve, reject) => {
-              console.log('resolve value: '+res);
+              bugout.bugout.log('resolve value: '+res);
               resolve('resolve value: '+res);
             });
         }
@@ -260,7 +260,7 @@ module.exports = sendAndReceiveService;
     }
 
     function emitResponse(res) {
-      console.log('res in emitResponse: '+res);
+      bugout.bugout.log('res in emitResponse: '+res);
 
       const settings = shareSettings.getObj();
       //handle stopswitch hit
@@ -273,13 +273,6 @@ module.exports = sendAndReceiveService;
       // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
       else if (res.search('wydone:') > -1 && res.search('@5') > -1 && settings.encoder.enable === true) {
         exceededMaximumNumberOfStepsToMiss(res);
-      }
-      // else if (res.search('2:') > -1) {
-      //   $rootScope.$emit('sendKfault', res);
-      // }
-      else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
-        //TODO fix this function
-        faultyResponse(res);
       }
       else if (res.search('wydone:') > -1) {
         //Added a timeout so we can wait for some promises to finish before the wydone listener is initialised
@@ -298,7 +291,7 @@ module.exports = sendAndReceiveService;
       stepMotorNum = shareSettings.getObj().stepMotorNum;
       stepMotorNum = typeof stepMotorNum === 'undefined' ? '0' : stepMotorNum;
       const resetCommand1 = crcService.appendCRC('<y8:y'+stepMotorNum+'>');
-      console.log('written resetCommand1: '+resetCommand1);
+      bugout.bugout.log('written resetCommand1: '+resetCommand1);
       $window.bluetoothSerial.write(resetCommand1, function () {
         logService.addOne('Program reset command1 sent: '+resetCommand1);
       }, function (err) {

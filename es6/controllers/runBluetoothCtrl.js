@@ -99,7 +99,6 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     }
   });
 
-  //TODO check this emergency sequence
   $scope.$on('$ionicView.leave',function () {
     logService.consoleLog('ionicView.leave called');
     sendAndReceiveService.unsubscribe();
@@ -204,8 +203,8 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   //calculate movement sequence
   $scope.calcSteps = function() {
     program = shareProgram.getObj();
-    console.log('program in calcSteps:');
-    console.log(program);
+    bugout.bugout.log('program in calcSteps:');
+    bugout.bugout.log(program);
     $scope.settings = shareSettings.getObj();
     $scope.movements = [];
     //call function to calculate steps for cuts, subcuts and pins, log $scope.movements, callback to inform user of movements
@@ -294,9 +293,9 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
           settingsDone = false;
 
           for (let i = 0; i < commands.length; i++){
-            console.log('going to await for command reply to command: '+commands[i]);
+            bugout.bugout.log('going to await for command reply to command: '+commands[i]);
             let res = yield sendAndReceiveService.sendWithRetry(commands[i]);
-            console.log('awaited reply for command: '+commands[i]+', i='+i+', response: '+res );
+            bugout.bugout.log('awaited reply for command: '+commands[i]+', i='+i+', response: '+res );
 
             //On last command, start check if settings have been sent correctly
             if (i === commands.length-1) {
@@ -320,15 +319,15 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     // Example: <w1>-9999;90#
     if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
       $scope.progress = res.slice(res.search(';')+1, res.search('#'));
-      console.log('progress: '+$scope.progress);
+      bugout.bugout.log('progress: '+$scope.progress);
     }
   }
 
   function checkWydone() {
-    console.log('checkWydone');
+    bugout.bugout.log('checkWydone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
-      console.log('checkWyDone runBluetooth')
+      bugout.bugout.log('checkWyDone runBluetooth')
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
@@ -417,14 +416,14 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
   function checkDone() {
-    console.log('checkDone');
+    bugout.bugout.log('checkDone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
-      console.log('checkDone runBluetooth')
+      bugout.bugout.log('checkDone runBluetooth')
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
-      console.log('bluetoothResponseListener: '+res);
+      bugout.bugout.log('bluetoothResponseListener: '+res);
       updateProgress(res);
     });
 

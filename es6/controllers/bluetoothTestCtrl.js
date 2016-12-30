@@ -1,15 +1,15 @@
 export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings,
                          buttonService, emergencyService, bluetoothService, logService,
                          calculateVarsService, sendAndReceiveService, statusService,
-                         modalService, $async) {
+                         modalService, $async, $state) {
 
   $scope.$on('$ionicView.beforeLeave', function () {
-    console.log('beforeLeave');
+    bugout.bugout.log('beforeLeave');
     sendAndReceiveService.unsubscribe();
   });
 
   $scope.$on('$ionicView.afterEnter', function () {
-    console.log('afterEnter');
+    bugout.bugout.log('afterEnter');
     sendAndReceiveService.subscribe();
   });
 
@@ -28,6 +28,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
   var testsSent = 0;
   $scope.testRunning = false;
   $scope.progress = 0;
+  let skipLeaveCheck = false;
 
   $scope.userDisconnect = function () {
     bluetoothService.disconnect();
@@ -72,15 +73,45 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     $scope.numberOfTests = {};
     testsSent = 0;
     $scope.testRunning = false;
-    if (statusService.getSending() === true ) {
-      addToLog('Cancelling current tasks');
-      emergencyService.on();
-    }
-    else {
-      sendAndReceiveService.clearBuffer();
-    }
+    sendAndReceiveService.unsubscribe();
+    sendAndReceiveService.clearBuffer();
     logService.setBulk($scope.bluetoothLog);
   });
+
+  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
+    logService.consoleLog('BEFORE LEAVE');
+    if (statusService.getSending() === true && !skipLeaveCheck ) {
+      event.preventDefault();
+      leaveWhileSendingWarning(toState);
+    }
+  });
+
+  $rootScope.$on('emergencyOff', () => {
+    $scope.completedTest = 0;
+    $scope.retriesNeeded = 0;
+    testsSent = 0;
+  });
+
+  function leaveWhileSendingWarning(toState) {
+    $ionicPopup.alert({
+      title: 'Your program is still running, are you sure?',
+      template: 'Leaving now will abort your program and turn on emergency',
+      buttons: [{
+        text: 'Cancel',
+        type: 'button-positive'
+      },{
+        text: 'Leave',
+        type: 'button-assertive',
+        onTap: function () {
+          skipLeaveCheck = true;
+          addToLog('Cancelling current tasks');
+          statusService.setSending(false);
+          emergencyService.on();
+          $state.go(toState);
+        }
+      }]
+    })
+  }
 
   $scope.emergencyOn = function () {
     emergencyService.on();
@@ -134,9 +165,9 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
           statusService.setSending(true);
 
           for (let i = 0; i < commands.length; i++){
-            console.log('going to await for command reply to command: '+commands[i]);
+            bugout.bugout.log('going to await for command reply to command: '+commands[i]);
             let res = yield sendAndReceiveService.sendWithRetry(commands[i]);
-            console.log('awaited reply for command: '+commands[i]+', i='+i+', response: '+res );
+            bugout.bugout.log('awaited reply for command: '+commands[i]+', i='+i+', response: '+res );
 
             //On last command, start check if settings have been sent correctly
             if (i === commands.length-1) {
@@ -157,14 +188,14 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
   });
 
   function checkWydone(type) {
-    console.log('checkWydone');
+    bugout.bugout.log('checkWydone');
     let timer = $interval(() => {
       sendAndReceiveService.writeAsync('<w'+stepMotorNum+'>');
-      console.log('checkWyDone( BluetoothtestCtrl');
+      bugout.bugout.log('checkWyDone( BluetoothtestCtrl');
     }, 250);
 
     let bluetoothResponseListener = $rootScope.$on('bluetoothResponse', (event, res) => {
-      console.log('bluetoothResponseListener: '+res);
+      bugout.bugout.log('bluetoothResponseListener: '+res);
       updateProgress(res);
     });
 
@@ -226,7 +257,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
   //  <w1>-9999;90#
     if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
       $scope.progress = res.slice(res.search(';')+1, res.search('#'));
-      console.log('progress: '+$scope.progress);
+      bugout.bugout.log('progress: '+$scope.progress);
     }
   }
 
@@ -273,7 +304,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     try {
       testsSent += 1;
       yield sendAndReceiveService.sendWithRetry(command);
-      console.log('sendwithRetry yielded');
+      bugout.bugout.log('sendwithRetry yielded');
       checkWydone('stressTestCommand');
     }
     catch (err) {

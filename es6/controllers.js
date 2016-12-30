@@ -17,28 +17,35 @@ angular.module('toothmasterControllers', [ngAsync.name])
   /*
   * $rootScope emits:
   * $rootScope.$on('emergencyOn')
+  * $rootScope.$on('resetEmergency')
+  * $rootScope.$on('emergencyReset1')
+  * $rootScope.$on('emergencyReset2')
   * $rootScope.$on('emergencyOff')
   * $rootScope.$on('stopswitchHit', response, stopswitchNumber)
   * $rootScope.$on('maxSteps', response, missedSteps)
   * $rootScope.$on('bluetoothResponse', response)
+  * $rootScope.$on('connectionLost')
+  * $rootScope.$on('errorAdded')
+  *
   * */
 
-.controller('SafetySlides', safetySlideCtrl)
+  .controller('SafetySlides', safetySlideCtrl)
 
-.controller('ProgramController', programCtrl)
+  .controller('ProgramController', programCtrl)
 
-.controller('SettingsCtrl', settingsCtrl)
+  .controller('SettingsCtrl', settingsCtrl)
 
-.controller('runBluetoothCtrl', runBluetoothCtrl)
+  .controller('runBluetoothCtrl', runBluetoothCtrl)
 
-.controller('homingCtrl', homingCtrl)
+  .controller('homingCtrl', homingCtrl)
 
-.controller('testCtrl', bluetoothTestCtrl)
+  .controller('testCtrl', bluetoothTestCtrl)
 
-.controller('bluetoothConnectionCtrl', bluetoothConnectionCtrl)
+  .controller('bluetoothConnectionCtrl', bluetoothConnectionCtrl)
 
-.controller('errorController', errorController)
-  .controller('crcTestCtrl', crcCtrl)
+  .controller('errorController', errorController)
   
+  .controller('crcTestCtrl', crcCtrl)
+
   .controller('modalCtrl', modalController);
 

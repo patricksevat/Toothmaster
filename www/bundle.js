@@ -8282,7 +8282,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', ['$ionicPopup', 'logService', '$state', _shareSettingsService2.default]).service('shareProgram', ['bugout', '$ionicPopup', '$state', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', 'statusService', 'emergencyService', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 0.9.10.69');
+	  bugout.bugout.log('version 0.9.10.71');
 	  console.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -8387,10 +8387,16 @@
 	/*
 	* $rootScope emits:
 	* $rootScope.$on('emergencyOn')
+	* $rootScope.$on('resetEmergency')
+	* $rootScope.$on('emergencyReset1')
+	* $rootScope.$on('emergencyReset2')
 	* $rootScope.$on('emergencyOff')
 	* $rootScope.$on('stopswitchHit', response, stopswitchNumber)
 	* $rootScope.$on('maxSteps', response, missedSteps)
 	* $rootScope.$on('bluetoothResponse', response)
+	* $rootScope.$on('connectionLost')
+	* $rootScope.$on('errorAdded')
+	*
 	* */
 	
 	.controller('SafetySlides', _safetySlides2.default).controller('ProgramController', _programCtrl2.default).controller('SettingsCtrl', _settingsCtrl2.default).controller('runBluetoothCtrl', _runBluetoothCtrl2.default).controller('homingCtrl', _homingCtrl2.default).controller('testCtrl', _bluetoothTestCtrl2.default).controller('bluetoothConnectionCtrl', _bluetoothConnectionCtrl2.default).controller('errorController', _errorController2.default).controller('crcTestCtrl', _crcTestCtrl2.default).controller('modalCtrl', _modalCtrl2.default);
@@ -8569,12 +8575,12 @@
 	    $scope.modal.hide();
 	    window.screen.unlockOrientation();
 	  };
-	  /*
-	   //Cleanup the modal when we're done with it!
-	   $scope.$on('$ionicView.leave', function() {
-	   $scope.modal.remove();
-	   logService.consoleLog('cleaning up modal');
-	   });*/
+	
+	  //Cleanup the modal when we're done with it!
+	  $scope.$on('$ionicView.leave', function () {
+	    $scope.modal.remove();
+	    logService.consoleLog('cleaning up modal');
+	  });
 	
 	  //on slide.id = 7, add read-safety-instruction button
 	  $scope.setLocalStorageSafety = function () {
@@ -9066,7 +9072,6 @@
 	    }
 	  });
 	
-	  //TODO check this emergency sequence
 	  $scope.$on('$ionicView.leave', function () {
 	    logService.consoleLog('ionicView.leave called');
 	    sendAndReceiveService.unsubscribe();
@@ -9171,8 +9176,8 @@
 	  //calculate movement sequence
 	  $scope.calcSteps = function () {
 	    program = shareProgram.getObj();
-	    console.log('program in calcSteps:');
-	    console.log(program);
+	    bugout.bugout.log('program in calcSteps:');
+	    bugout.bugout.log(program);
 	    $scope.settings = shareSettings.getObj();
 	    $scope.movements = [];
 	    //call function to calculate steps for cuts, subcuts and pins, log $scope.movements, callback to inform user of movements
@@ -9279,14 +9284,14 @@
 	              break;
 	            }
 	
-	            console.log('going to await for command reply to command: ' + commands[i]);
+	            bugout.bugout.log('going to await for command reply to command: ' + commands[i]);
 	            _context.next = 11;
 	            return sendAndReceiveService.sendWithRetry(commands[i]);
 	
 	          case 11:
 	            res = _context.sent;
 	
-	            console.log('awaited reply for command: ' + commands[i] + ', i=' + i + ', response: ' + res);
+	            bugout.bugout.log('awaited reply for command: ' + commands[i] + ', i=' + i + ', response: ' + res);
 	
 	            //On last command, start check if settings have been sent correctly
 	            if (i === commands.length - 1) {
@@ -9329,15 +9334,15 @@
 	    // Example: <w1>-9999;90#
 	    if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
 	      $scope.progress = res.slice(res.search(';') + 1, res.search('#'));
-	      console.log('progress: ' + $scope.progress);
+	      bugout.bugout.log('progress: ' + $scope.progress);
 	    }
 	  }
 	
 	  function checkWydone() {
-	    console.log('checkWydone');
+	    bugout.bugout.log('checkWydone');
 	    var timer = $interval(function () {
 	      sendAndReceiveService.writeAsync('<w' + stepMotorNum + '>');
-	      console.log('checkWyDone runBluetooth');
+	      bugout.bugout.log('checkWyDone runBluetooth');
 	    }, 250);
 	
 	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
@@ -9459,14 +9464,14 @@
 	
 	  //check if prev stepCommand is done, send command, start pinging <w>, check for 'done:', allow next stepCommand
 	  function checkDone() {
-	    console.log('checkDone');
+	    bugout.bugout.log('checkDone');
 	    var timer = $interval(function () {
 	      sendAndReceiveService.writeAsync('<w' + stepMotorNum + '>');
-	      console.log('checkDone runBluetooth');
+	      bugout.bugout.log('checkDone runBluetooth');
 	    }, 250);
 	
 	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
-	      console.log('bluetoothResponseListener: ' + res);
+	      bugout.bugout.log('bluetoothResponseListener: ' + res);
 	      updateProgress(res);
 	    });
 	
@@ -9592,7 +9597,7 @@
 	  value: true
 	});
 	
-	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, $ionicHistory, logModalService, modalService, $async, errorService) {
+	exports.default = function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal, $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, bugout, statusService, $ionicHistory, logModalService, modalService, $async, errorService) {
 	  $scope.$on('$ionicView.unloaded', function () {
 	    logService.consoleLog('\nUNLOADED\n');
 	  });
@@ -9622,6 +9627,7 @@
 	    });
 	  };
 	  $scope.homingDone = false;
+	  var skipLeaveCheck = false;
 	
 	  function setButtons(obj) {
 	    buttonService.setValues(obj);
@@ -9651,19 +9657,44 @@
 	    $scope.settings = shareSettings.getObj();
 	    stepMotorNum = $scope.settings.stepMotorNum;
 	    $scope.homingDone = false;
+	    skipLeaveCheck = false;
 	  });
 	
 	  $scope.$on('$ionicView.leave', function () {
-	    logService.consoleLog('leaveView in bluetoothConnectionCtrl fired');
-	    if (statusService.getSending() === true) {
-	      addToLog('Cancelling current tasks');
-	      emergencyService.on();
-	    } else {
-	      sendAndReceiveService.clearBuffer();
-	    }
-	    //TODO perhaps create listeners in a var and cancel var on leave?
+	    logService.consoleLog('ionicView.leave called');
+	    sendAndReceiveService.unsubscribe();
+	    sendAndReceiveService.clearBuffer();
 	    logService.setBulk($scope.bluetoothLog);
 	  });
+	
+	  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
+	    logService.consoleLog('BEFORE LEAVE');
+	    if (statusService.getSending() === true && !skipLeaveCheck) {
+	      event.preventDefault();
+	      leaveWhileSendingWarning(toState);
+	    }
+	  });
+	
+	  function leaveWhileSendingWarning(toState) {
+	    $ionicPopup.alert({
+	      title: 'Your program is still running, are you sure?',
+	      template: 'Leaving now will abort your program and turn on emergency',
+	      buttons: [{
+	        text: 'Cancel',
+	        type: 'button-positive'
+	      }, {
+	        text: 'Leave',
+	        type: 'button-assertive',
+	        onTap: function onTap() {
+	          skipLeaveCheck = true;
+	          addToLog('Cancelling current tasks');
+	          statusService.setSending(false);
+	          emergencyService.on();
+	          $state.go(toState);
+	        }
+	      }]
+	    });
+	  }
 	
 	  $scope.emergencyOn = function () {
 	    emergencyService.on();
@@ -9697,14 +9728,14 @@
 	              break;
 	            }
 	
-	            console.log('try: ' + i + ', command: ' + str);
+	            bugout.bugout.log('try: ' + i + ', command: ' + str);
 	            _context.next = 6;
 	            return sendAndReceiveService.writeAsync(str);
 	
 	          case 6:
 	            res = _context.sent;
 	
-	            console.log('res in sendWithretry: ' + res);
+	            bugout.bugout.log('res in sendWithretry: ' + res);
 	
 	            if (!(i === 4)) {
 	              _context.next = 12;
@@ -9722,7 +9753,7 @@
 	            }
 	
 	            return _context.abrupt('return', new Promise(function (resolve, reject) {
-	              console.log('resolve value: ' + res);
+	              bugout.bugout.log('resolve value: ' + res);
 	              resolve('resolve value: ' + res);
 	            }));
 	
@@ -9768,21 +9799,21 @@
 	              break;
 	            }
 	
-	            console.log('going to await for command reply to command: ' + homingCommands[i]);
+	            bugout.bugout.log('going to await for command reply to command: ' + homingCommands[i]);
 	            _context2.next = 10;
 	            return $scope.sendWithRetry(homingCommands[i]);
 	
 	          case 10:
 	            res = _context2.sent;
 	
-	            console.log('awaited reply for command: ' + homingCommands[i] + ', i=' + i + ', response: ' + res);
+	            bugout.bugout.log('awaited reply for command: ' + homingCommands[i] + ', i=' + i + ', response: ' + res);
 	
 	            if (i === homingCommands.length - 1) {
-	              console.log('commands');
-	              console.log(homingCommands);
-	              console.log('commands.length');
-	              console.log(homingCommands.length);
-	              console.log('last command of sendSettings is OK');
+	              bugout.bugout.log('commands');
+	              bugout.bugout.log(homingCommands);
+	              bugout.bugout.log('commands.length');
+	              bugout.bugout.log(homingCommands.length);
+	              bugout.bugout.log('last command of sendSettings is OK');
 	              checkWydone();
 	            }
 	
@@ -9818,14 +9849,14 @@
 	  }));
 	
 	  function checkWydone() {
-	    console.log('checkWydone');
+	    bugout.bugout.log('checkWydone');
 	    var timer = $interval(function () {
 	      sendAndReceiveService.writeAsync('<w' + stepMotorNum + '>');
-	      console.log('checkWydone Homing');
+	      bugout.bugout.log('checkWydone Homing');
 	    }, 250);
 	
 	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
-	      console.log('bluetoothResponseListener: ' + res);
+	      bugout.bugout.log('bluetoothResponseListener: ' + res);
 	    });
 	
 	    var wydoneListener = $rootScope.$on('wydone', function (event, res) {
@@ -9879,15 +9910,15 @@
 	  value: true
 	});
 	
-	exports.default = function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, modalService, $async) {
+	exports.default = function ($rootScope, $scope, $ionicPopup, $interval, $timeout, shareSettings, buttonService, emergencyService, bluetoothService, logService, calculateVarsService, sendAndReceiveService, statusService, modalService, $async, $state) {
 	
 	  $scope.$on('$ionicView.beforeLeave', function () {
-	    console.log('beforeLeave');
+	    bugout.bugout.log('beforeLeave');
 	    sendAndReceiveService.unsubscribe();
 	  });
 	
 	  $scope.$on('$ionicView.afterEnter', function () {
-	    console.log('afterEnter');
+	    bugout.bugout.log('afterEnter');
 	    sendAndReceiveService.subscribe();
 	  });
 	
@@ -9906,6 +9937,7 @@
 	  var testsSent = 0;
 	  $scope.testRunning = false;
 	  $scope.progress = 0;
+	  var skipLeaveCheck = false;
 	
 	  $scope.userDisconnect = function () {
 	    bluetoothService.disconnect();
@@ -9950,14 +9982,45 @@
 	    $scope.numberOfTests = {};
 	    testsSent = 0;
 	    $scope.testRunning = false;
-	    if (statusService.getSending() === true) {
-	      addToLog('Cancelling current tasks');
-	      emergencyService.on();
-	    } else {
-	      sendAndReceiveService.clearBuffer();
-	    }
+	    sendAndReceiveService.unsubscribe();
+	    sendAndReceiveService.clearBuffer();
 	    logService.setBulk($scope.bluetoothLog);
 	  });
+	
+	  $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
+	    logService.consoleLog('BEFORE LEAVE');
+	    if (statusService.getSending() === true && !skipLeaveCheck) {
+	      event.preventDefault();
+	      leaveWhileSendingWarning(toState);
+	    }
+	  });
+	
+	  $rootScope.$on('emergencyOff', function () {
+	    $scope.completedTest = 0;
+	    $scope.retriesNeeded = 0;
+	    testsSent = 0;
+	  });
+	
+	  function leaveWhileSendingWarning(toState) {
+	    $ionicPopup.alert({
+	      title: 'Your program is still running, are you sure?',
+	      template: 'Leaving now will abort your program and turn on emergency',
+	      buttons: [{
+	        text: 'Cancel',
+	        type: 'button-positive'
+	      }, {
+	        text: 'Leave',
+	        type: 'button-assertive',
+	        onTap: function onTap() {
+	          skipLeaveCheck = true;
+	          addToLog('Cancelling current tasks');
+	          statusService.setSending(false);
+	          emergencyService.on();
+	          $state.go(toState);
+	        }
+	      }]
+	    });
+	  }
 	
 	  $scope.emergencyOn = function () {
 	    emergencyService.on();
@@ -10031,14 +10094,14 @@
 	              break;
 	            }
 	
-	            console.log('going to await for command reply to command: ' + commands[i]);
+	            bugout.bugout.log('going to await for command reply to command: ' + commands[i]);
 	            _context.next = 10;
 	            return sendAndReceiveService.sendWithRetry(commands[i]);
 	
 	          case 10:
 	            res = _context.sent;
 	
-	            console.log('awaited reply for command: ' + commands[i] + ', i=' + i + ', response: ' + res);
+	            bugout.bugout.log('awaited reply for command: ' + commands[i] + ', i=' + i + ', response: ' + res);
 	
 	            //On last command, start check if settings have been sent correctly
 	            if (i === commands.length - 1) {
@@ -10078,14 +10141,14 @@
 	  }));
 	
 	  function checkWydone(type) {
-	    console.log('checkWydone');
+	    bugout.bugout.log('checkWydone');
 	    var timer = $interval(function () {
 	      sendAndReceiveService.writeAsync('<w' + stepMotorNum + '>');
-	      console.log('checkWyDone( BluetoothtestCtrl');
+	      bugout.bugout.log('checkWyDone( BluetoothtestCtrl');
 	    }, 250);
 	
 	    var bluetoothResponseListener = $rootScope.$on('bluetoothResponse', function (event, res) {
-	      console.log('bluetoothResponseListener: ' + res);
+	      bugout.bugout.log('bluetoothResponseListener: ' + res);
 	      updateProgress(res);
 	    });
 	
@@ -10141,7 +10204,7 @@
 	    //  <w1>-9999;90#
 	    if (res.search('<w') > -1 && res.search(';') > -1 && res.search('#') > -1) {
 	      $scope.progress = res.slice(res.search(';') + 1, res.search('#'));
-	      console.log('progress: ' + $scope.progress);
+	      bugout.bugout.log('progress: ' + $scope.progress);
 	    }
 	  }
 	
@@ -10202,7 +10265,7 @@
 	            return sendAndReceiveService.sendWithRetry(command);
 	
 	          case 5:
-	            console.log('sendwithRetry yielded');
+	            bugout.bugout.log('sendwithRetry yielded');
 	            checkWydone('stressTestCommand');
 	            _context3.next = 13;
 	            break;
@@ -10804,14 +10867,14 @@
 	                        break;
 	                      }
 	
-	                      console.log('try: ' + i + ', command: ' + str);
+	                      bugout.bugout.log('try: ' + i + ', command: ' + str);
 	                      _context.next = 6;
 	                      return sendAndReceive.writeAsync(str);
 	
 	                    case 6:
 	                      res = _context.sent;
 	
-	                      console.log('res in sendWithretry: ' + res);
+	                      bugout.bugout.log('res in sendWithretry: ' + res);
 	
 	                      if (!(i === 4)) {
 	                        _context.next = 12;
@@ -10832,7 +10895,7 @@
 	
 	                      return _context.abrupt("return", {
 	                        v: new Promise(function (resolve, reject) {
-	                          console.log('resolve value: ' + res);
+	                          bugout.bugout.log('resolve value: ' + res);
 	                          resolve('resolve value: ' + res);
 	                        })
 	                      });
@@ -11038,7 +11101,7 @@
 	  }
 	
 	  function emitResponse(res) {
-	    console.log('res in emitResponse: ' + res);
+	    bugout.bugout.log('res in emitResponse: ' + res);
 	
 	    var settings = shareSettings.getObj();
 	    //handle stopswitch hit
@@ -11051,21 +11114,14 @@
 	    // in splicedStr, splice again from pos[2] ([0] = @, [1] is status code), till indexOf(';')
 	    else if (res.search('wydone:') > -1 && res.search('@5') > -1 && settings.encoder.enable === true) {
 	        exceededMaximumNumberOfStepsToMiss(res);
+	      } else if (res.search('wydone:') > -1) {
+	        //Added a timeout so we can wait for some promises to finish before the wydone listener is initialised
+	        $timeout(function () {
+	          $rootScope.$emit('wydone', res);
+	        }, 200);
+	      } else {
+	        $rootScope.$emit('bluetoothResponse', res);
 	      }
-	      // else if (res.search('2:') > -1) {
-	      //   $rootScope.$emit('sendKfault', res);
-	      // }
-	      else if (res.indexOf('$') > -1 && res.search('10:') === -1) {
-	          //TODO fix this function
-	          faultyResponse(res);
-	        } else if (res.search('wydone:') > -1) {
-	          //Added a timeout so we can wait for some promises to finish before the wydone listener is initialised
-	          $timeout(function () {
-	            $rootScope.$emit('wydone', res);
-	          }, 200);
-	        } else {
-	          $rootScope.$emit('bluetoothResponse', res);
-	        }
 	  }
 	
 	  function sendEmergency() {
@@ -11073,7 +11129,7 @@
 	    stepMotorNum = shareSettings.getObj().stepMotorNum;
 	    stepMotorNum = typeof stepMotorNum === 'undefined' ? '0' : stepMotorNum;
 	    var resetCommand1 = crcService.appendCRC('<y8:y' + stepMotorNum + '>');
-	    console.log('written resetCommand1: ' + resetCommand1);
+	    bugout.bugout.log('written resetCommand1: ' + resetCommand1);
 	    $window.bluetoothSerial.write(resetCommand1, function () {
 	      logService.addOne('Program reset command1 sent: ' + resetCommand1);
 	    }, function (err) {
