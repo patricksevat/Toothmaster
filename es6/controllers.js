@@ -10,11 +10,11 @@ import bluetoothTestCtrl from './controllers/bluetoothTestCtrl'
 import bluetoothConnectionCtrl from './controllers/bluetoothConnectionCtrl'
 import errorController from './controllers/errorController'
 import modalController from './controllers/modalCtrl'
-import crcCtrl from './controllers/crcTestCtrl'
+import connectionStatusCtrl from './controllers/connectionStatusCtrl'
 
 module.exports =
 angular.module('toothmasterControllers', [ngAsync.name])
-  /*
+/*
   * $rootScope emits:
   * $rootScope.$on('emergencyOn')
   * $rootScope.$on('resetEmergency')
@@ -26,7 +26,7 @@ angular.module('toothmasterControllers', [ngAsync.name])
   * $rootScope.$on('bluetoothResponse', response)
   * $rootScope.$on('connectionLost')
   * $rootScope.$on('errorAdded')
-  *
+  * $rootScope.$on('bluetoothValuesUpdated')
   * */
 
   .controller('SafetySlides', safetySlideCtrl)
@@ -45,7 +45,7 @@ angular.module('toothmasterControllers', [ngAsync.name])
 
   .controller('errorController', errorController)
   
-  .controller('crcTestCtrl', crcCtrl)
+  .controller('connectionStatusCtrl', connectionStatusCtrl)
 
   .controller('modalCtrl', modalController);
 

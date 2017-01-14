@@ -1,11 +1,12 @@
-export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, logService){
+export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, logService, bugout){
   $scope.settings = {
     encoder: {
       enable: false,
       stepsPerRPM: null,
       stepsToMiss: null
     },
-    homingStopswitch: false
+    homingStopswitch: false,
+    direction: false
   };
 
   //
@@ -18,9 +19,8 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
   $scope.settingsHaveChanged = function () {
     $scope.settingsChanged = true;
     $scope.skipCheck = false;
-    console.log('settingsChanged: '+$scope.settingsChanged);
-    console.log( 'settings: ');
-    console.log($scope.settings);
+    bugout.bugout.log( '$scope.settings: ');
+    bugout.bugout.log($scope.settings);
   };
 
   $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
@@ -88,29 +88,48 @@ export default function($rootScope, $scope, $ionicPopup, $state, shareSettings, 
   //
 
   $scope.showAlertUnsavedChanges = function(toState){
-    $ionicPopup.alert(
-      {
-        title: 'You have unsaved changes',
-        template: 'Do you want to save your changes before leaving?',
-        buttons: [{
-          text: 'Yes',
-          type: 'button-positive',
-          onTap: () => {
-            $scope.saveSettings();
-            $state.go(toState.name);
-          }
-        },{
-          text: 'No',
-          type: 'button-energized',
-          onTap: () => {
-            console.log('toState in alert unsaved changes onTap');
-            console.log(toState);
-            $scope.skipCheck = true;
-            $state.go(toState.name);
-          }
-        }]
-      }
-    )
+    if (shareSettings.checkSettings($scope.settings, true) === false) {
+      $ionicPopup.alert(
+        {
+          title: 'You have unsaved changes and incorrect settings',
+          template: 'Do you want to correct and save your changes before leaving?',
+          buttons: [{
+            text: 'Yes',
+            type: 'button-positive'
+          },{
+            text: 'No, leave anyway',
+            type: 'button-energized',
+            onTap: () => {
+              $scope.skipCheck = true;
+              $state.go(toState.name);
+            }
+          }]
+        }
+      )
+    }
+    else {
+      $ionicPopup.alert(
+        {
+          title: 'You have unsaved changes',
+          template: 'Do you want to save your changes before leaving?',
+          buttons: [{
+            text: 'Yes',
+            type: 'button-positive',
+            onTap: () => {
+              $scope.saveSettings();
+              $state.go(toState.name);
+            }
+          },{
+            text: 'No',
+            type: 'button-energized',
+            onTap: () => {
+              $scope.skipCheck = true;
+              $state.go(toState.name);
+            }
+          }]
+        }
+      )
+    }
   };
 
   $scope.showAlertMaxFreq = function(){

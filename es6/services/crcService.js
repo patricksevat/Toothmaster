@@ -7,7 +7,8 @@ export default function crcService() {
     let crc = crc16(str);
     let high = crc.Uint8High === 0 ? 1 : crc.Uint8High;
     let low = crc.Uint8Low === 0 ? 1 : crc.Uint8Low;
-    
-    return str + String.fromCharCode(high) + String.fromCharCode(low) ;
+
+    // return str + String.fromCharCode(high) + String.fromCharCode(low) ;
+    return str + String.fromCharCode(crc.Uint8High) + String.fromCharCode(crc.Uint8Low) ;
   }
 }

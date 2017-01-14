@@ -16,6 +16,10 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     sendAndReceiveService.subscribe();
   });
 
+  $rootScope.$on('connectionLost', () => {
+    skipLeaveCheck = true;
+  });
+
   var homingStopswitchInt;
   //homing commands
   var homingCommands;
@@ -99,7 +103,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       }]
     })
   }
-  
+
   $scope.emergencyOn = function () {
     emergencyService.on();
   };
@@ -109,10 +113,15 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     emergencyService.reset();
   };
 
+  $rootScope.$on('bluetoothValuesUpdated', function (event, valuesObj) {
+    $scope.bluetoothEnabled = valuesObj.bluetoothEnabled;
+    $scope.isConnected = valuesObj.isConnected;
+  });
+  
   $rootScope.$on('connectionLost', () => {
     $scope.isConnected = false;
   });
-  
+
   //
   //SECTION: homing logic
   //
@@ -197,7 +206,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       $interval.cancel(timer);
       wydoneListener();
     });
-    
+
     $rootScope.$on('$ionicView.leave', () => {
       $interval.cancel(timer);
       wydoneListener();

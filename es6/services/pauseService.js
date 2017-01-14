@@ -21,6 +21,7 @@ export default function (statusService, bluetoothService, logService, buttonServ
   function resume() {
     const sending = statusService.getSending();
     if (window.localStorage['lastConnectedDevice'] !== '' && !sending) {
+      bugout.bugout.log('Connecting with retry from resume');
       bluetoothService.connectWithRetry();
     }
     else if (sending) {

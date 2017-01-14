@@ -1,8 +1,33 @@
-export default function($scope, $ionicModal, $ionicPopup, shareSettings, shareProgram, $state, logService) {
+export default function($scope, $ionicModal, $ionicPopup, shareSettings, shareProgram, $state, logService, modalService) {
   $scope.presets = [
     { titlePreset: '5mm everything', sawWidth: 5, cutWidth: 5, pinWidth: 5, numberOfCuts: 5, startPosition: 5  },
     { titlePreset: '15mm everything', sawWidth: 15, cutWidth: 15, pinWidth: 15, numberOfCuts: 15, startPosition: 15  }
   ];
+
+  $scope.$on('$ionicView.enter', () => {
+    loadCurrentProgram();
+    $scope.loadUserPrograms();
+  });
+
+  $scope.$on('$ionicView.leave', () => {
+    logService.consoleLog('$scope.program: ');
+    logService.consoleLog($scope.currentProgram);
+    saveCurrentProgram();
+  });
+
+  function loadCurrentProgram() {
+    if (window.localStorage['currentProgram'] !== undefined) {
+      $scope.currentProgram = JSON.parse(window.localStorage['currentProgram']);
+    }
+    else if (window.localStorage['lastUsedProgram'] !== "" && window.localStorage['lastUsedProgram'] !== undefined) {
+      $scope.currentProgram = JSON.parse(window.localStorage['lastUsedProgram']);
+      shareProgram.setObj($scope.currentProgram);
+    }
+  }
+
+  function saveCurrentProgram() {
+    window.localStorage['currentProgram'] = JSON.stringify($scope.currentProgram)
+  }
 
   $scope.userPrograms = [];
 
@@ -18,16 +43,15 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
   $scope.loadUserPrograms = function() {
     $scope.userPrograms = [];
     if (window.localStorage.length === 5) {
-      logService.consoleLog('only safety, settings, lastConnectedDevice, commandIDNum and lastUsedProgram found in localstorage');
+      logService.consoleLog('only safety, settings, lastConnectedDevice and lastUsedProgram found in localstorage');
     }
-    //load the userPrograms stored in localStorage. objects are named 1 - n.
+    //load the userPrograms stored in localStorage. objects are named n-1.
     //parse the userPrograms in localStorage so that they are converted to objects
     //push the parsed userPrograms to $scope.userPrograms array
     else {
       logService.consoleLog(window.localStorage);
-      for (var a=0; a<window.localStorage.length; a++) {
-        if (window.localStorage.key(a) == 'Safety' || window.localStorage.key(a) == 'settings' || window.localStorage.key(a) == 'lastUsedProgram' || window.localStorage.key(a) == 'lastConnectedDevice' || window.localStorage.key(a) == 'commandIdNum') {
-
+      for (let a=0; a<window.localStorage.length; a++) {
+        if (window.localStorage.key(a) == 'Safety' || window.localStorage.key(a) == 'settings' || window.localStorage.key(a) == 'lastUsedProgram' || window.localStorage.key(a) == 'lastConnectedDevice') {
         }
         else{
           var tempName = window.localStorage.key(a);
@@ -39,8 +63,6 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
       }
     }
   };
-
-  $scope.loadUserPrograms();
 
   $scope.loadUserProgram = function($index) {
     //load userProgram & close load modal
@@ -80,9 +102,6 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
   $scope.saveProgram = function() {
     //show alert if title is not filled in
     if ($scope.checkCurrentProgram() === true) {
-      if ($scope.currentProgram.titlePreset) {
-        delete $scope.currentProgram.titlePreset
-      }
       window.localStorage[$scope.currentProgram.title] = JSON.stringify($scope.currentProgram);
       $scope.userPrograms.push($scope.currentProgram);
       logService.consoleLog('userProgram pushed to userPrograms & localStorage');
@@ -96,9 +115,6 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
       $scope.loadUserPrograms();
       shareProgram.setObj($scope.currentProgram);
     }
-    else {
-      //$scope.checkCurrentProgram();
-    }
   };
 
   $scope.showAlertSaveSucces = function() {
@@ -106,15 +122,14 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
       {
         title: 'Program saved!',
         scope: $scope,
-        buttons: [
-          {
-            //button holds current program & closes modal
-            text: 'Use current program',
-            type: 'button-balanced',
-            onTap: function() {
-              $scope.closeModal(2);
-            }
-          },
+        buttons: [{
+          //button holds current program & closes modal
+          text: 'Use current program',
+          type: 'button-balanced',
+          onTap: function() {
+            $scope.closeModal(2);
+          }
+        },
           {
             //button clears program fields and title
             text: 'Create new program',
@@ -128,8 +143,7 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
               $scope.currentProgram.startPosition = undefined;
               $scope.closeModal(2);
             }
-          }
-        ]
+          }]
       }
     )
   };
@@ -152,7 +166,23 @@ export default function($scope, $ionicModal, $ionicPopup, shareSettings, sharePr
     )
   };
 
-  //TODO check if its better to move these modals also to modalCtrl
+  $scope.openLoadModal = function () {
+    modalService
+      .init('load-modal.html')
+      .then(function (modal) {
+        modal.show();
+      })
+  };
+
+  $scope.openSaveModal = function () {
+    modalService
+      .init('save-modal')
+      .then(function (modal) {
+        modal.show()
+      })
+  };
+
+
   $ionicModal.fromTemplateUrl('load-modal.html', {
     id: 1,
     scope: $scope,

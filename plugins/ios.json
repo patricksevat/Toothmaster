@@ -1,0 +1,48 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "cordova-plugin-bluetooth-serial": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-console": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-crosswalk-webview": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-device": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-email": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-file": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-inappbrowser": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-screen-orientation": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-splashscreen": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        },
+        "ionic-plugin-keyboard": {
+            "PACKAGE_NAME": "eu.jointmaster.toothmaster"
+        }
+    },
+    "dependent_plugins": {}
+}

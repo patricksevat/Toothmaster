@@ -1,0 +1,15 @@
+<div class="item item-text-wrap">
+  <div class="row">
+    <div class="bluetooth-icon col-25 col-center">
+      <i class=" ion-bluetooth" ng-class="{'bg-green': bluetoothEnabled}"></i>
+      <i class=" ion-alert-circled" ng-hide="isConnected"></i>
+      <i class=" ion-checkmark" ng-show="isConnected"></i>
+    </div>
+    <div class="bluetooth-text col-75">
+      <p class="bluetooth-text" ng-hide="bluetoothEnabled">Bluetooth turned off</p>
+      <p class="bluetooth-text" ng-show="bluetoothEnabled">Bluetooth turned on</p>
+      <p class="bluetooth-text" ng-show="isConnected">Connected with <br>{{deviceName}}</p>
+      <p class="bluetooth-text" ng-hide="isConnected">Bluetooth not connected </p>
+    </div>
+  </div>
+</div>

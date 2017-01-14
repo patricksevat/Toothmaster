@@ -7,14 +7,9 @@ export default function ($scope, $rootScope, errorService, $ionicScrollDelegate)
     loadErrors();
   });
 
-  $rootScope.$on('errorAdded', function () {
+  $rootScope.$on('errorsChanged', function () {
     loadErrors();
   });
-
-  $rootScope.$on('emergencyOff', () => {
-    errorService.removeEmergencyError();
-  });
-
 
   function loadErrors() {
     $scope.errors = errorService.getErrors();
@@ -29,7 +24,6 @@ export default function ($scope, $rootScope, errorService, $ionicScrollDelegate)
   loadErrors();
 
   $scope.dismissError = () => {
-    console.log('dismiss error');
     errorService.removeFirstError();
     loadErrors();
   };

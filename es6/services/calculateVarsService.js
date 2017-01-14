@@ -1,4 +1,3 @@
-//TODO check why cb is used, again there's no async here
 export default function calculateVarsService(shareProgram, shareSettings) {
   const vars = this;
   //Available methods
@@ -7,6 +6,7 @@ export default function calculateVarsService(shareProgram, shareSettings) {
   //Scoped variables
   let stepMotorNum = shareSettings.getObj().stepMotorNum;
 
+  //TODO check why cb is used, again there's no async here
   function getVars(type, cb) {
     stepMotorNum = shareSettings.getObj().stepMotorNum;
     const program = shareProgram.getObj();
@@ -40,7 +40,7 @@ export default function calculateVarsService(shareProgram, shareSettings) {
     //type can be: homing, test or runBluetooth
     if (type === 'homing') {
       vars.return.vars.homingStopswitchInt = (settings.homingStopswitch) ? 0 : 1;
-      vars.return.commands = ['<v'+settings.direction+stepMotorNum+'>',
+      vars.return.commands = ['<v'+vars.return.vars.direction+stepMotorNum+'>',
         '<p'+vars.return.vars.stepsPerRPM+stepMotorNum+'>', '<r'+vars.return.vars.maxRPM+stepMotorNum+'>',
         '<o'+vars.return.vars.time+stepMotorNum+'>','<h'+vars.return.vars.homingStopswitchInt+stepMotorNum+'>',
         '<kFAULT'+stepMotorNum+'>'];
@@ -53,7 +53,7 @@ export default function calculateVarsService(shareProgram, shareSettings) {
       }
     }
     else if (type === 'runBluetooth') {
-      vars.return.commands = ['<v'+(vars.return.vars.direction+stepMotorNum || 1)+'>', '<s'+vars.return.vars.startPositionSteps+stepMotorNum+'>',
+      vars.return.commands = ['<v'+vars.return.vars.direction+stepMotorNum+'>', '<s'+vars.return.vars.startPositionSteps+stepMotorNum+'>',
         '<p'+vars.return.vars.stepsPerRPM+stepMotorNum+'>','<r'+vars.return.vars.maxRPM+stepMotorNum+'>',
         '<f'+vars.return.vars.stepMotorOnOff+stepMotorNum+'>', '<o'+vars.return.vars.time+stepMotorNum+'>',
         '<kFAULT'+stepMotorNum+'>'];

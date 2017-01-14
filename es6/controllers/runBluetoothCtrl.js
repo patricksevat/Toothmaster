@@ -1,7 +1,7 @@
 export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetoothSerial, $ionicPopup, $ionicModal,
                         $state, $ionicPlatform, $window, $interval, $timeout, shareSettings, shareProgram, skipService, buttonService, emergencyService,
                         bluetoothService, logService, calculateVarsService, sendAndReceiveService,
-                        statusService, logModalService, modalService, $async, errorService){
+                        statusService, logModalService, modalService, $async, errorService, bugout){
 
   $scope.bluetoothLog = logService.getLog();
   $scope.bluetoothEnabled = null;
@@ -167,12 +167,22 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
 
   $rootScope.$on('emergencyOff', function () {
     statusService.setSending(false);
+    $scope.progress = 0;
     $scope.movements = [];
     $scope.movementsNum = 0;
     done = true;
     settingsDone = true;
     $scope.buttons = buttonService.getValues();
     sendAndReceiveService.subscribe();
+  });
+
+  $rootScope.$on('bluetoothValuesUpdated', function (event, valuesObj) {
+    $scope.bluetoothEnabled = valuesObj.bluetoothEnabled;
+    $scope.isConnected = valuesObj.isConnected;
+  });
+
+  $rootScope.$on('connectionLost', () => {
+    skipLeaveCheck = true;
   });
 
   $scope.emergencyOn = function () {
@@ -225,7 +235,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
   function cutsAndPins() {
     //do this for number of cuts
     for (let i = 1; i <= program.numberOfCuts; i++) {
-      logService.consoleLog('let i ='+i);
+      logService.consoleLog('calculating cut ='+i);
 
       //how many subcuts do we need for this cut to complete
       const subCuts = program.cutWidth / program.sawWidth;
@@ -238,6 +248,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
       if (i<program.numberOfCuts) {
         logService.consoleLog('Calculating pin');
+        //TODO pinsteps is wrong
         const pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
         if (program.cutWidth > program.sawWidth) {
           addMovement(pinSteps, 'Make subcut 1/'+cutsRoundedUp);
@@ -466,7 +477,7 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       $ionicPopup.alert({
         title: $scope.movements[$scope.movementsNum].description,
         buttons: [{
-          type: 'button-calm',
+          type: 'button-positive',
           text: 'OK',
           onTap: $scope.showRestartPopup()
         }]

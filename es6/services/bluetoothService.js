@@ -23,7 +23,8 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   //service scope vars
   //
 
-  let bluetoothEnabled, isConnected;
+  let bluetoothEnabled;
+  let isConnected;
   let retry = 1;
   let deviceName = '';
 
@@ -43,15 +44,25 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
     })
   }
 
-  function getBluetoothEnabledValue(cb) {
+  function getBluetoothEnabledValue(cb, skipLog) {
     $cordovaBluetoothSerial.isEnabled().then(function () {
       bluetoothEnabled = true;
-      bugout.bugout.log('checkBluetoothEnabledService.value ='+bluetoothEnabled);
-      if (cb) cb(bluetoothEnabled);
-      else return bluetoothEnabled;
+      emitValues();
+
+      if (!skipLog)
+        bugout.bugout.log('checkBluetoothEnabledService.value ='+bluetoothEnabled);
+
+      if (cb)
+        cb(bluetoothEnabled);
+      else
+        return bluetoothEnabled;
     }, function () {
       bluetoothEnabled = false;
-      bugout.bugout.log('checkBluetoothEnabledService.value ='+bluetoothEnabled);
+      emitValues();
+
+      if (!skipLog)
+        bugout.bugout.log('checkBluetoothEnabledService.value ='+bluetoothEnabled);
+
       if (cb) cb(bluetoothEnabled);
       else return bluetoothEnabled;
     })
@@ -60,14 +71,24 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   function getConnectedValue(cb) {
     $cordovaBluetoothSerial.isConnected().then(function () {
       isConnected = true;
+      emitValues();
       return isConnected;
     }, function () {
       isConnected = false;
+      emitValues();
       bugout.bugout.log('getConnectedValue ='+isConnected);
       return isConnected;
     }).then(function () {
       if (cb) cb(isConnected)
     })
+  }
+
+  function emitValues() {
+    $rootScope.$emit('bluetoothValuesUpdated', {
+      isConnected,
+      bluetoothEnabled,
+      deviceName
+    });
   }
 
   function getDeviceName() {
@@ -81,6 +102,8 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   function connectToSelectedDevice(deviceID, deviceName) {
     return new Promise((resolve, reject) => {
       $cordovaBluetoothSerial.connect(deviceID).then(function () {
+        console.log('connecting to selected device: '+deviceName+' '+deviceID);
+        $rootScope.$emit('connectedToDevice');
         saveLastConnectedDevice(deviceID, deviceName);
         setDeviceName(deviceName);
         checkConnectionAliveInterval();
@@ -93,16 +116,17 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
 
   self.connectWithRetry = $async(function* () {
     try {
+      console.log('connect with retry called');
       let lastConnectedDevice = JSON.parse(getLastConnectedDevice());
       isConnected = yield getConnectedPromise();
       bluetoothEnabled = yield getEnabledPromise();
-      console.log('lastConnectedDevice: ');
-      console.log(lastConnectedDevice);
-      console.log('bluetoothEnabled: '+bluetoothEnabled);
-      console.log('isConnected: '+isConnected);
+      bugout.bugout.log('lastConnectedDevice: ');
+      bugout.bugout.log(lastConnectedDevice);
+      bugout.bugout.log('bluetoothEnabled: '+bluetoothEnabled);
+      bugout.bugout.log('isConnected: '+isConnected);
 
       for (let i = 0; i < 5; i++) {
-        console.log('connect with retry i: '+i);
+        bugout.bugout.log('connect with retry i: '+i);
         if (i === 4) {
           return new Promise((resolve, reject) => {
             reject();
@@ -110,13 +134,13 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
         }
         else if (lastConnectedDevice && bluetoothEnabled && !isConnected) {
           yield connectToSelectedDevice(lastConnectedDevice.id, lastConnectedDevice.name).then(() => {
-            console.log('resolving connect with retry number: '+i);
+            bugout.bugout.log('resolving connect with retry number: '+i);
             isConnected = true;
           }, (err) => {
-            console.log('continuing connect with retry after fail to connect, err: '+err);
+            bugout.bugout.log('continuing connect with retry after fail to connect, err: '+err);
             isConnected = false;
           });
-          console.log('yielded connect with retry number: '+i);
+          bugout.bugout.log('yielded connect with retry number: '+i);
         }
 
         if (isConnected)
@@ -177,32 +201,40 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   let connectionAlive = null;
 
   function checkConnectionAliveInterval() {
-    console.log('interval initiated');
+    bugout.bugout.log('checkConnectionAliveInterval initiated');
     connectionAlive = $interval(() => {
       getConnectedValue(function (connected) {
         if (!connected) {
-          console.log('connection lost from interval');
+          bugout.bugout.log('connection lost from interval');
           $rootScope.$emit('connectionLost');
           $interval.cancel(connectionAlive);
-          console.log('\nshould be null: connectionAlive: ');
-          console.log(connectionAlive);
-          
           if (statusService.getSending() === true) {
-            logService.addOne('Lost connecting while sending, turning on emergency', true);
+            logService.addOne('Lost connection while sending, turning on emergency', true);
             emergencyService.on();
           }
         }
-      })
+      }, true);
     }, 1000);
   }
 
   function cancelConnectionAliveInterval() {
     if (connectionAlive) {
       $interval.cancel(connectionAlive);
-      console.log('canceled interval')
+      bugout.bugout.log('canceled connectionAliveInterval')
     }
-
   }
+
+  let bluetoothEnabledInterval = $interval(() => {
+    getBluetoothEnabledValue(function (enabled) {
+      if (!enabled) {
+        // bugout.bugout.log('bluetooth disabled from interval');
+        if (statusService.getSending() === true) {
+          logService.addOne('Bluetooth disabled while sending, turning on emergency', true);
+          emergencyService.on();
+        }
+      }
+    }, true)
+  }, 1000);
 
   //
   //  Helpers

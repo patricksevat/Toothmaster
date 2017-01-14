@@ -51,7 +51,7 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
     bluetoothService.getConnectedValue(function (value) {
       $scope.isConnected = value;
       logService.consoleLog('$scope.isConnected: '+$scope.isConnected);
-      if (!$scope.isConnected) {
+      if (!$scope.isConnected && $scope.bluetoothEnabled) {
         logService.consoleLog('connected false, calling getAvailableDevices');
         $scope.getAvailableDevices();
       }
@@ -59,13 +59,12 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
   });
 
   $scope.userDisconnect = function () {
-    console.log('$scope.userDisconnect called');
+    logService.consoleLog('$scope.userDisconnect called');
     bluetoothService.disconnect();
     $scope.isConnected = false;
     // $scope.getAvailableDevices();
     $timeout(function () {
       $scope.getAvailableDevices();
-      console.log('getAvailableDevices called in userDisconnect after timeout');
     }, 500);
 
   };
@@ -75,15 +74,16 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
     logService.setBulk($scope.bluetoothLog);
   });
 
+  $rootScope.$on('bluetoothValuesUpdated', function (event, valuesObj) {
+    $scope.bluetoothEnabled = valuesObj.bluetoothEnabled;
+    $scope.isConnected = valuesObj.isConnected;
+  });
+
   $rootScope.$on('connectionLost', () => {
     $scope.isConnected = false;
   });
 
   $scope.getAvailableDevices = function () {
-    if ($scope.searchingForDevices === true) {
-    }
-
-    console.log('getAvailableDevices Called');
     $scope.searchingForDevices = true;
     $scope.availableDevices = [];
     $scope.pairedDevices = [];
@@ -92,11 +92,9 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
         $ionicPlatform.ready(function() {
           logService.consoleLog('Calling get available devices');
           if (ionic.Platform.isAndroid()) {
-            console.log('platform android');
             getAndroidDevices();
           }
           else if (ionic.Platform.isIOS()) {
-            console.log('platform iOS');
             getiOSDevices();
           }
         })
@@ -108,31 +106,31 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
     //discover unpaired
     addToLog('Searching for unpaired Bluetooth devices');
     $cordovaBluetoothSerial.discoverUnpaired().then(function (devices) {
-      console.log('devices: ');
-      console.log(devices);
+      logService.consoleLog('unpairedDevices: ');
+      logService.consoleLog(devices);
       if (devices.length === 0) {
         $scope.noUnpairedDevices = true;
-        console.log('$scope.noUnpairedDevices: '+$scope.noUnpairedDevices);
+        logService.consoleLog('$scope.noUnpairedDevices: '+$scope.noUnpairedDevices);
       }
-      console.log('unpaired devices');
-      console.log(devices);
       devices.forEach(function (device) {
           $scope.availableDevices.push(device);
           addToLog('Unpaired Bluetooth device found');
         });
       $scope.searchingForDevices = false;
     }, function () {
-      addToLog('Cannot find unpaired Bluetooth devices', true);
+      addToLog('Cannot find unpaired Bluetooth devices', true, 'warning');
     });
     //discover paired
     $cordovaBluetoothSerial.list().then(function (devices) {
+      logService.consoleLog('pairedDevices: ');
+      logService.consoleLog(devices);
       addToLog('Searching for paired Bluetooth devices');
       devices.forEach(function (device) {
         $scope.pairedDevices.push(device);
         addToLog('Paired Bluetooth device found');
       })
     },function () {
-      addToLog('Cannot find paired Bluetooth devices', true);
+      addToLog('Cannot find paired Bluetooth devices', true, 'warning');
     })
   }
 
@@ -147,7 +145,7 @@ export default function ($rootScope, $scope, $cordovaBluetoothSerial, $ionicPopu
       });
       $scope.searchingForDevices = false;
     }, function () {
-      addToLog('No devices found', true);
+      addToLog('No devices found', true, 'warning');
     })
   }
 

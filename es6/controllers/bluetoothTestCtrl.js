@@ -63,6 +63,11 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     });
     $scope.settings = shareSettings.getObj();
     stepMotorNum = $scope.settings.stepMotorNum;
+    skipLeaveCheck = false;
+    if (statusService.getEmergency() === true) {
+      logService.consoleLog('set resetbutton true');
+      setButtons({'showResetButton': true});
+    }
   });
 
   $scope.$on('$ionicView.leave', function () {
@@ -87,9 +92,20 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
   });
 
   $rootScope.$on('emergencyOff', () => {
+    $scope.progress = 0;
     $scope.completedTest = 0;
     $scope.retriesNeeded = 0;
     testsSent = 0;
+  });
+
+  $rootScope.$on('bluetoothValuesUpdated', function (event, valuesObj) {
+    $scope.bluetoothEnabled = valuesObj.bluetoothEnabled;
+    $scope.isConnected = valuesObj.isConnected;
+  });
+
+  $rootScope.$on('connectionLost', () => {
+    $scope.isConnected = false;
+    skipLeaveCheck = true;
   });
 
   function leaveWhileSendingWarning(toState) {
@@ -120,6 +136,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     sentSettingsForTest = false;
     testsSent = 0;
     $scope.testRunning = false;
+
   };
 
   //This actually calls reset
@@ -130,6 +147,10 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
 
   $rootScope.$on('connectionLost', () => {
     $scope.isConnected = false;
+  });
+
+  $rootScope.$on('emergencyOff', () => {
+    sendAndReceiveService.subscribe();
   });
 
   //
@@ -220,6 +241,7 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     });
 
     $rootScope.$on('$ionicView.leave', () => {
+      bugout.bugout.log('ionicView.leave in checkWydone in bluetoothTestCtrl');
       bluetoothResponseListener();
       wydoneListener();
       $interval.cancel(timer);
@@ -324,24 +346,31 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
     logService.consoleLog('completed tests: '+$scope.completedTest+' number of tests: '+$scope.numberOfTests.tests+' sent tests: '+testsSent);
     sentSettingsForTest = false;
     statusService.setSending(false);
+    $scope.completedTest = 0;
+    testsSent = 0;
   }
 
-  $scope.getVersion = function() {
-    if (statusService.getEmergency() === false && statusService.getSending() === false){
-      sendAndReceiveService.write('<y8:y'+stepMotorNum+'>');
-      sendAndReceiveService.write(softwareVersionCommand, function () {
-        let listen = $rootScope.$on('bluetoothResponse', function (event, res) {
+  $scope.getVersion = $async(function* () {
+    try {
+      if (statusService.getEmergency() === false && statusService.getSending() === false){
+        let versionListener = $rootScope.$on('bluetoothResponse', function (event, res) {
           if (res.search('<14:') > -1) {
             $ionicPopup.alert({
               title: 'Version number',
               template: 'Your version number is: '+res.slice(res.lastIndexOf(':')+1,res.lastIndexOf('>'))
             });
-            listen();
+            versionListener();
           }
-        })
-      });
+        });
+
+        yield sendAndReceiveService.sendWithRetry('<y8:y'+stepMotorNum+'>');
+        yield sendAndReceiveService.sendWithRetry(softwareVersionCommand);
+      }
     }
-  };
+    catch(err) {
+      addToLog('Could not retrieve version', true, 'warning');
+    }
+  });
 
   function addToLog(str) {
     logService.addOne(str);

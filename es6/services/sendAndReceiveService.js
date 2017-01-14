@@ -4,7 +4,8 @@
 module.exports = sendAndReceiveService;
 
   function sendAndReceiveService(statusService, emergencyService, $window, logService, $rootScope,
-                                 buttonService, crcService, shareSettings, $timeout, $async, bugout) {
+                                 buttonService, crcService, shareSettings, $timeout, $async, bugout,
+                                  bluetoothService, $interval) {
     const sendAndReceive = this;
     //Available methods
     sendAndReceive.subscribe = subscribe;
@@ -292,11 +293,21 @@ module.exports = sendAndReceiveService;
       stepMotorNum = typeof stepMotorNum === 'undefined' ? '0' : stepMotorNum;
       const resetCommand1 = crcService.appendCRC('<y8:y'+stepMotorNum+'>');
       bugout.bugout.log('written resetCommand1: '+resetCommand1);
-      $window.bluetoothSerial.write(resetCommand1, function () {
-        logService.addOne('Program reset command1 sent: '+resetCommand1);
-      }, function (err) {
-        logService.addOne('Error: Program reset command could not be sent. '+err, true);
-      });
+
+      //TODO test interval
+
+      let connectionAvailable = $interval(function () {
+        bluetoothService.getConnectedValued(function (value) {
+          if (value) {
+            $window.bluetoothSerial.write(resetCommand1, function () {
+              logService.addOne('Program reset command1 sent: '+resetCommand1);
+            }, function (err) {
+              logService.addOne('Error: Program reset command could not be sent. '+err, true);
+            });
+            $interval.cancel(connectionAvailable);
+          }
+        })
+      }, 1000);
     }
 
     function subscribeEmergency() {

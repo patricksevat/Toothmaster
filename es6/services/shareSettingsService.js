@@ -31,32 +31,36 @@ export default function shareSettings($ionicPopup, logService, $state) {
     }
   }
 
-  function checkSettings() {
+  function checkSettings(settings, skipAlert) {
+    const settingsToCheck = typeof settings === 'undefined' ? shareSettings.obj.settings : settings;
     // shareSettings.obj = shareSettings.getObj();
-    logService.consoleLog(shareSettings.obj.settings);
-    if (shareSettings.obj.settings === undefined){
+    logService.consoleLog('Checking settings:');
+    logService.consoleLog(settingsToCheck);
+    if (settingsToCheck === undefined){
       logService.consoleLog('settings are not filled in correctly');
       settingsAlert();
       return false;
     }
 
     //Pass the check with encoder disabled
-    else if (shareSettings.obj.settings.maxFreq !== null && shareSettings.obj.settings.dipswitch !== null &&
-      shareSettings.obj.settings.spindleAdvancement !== null && shareSettings.obj.settings.time !== null && shareSettings.obj.settings.stepMotorNum !== null &&
-      shareSettings.obj.settings.homingStopswitch !== null && shareSettings.obj.settings.encoder.enable === false) {
+    else if (settingsToCheck.maxFreq !== null && settingsToCheck.dipswitch !== null &&
+      settingsToCheck.spindleAdvancement !== null && settingsToCheck.time !== null && settingsToCheck.stepMotorNum !== null &&
+      settingsToCheck.homingStopswitch !== null && settingsToCheck.encoder.enable === false) {
       logService.consoleLog('checkSettings passed');
       return true;
     }
     //  Pass the check with encoder enabled
-    else if (shareSettings.obj.settings.maxFreq !== null  && shareSettings.obj.settings.dipswitch !== null && shareSettings.obj.settings.stepMotorNum !== null &&
-      shareSettings.obj.settings.spindleAdvancement !== null && shareSettings.obj.settings.time !== null && shareSettings.obj.settings.homingStopswitch !== null && shareSettings.obj.settings.encoder.enable === true &&
-      shareSettings.obj.settings.encoder.stepsPerRPM !== 0 && shareSettings.obj.settings.encoder.stepsToMiss > 0) {
+    else if (settingsToCheck.maxFreq !== null  && settingsToCheck.dipswitch !== null && settingsToCheck.stepMotorNum !== null &&
+      settingsToCheck.spindleAdvancement !== null && settingsToCheck.time !== null && settingsToCheck.homingStopswitch !== null && settingsToCheck.encoder.enable === true &&
+      settingsToCheck.encoder.stepsPerRPM !== 0 && settingsToCheck.encoder.stepsToMiss > 0) {
       logService.consoleLog('checkSettings passed');
       return true;
     }
     else {
       logService.consoleLog('settings are not filled in correctly');
-      settingsAlert();
+      if (!skipAlert) {
+        settingsAlert();
+      }
       return false;
     }
   }
@@ -86,8 +90,6 @@ export default function shareSettings($ionicPopup, logService, $state) {
         //iterate over encoder object if encoder is enabled
         if (angular.isObject(settingsObj[setting])) {
           if (settingsObj.encoder.enable) {
-            console.log('object setting, should be encoder: ');
-            console.log(setting);
             for (let encoderSetting in settingsObj.encoder) {
               if (settingsObj.encoder.hasOwnProperty(encoderSetting)) {
                 templateText += `<p>${humanReadable.encoder[encoderSetting]}: ${validateValue(settingsObj.encoder[encoderSetting])}</p>`
@@ -116,7 +118,7 @@ export default function shareSettings($ionicPopup, logService, $state) {
   //
   //Alerts
   //
-  
+
   function stepMotorAlert() {
     $ionicPopup.alert(
       {

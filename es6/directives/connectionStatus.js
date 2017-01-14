@@ -2,6 +2,6 @@ export default function ($rootScope) {
   return {
     restrict: 'E',
     replace: 'true',
-    templateUrl: './templates/errorHeader.html'
+    templateUrl: './templates/connectionStatus.html'
   }
 }

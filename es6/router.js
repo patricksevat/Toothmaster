@@ -1,5 +1,5 @@
 function router($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
-  $ionicConfigProvider.views.maxCache(1);
+  // $ionicConfigProvider.views.maxCache(1);
 
   /**
    * Important, for app, every path is relative to index.html

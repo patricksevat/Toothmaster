@@ -1,4 +1,4 @@
-<ion-view cache-view="false">
+<ion-view>
   <ion-nav-title>
     Bluetooth connection<img src="./img/icon.png" class="logo">
   </ion-nav-title>
@@ -21,30 +21,14 @@
         </button>
       </div>
 
-      <div class="item item-text-wrap">
-        <div class="row">
-          <div class="bluetooth-icon col-25 col-center">
-            <i class=" ion-bluetooth" ng-class="{'bg-green': bluetoothEnabled}"></i>
-            <i class=" glyphicon glyphicon-exclamation-sign" ng-hide="isConnected"></i>
-            <i class=" glyphicon glyphicon-ok" ng-show="isConnected"></i>
-          </div>
-          <div class="bluetooth-text col-75">
-            <p class="bluetooth-text" ng-hide="bluetoothEnabled">Bluetooth turned off</p>
-            <p class="bluetooth-text" ng-show="bluetoothEnabled">Bluetooth turned on</p>
-            <p class="bluetooth-text" ng-show="isConnected">
-              Connected with
-              <br>{{deviceName}}
-            </p>
-            <p class="bluetooth-text" ng-hide="isConnected">Bluetooth not connected </p>
-          </div>
-        </div>
-      </div>
+      <connection-status
+        ng-controller="connectionStatusCtrl"
+      ></connection-status>
 
       <div class="item item-divider" ng-hide="isConnected || !bluetoothEnabled">
         <p class="bluetooth-text">Available devices</p>
       </div>
 
-      <!-- TODO explainer for Windows Phone that unpaired devices must be connected manually-->
       <div id="bluetooth-available-devices-div" ng-model="availableDevices" ng-hide="isConnected || !bluetoothEnabled">
 
         <!--Shown when searchingForDevices for unpaired devices-->
