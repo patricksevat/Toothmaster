@@ -20,17 +20,29 @@ module.exports = sendAndReceiveService;
 
     //Immediately after emergency is on
     $rootScope.$on("emergencyOn", function () {
-      //Unsubscribe from regular responses
-      sendAndReceive.unsubscribe();
 
-      //Subscribe to emergency responses
-      subscribeEmergency();
+      let connectionAvailable = $interval(function () {
+        //TODO test interval
+        bluetoothService.getConnectedValue(function (value) {
+          if (value) {
+            $interval.cancel(connectionAvailable);
 
-      //Create listener for emergency command <y8:yX>
-      createResetListener1();
+            //Unsubscribe from regular responses
+            sendAndReceive.unsubscribe();
 
-      //Send <y8:yX>
-      sendEmergency();
+            //Subscribe to emergency responses
+            subscribeEmergency();
+
+            //Create listener for emergency command <y8:yX>
+            createResetListener1();
+
+            //Send <y8:yX>
+            sendEmergency();
+          }
+        });
+      }, 1000);
+
+
     });
 
     //After emergency commands are good allow for resetting of emergency on button click
@@ -78,13 +90,15 @@ module.exports = sendAndReceiveService;
     }
 
     function unsubscribe() {
-      emergencySubscribed = false;
-      $window.bluetoothSerial.unsubscribe(function () {
-        logService.consoleLog('Succesfully unsubscribed');
-        statusService.setSubscribed(false);
-      }, function () {
-        logService.consoleLog('ERROR: could not unsubscribe');
-      })
+      if (bluetoothService.getConnectedValue()) {
+        emergencySubscribed = false;
+        $window.bluetoothSerial.unsubscribe(function () {
+          logService.consoleLog('Succesfully unsubscribed');
+          statusService.setSubscribed(false);
+        }, function () {
+          logService.consoleLog('ERROR: could not unsubscribe');
+        })
+      }
     }
 
     function responseListener(searchStr) {
@@ -197,7 +211,7 @@ module.exports = sendAndReceiveService;
           //append string with cyclic redundancy check
           const strWithCrc = crcService.appendCRC(str);
           $window.bluetoothSerial.write(strWithCrc, function () {
-            bugout.bugout.log('sent: '+strWithCrc);
+            logService.addOne('sent command: '+strWithCrc);
             lastCommandTime = Date.now();
             resolve();
           }, function () {
@@ -287,6 +301,7 @@ module.exports = sendAndReceiveService;
       }
     }
 
+    //FIXME this function is called twice
     function sendEmergency() {
       logService.consoleLog('\n\nsendAndReceiveService.sendEmergency called');
       stepMotorNum = shareSettings.getObj().stepMotorNum;
@@ -294,20 +309,11 @@ module.exports = sendAndReceiveService;
       const resetCommand1 = crcService.appendCRC('<y8:y'+stepMotorNum+'>');
       bugout.bugout.log('written resetCommand1: '+resetCommand1);
 
-      //TODO test interval
-
-      let connectionAvailable = $interval(function () {
-        bluetoothService.getConnectedValued(function (value) {
-          if (value) {
-            $window.bluetoothSerial.write(resetCommand1, function () {
-              logService.addOne('Program reset command1 sent: '+resetCommand1);
-            }, function (err) {
-              logService.addOne('Error: Program reset command could not be sent. '+err, true);
-            });
-            $interval.cancel(connectionAvailable);
-          }
-        })
-      }, 1000);
+      $window.bluetoothSerial.write(resetCommand1, function () {
+        logService.addOne('Program reset command1 sent: '+resetCommand1);
+      }, function (err) {
+        logService.addOne('Error: Program reset command could not be sent. '+err, true);
+      });
     }
 
     function subscribeEmergency() {

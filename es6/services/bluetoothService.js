@@ -116,7 +116,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
 
   self.connectWithRetry = $async(function* () {
     try {
-      console.log('connect with retry called');
+      bugout.bugout.log('connect with retry called, reconnecting with lastConnectedDevice');
       let lastConnectedDevice = JSON.parse(getLastConnectedDevice());
       isConnected = yield getConnectedPromise();
       bluetoothEnabled = yield getEnabledPromise();
@@ -124,6 +124,16 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
       bugout.bugout.log(lastConnectedDevice);
       bugout.bugout.log('bluetoothEnabled: '+bluetoothEnabled);
       bugout.bugout.log('isConnected: '+isConnected);
+
+      if (!bluetoothEnabled) {
+        bugout.bugout.log('bluetooth disabled, canceling connectWithRetry');
+        return new Promise.reject();
+      }
+
+      if (isConnected) {
+        bugout.bugout.log('already connected, canceling connectWithRetry');
+        return new Promise.reject();
+      }
 
       for (let i = 0; i < 5; i++) {
         bugout.bugout.log('connect with retry i: '+i);
@@ -135,6 +145,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
         else if (lastConnectedDevice && bluetoothEnabled && !isConnected) {
           yield connectToSelectedDevice(lastConnectedDevice.id, lastConnectedDevice.name).then(() => {
             bugout.bugout.log('resolving connect with retry number: '+i);
+            logService.addOne('Connected to your last connected device ('+lastConnectedDevice.name+') on start-up');
             isConnected = true;
           }, (err) => {
             bugout.bugout.log('continuing connect with retry after fail to connect, err: '+err);

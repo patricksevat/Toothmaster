@@ -73,25 +73,25 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
           bugout.bugout.log('startChangeStart, toState: '+toState.name);
         });
 
-    $ionicPlatform.on('pause', function () {
-      bugout.bugout.log('onPause called from app.js');
-      if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
-        || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
-        pauseService.pause();
-      }
-      else {
-      }
-    });
-
-    $ionicPlatform.on('resume', function () {
-      bugout.bugout.log('onResume called from app.js');
-      if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
-        || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
-        pauseService.resume();
-      }
-      else {
-      }
-    });
+    // $ionicPlatform.on('pause', function () {
+    //   bugout.bugout.log('onPause called from app.js');
+    //   if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
+    //     || $ionicHistory.currentStateName() === 'app.test') {
+    //     pauseService.pause();
+    //   }
+    //   else {
+    //   }
+    // });
+    //
+    // $ionicPlatform.on('resume', function () {
+    //   bugout.bugout.log('onResume called from app.js');
+    //   if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
+    //     || $ionicHistory.currentStateName() === 'app.test') {
+    //     pauseService.resume();
+    //   }
+    //   else {
+    //   }
+    // });
 
   $ionicPlatform.ready(function() {
 

@@ -237,21 +237,37 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     for (let i = 1; i <= program.numberOfCuts; i++) {
       logService.consoleLog('calculating cut ='+i);
 
+      //IMPORTANT: for the first (sub)cut: we are already in place for the first (sub)cut after moving to start position.
+      //The popup message for making the first (sub)cut is handled by movedToStartPosition() which is called
+      //after settings have succesfully been sent
+
+      //The order may seem counter intuitive: calculating subcuts before calculating pins.
+      //However, remember that with the first cut we are already in start position for the first (sub)cut,
+      // then we need to add movements for subcuts of cut 1 (if needed), then we need to calculate pin 1,
+      // add message for the cut 2 and add movements for the subcuts of cut 2 (if needed), then calculate pin 2, etc.
+      // on the last cut we only calculate the subcuts of the last cut (if needed) and skip the last pin calculation
+
       //how many subcuts do we need for this cut to complete
-      const subCuts = program.cutWidth / program.sawWidth;
-      const cutsRoundedUp = Math.ceil(subCuts);
-      //if cut width is wider than saw width, calculate subcuts (multiple subcuts needed to complete one cut)
-      if (program.cutWidth > program.sawWidth){
-        calculateSubCuts(subCuts, cutsRoundedUp);
+      const cutsRoundedUp = Math.ceil(program.cutWidth / program.sawWidth);
+
+      //if we need subcuts, calculate subcuts (multiple subcuts needed to complete one cut)
+      if (cutsRoundedUp > 1){
+        calculateSubCuts(cutsRoundedUp);
       }
 
-      //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
+      //IMPORTANT: similar to moving to start position, we are now going to calculate the pins.
+      //Pins behave like moving to start position, with the exception that we do need to add a message
+      //Furthermore we do not need to move beyond the last (sub)cut, thus for calculating pin steps we use
+      //i<numberOfCuts
+
       if (i<program.numberOfCuts) {
         logService.consoleLog('Calculating pin');
-        //TODO pinsteps is wrong
-        const pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+        //A pin needs to include the saw width to get to the right position
+        const pinSteps = (program.pinWidth + program.sawWidth) / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+
+        //Add the message after moving beyond a pin
         if (program.cutWidth > program.sawWidth) {
-          addMovement(pinSteps, 'Make subcut 1/'+cutsRoundedUp);
+          addMovement(pinSteps, 'Make the subcut 1/'+cutsRoundedUp);
         }
         else if (program.cutWidth === program.sawWidth) {
           addMovement(pinSteps, 'Make the cut');
@@ -266,15 +282,17 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     }
   }
 
-  function calculateSubCuts(subCuts, cutsRoundedUp) {
+  function calculateSubCuts(cutsRoundedUp) {
+    // IMPORTANT: here we calculate the remaining subcut steps,
+    // we start iterating at 2 because first subcut is already added after moving to the start position or
+    // moving past the pin, the messages for the first subcut are handled in other places:
+    // movedToStartPosition() for first cut, cutsAndPins() for subsequent cuts
 
-
-    // calculate remaining subcut steps, start at 2 because first subcut is already added after moving to past pin
-    for (var j=2; j<= cutsRoundedUp; j++){
+    for (let j=2; j<= cutsRoundedUp; j++){
       logService.consoleLog('Var j'+j);
       if (j<cutsRoundedUp){
         var stepsPerSawWidth = program.sawWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-        addMovement(stepsPerSawWidth, 'Make subcut '+j+'/'+cutsRoundedUp)
+        addMovement(stepsPerSawWidth, 'Make the subcut '+j+'/'+cutsRoundedUp)
       }
 
       //calculate remaining mm & steps, based on number of subcuts already taken

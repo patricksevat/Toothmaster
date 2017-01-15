@@ -8184,73 +8184,73 @@
 	
 	var _controllers2 = _interopRequireDefault(_controllers);
 	
-	var _sendAndReceiveService = __webpack_require__(310);
+	var _sendAndReceiveService = __webpack_require__(311);
 	
 	var _sendAndReceiveService2 = _interopRequireDefault(_sendAndReceiveService);
 	
-	var _shareSettingsService = __webpack_require__(311);
+	var _shareSettingsService = __webpack_require__(312);
 	
 	var _shareSettingsService2 = _interopRequireDefault(_shareSettingsService);
 	
-	var _shareProgramService = __webpack_require__(312);
+	var _shareProgramService = __webpack_require__(313);
 	
 	var _shareProgramService2 = _interopRequireDefault(_shareProgramService);
 	
-	var _skipService = __webpack_require__(313);
+	var _skipService = __webpack_require__(314);
 	
 	var _skipService2 = _interopRequireDefault(_skipService);
 	
-	var _buttonService = __webpack_require__(314);
+	var _buttonService = __webpack_require__(315);
 	
 	var _buttonService2 = _interopRequireDefault(_buttonService);
 	
-	var _emergencyService = __webpack_require__(315);
+	var _emergencyService = __webpack_require__(316);
 	
 	var _emergencyService2 = _interopRequireDefault(_emergencyService);
 	
-	var _bluetoothService = __webpack_require__(316);
+	var _bluetoothService = __webpack_require__(317);
 	
-	var _logService = __webpack_require__(317);
+	var _logService = __webpack_require__(318);
 	
 	var _logService2 = _interopRequireDefault(_logService);
 	
-	var _calculateVarsService = __webpack_require__(318);
+	var _calculateVarsService = __webpack_require__(319);
 	
 	var _calculateVarsService2 = _interopRequireDefault(_calculateVarsService);
 	
-	var _logModalService = __webpack_require__(319);
+	var _logModalService = __webpack_require__(320);
 	
 	var _logModalService2 = _interopRequireDefault(_logModalService);
 	
-	var _modalService = __webpack_require__(320);
+	var _modalService = __webpack_require__(321);
 	
 	var _modalService2 = _interopRequireDefault(_modalService);
 	
-	var _statusService = __webpack_require__(321);
+	var _statusService = __webpack_require__(322);
 	
 	var _statusService2 = _interopRequireDefault(_statusService);
 	
-	var _pauseService = __webpack_require__(322);
+	var _pauseService = __webpack_require__(323);
 	
 	var _pauseService2 = _interopRequireDefault(_pauseService);
 	
-	var _crcService = __webpack_require__(323);
+	var _crcService = __webpack_require__(324);
 	
 	var _crcService2 = _interopRequireDefault(_crcService);
 	
-	var _errorService = __webpack_require__(325);
+	var _errorService = __webpack_require__(326);
 	
 	var _errorService2 = _interopRequireDefault(_errorService);
 	
-	var _errorDirective = __webpack_require__(326);
+	var _errorDirective = __webpack_require__(327);
 	
 	var _errorDirective2 = _interopRequireDefault(_errorDirective);
 	
-	var _modalDirective = __webpack_require__(327);
+	var _modalDirective = __webpack_require__(328);
 	
 	var _modalDirective2 = _interopRequireDefault(_modalDirective);
 	
-	var _connectionStatus = __webpack_require__(330);
+	var _connectionStatus = __webpack_require__(329);
 	
 	var _connectionStatus2 = _interopRequireDefault(_connectionStatus);
 	
@@ -8258,7 +8258,7 @@
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _router = __webpack_require__(328);
+	var _router = __webpack_require__(330);
 	
 	var _router2 = _interopRequireDefault(_router);
 	
@@ -8290,19 +8290,25 @@
 	    bugout.bugout.log('startChangeStart, toState: ' + toState.name);
 	  });
 	
-	  $ionicPlatform.on('pause', function () {
-	    bugout.bugout.log('onPause called from app.js');
-	    if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing' || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
-	      pauseService.pause();
-	    } else {}
-	  });
-	
-	  $ionicPlatform.on('resume', function () {
-	    bugout.bugout.log('onResume called from app.js');
-	    if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing' || $ionicHistory.currentStateName() === 'app.test' || $ionicHistory.currentStateName() === 'app.bluetoothConnection') {
-	      pauseService.resume();
-	    } else {}
-	  });
+	  // $ionicPlatform.on('pause', function () {
+	  //   bugout.bugout.log('onPause called from app.js');
+	  //   if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
+	  //     || $ionicHistory.currentStateName() === 'app.test') {
+	  //     pauseService.pause();
+	  //   }
+	  //   else {
+	  //   }
+	  // });
+	  //
+	  // $ionicPlatform.on('resume', function () {
+	  //   bugout.bugout.log('onResume called from app.js');
+	  //   if ($ionicHistory.currentStateName() === 'app.runBluetooth' || $ionicHistory.currentStateName() === 'app.homing'
+	  //     || $ionicHistory.currentStateName() === 'app.test') {
+	  //     pauseService.resume();
+	  //   }
+	  //   else {
+	  //   }
+	  // });
 	
 	  $ionicPlatform.ready(function () {
 	
@@ -8377,7 +8383,7 @@
 	
 	var _modalCtrl2 = _interopRequireDefault(_modalCtrl);
 	
-	var _connectionStatusCtrl = __webpack_require__(329);
+	var _connectionStatusCtrl = __webpack_require__(310);
 	
 	var _connectionStatusCtrl2 = _interopRequireDefault(_connectionStatusCtrl);
 	
@@ -9257,21 +9263,37 @@
 	    for (var i = 1; i <= program.numberOfCuts; i++) {
 	      logService.consoleLog('calculating cut =' + i);
 	
+	      //IMPORTANT: for the first (sub)cut: we are already in place for the first (sub)cut after moving to start position.
+	      //The popup message for making the first (sub)cut is handled by movedToStartPosition() which is called
+	      //after settings have succesfully been sent
+	
+	      //The order may seem counter intuitive: calculating subcuts before calculating pins.
+	      //However, remember that with the first cut we are already in start position for the first (sub)cut,
+	      // then we need to add movements for subcuts of cut 1 (if needed), then we need to calculate pin 1,
+	      // add message for the cut 2 and add movements for the subcuts of cut 2 (if needed), then calculate pin 2, etc.
+	      // on the last cut we only calculate the subcuts of the last cut (if needed) and skip the last pin calculation
+	
 	      //how many subcuts do we need for this cut to complete
-	      var subCuts = program.cutWidth / program.sawWidth;
-	      var cutsRoundedUp = Math.ceil(subCuts);
-	      //if cut width is wider than saw width, calculate subcuts (multiple subcuts needed to complete one cut)
-	      if (program.cutWidth > program.sawWidth) {
-	        calculateSubCuts(subCuts, cutsRoundedUp);
+	      var cutsRoundedUp = Math.ceil(program.cutWidth / program.sawWidth);
+	
+	      //if we need subcuts, calculate subcuts (multiple subcuts needed to complete one cut)
+	      if (cutsRoundedUp > 1) {
+	        calculateSubCuts(cutsRoundedUp);
 	      }
 	
-	      //calculate steps for pins, not needed after last cut, thus i<numberOfCuts
+	      //IMPORTANT: similar to moving to start position, we are now going to calculate the pins.
+	      //Pins behave like moving to start position, with the exception that we do need to add a message
+	      //Furthermore we do not need to move beyond the last (sub)cut, thus for calculating pin steps we use
+	      //i<numberOfCuts
+	
 	      if (i < program.numberOfCuts) {
 	        logService.consoleLog('Calculating pin');
-	        //TODO pinsteps is wrong
-	        var pinSteps = program.pinWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+	        //A pin needs to include the saw width to get to the right position
+	        var pinSteps = (program.pinWidth + program.sawWidth) / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
+	
+	        //Add the message after moving beyond a pin
 	        if (program.cutWidth > program.sawWidth) {
-	          addMovement(pinSteps, 'Make subcut 1/' + cutsRoundedUp);
+	          addMovement(pinSteps, 'Make the subcut 1/' + cutsRoundedUp);
 	        } else if (program.cutWidth === program.sawWidth) {
 	          addMovement(pinSteps, 'Make the cut');
 	        }
@@ -9285,14 +9307,17 @@
 	    }
 	  }
 	
-	  function calculateSubCuts(subCuts, cutsRoundedUp) {
+	  function calculateSubCuts(cutsRoundedUp) {
+	    // IMPORTANT: here we calculate the remaining subcut steps,
+	    // we start iterating at 2 because first subcut is already added after moving to the start position or
+	    // moving past the pin, the messages for the first subcut are handled in other places:
+	    // movedToStartPosition() for first cut, cutsAndPins() for subsequent cuts
 	
-	    // calculate remaining subcut steps, start at 2 because first subcut is already added after moving to past pin
 	    for (var j = 2; j <= cutsRoundedUp; j++) {
 	      logService.consoleLog('Var j' + j);
 	      if (j < cutsRoundedUp) {
 	        var stepsPerSawWidth = program.sawWidth / $scope.settings.spindleAdvancement * $scope.settings.dipswitch;
-	        addMovement(stepsPerSawWidth, 'Make subcut ' + j + '/' + cutsRoundedUp);
+	        addMovement(stepsPerSawWidth, 'Make the subcut ' + j + '/' + cutsRoundedUp);
 	      }
 	
 	      //calculate remaining mm & steps, based on number of subcuts already taken
@@ -10843,6 +10868,38 @@
 /* 310 */
 /***/ function(module, exports) {
 
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($rootScope, $scope, bluetoothService) {
+	  $scope.deviceName = bluetoothService.getDeviceName();
+	
+	  bluetoothService.getBluetoothEnabledValue(function (val) {
+	    $scope.bluetoothEnabled = val;
+	  });
+	
+	  bluetoothService.getConnectedValue(function (val) {
+	    $scope.isConnected = val;
+	  });
+	
+	  $rootScope.$on('bluetoothValuesUpdated', function (event, valuesObj) {
+	    $scope.bluetoothEnabled = valuesObj.bluetoothEnabled;
+	    $scope.isConnected = valuesObj.isConnected;
+	    $scope.deviceName = valuesObj.deviceName;
+	  });
+	
+	  $rootScope.$on('connectionLost', function () {
+	    $scope.isConnected = false;
+	  });
+	};
+
+/***/ },
+/* 311 */
+/***/ function(module, exports) {
+
 	"use strict";
 	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -10867,17 +10924,27 @@
 	
 	  //Immediately after emergency is on
 	  $rootScope.$on("emergencyOn", function () {
-	    //Unsubscribe from regular responses
-	    sendAndReceive.unsubscribe();
 	
-	    //Subscribe to emergency responses
-	    subscribeEmergency();
+	    var connectionAvailable = $interval(function () {
+	      //TODO test interval
+	      bluetoothService.getConnectedValue(function (value) {
+	        if (value) {
+	          $interval.cancel(connectionAvailable);
 	
-	    //Create listener for emergency command <y8:yX>
-	    createResetListener1();
+	          //Unsubscribe from regular responses
+	          sendAndReceive.unsubscribe();
 	
-	    //Send <y8:yX>
-	    sendEmergency();
+	          //Subscribe to emergency responses
+	          subscribeEmergency();
+	
+	          //Create listener for emergency command <y8:yX>
+	          createResetListener1();
+	
+	          //Send <y8:yX>
+	          sendEmergency();
+	        }
+	      });
+	    }, 1000);
 	  });
 	
 	  //After emergency commands are good allow for resetting of emergency on button click
@@ -10924,13 +10991,15 @@
 	  }
 	
 	  function unsubscribe() {
-	    emergencySubscribed = false;
-	    $window.bluetoothSerial.unsubscribe(function () {
-	      logService.consoleLog('Succesfully unsubscribed');
-	      statusService.setSubscribed(false);
-	    }, function () {
-	      logService.consoleLog('ERROR: could not unsubscribe');
-	    });
+	    if (bluetoothService.getConnectedValue()) {
+	      emergencySubscribed = false;
+	      $window.bluetoothSerial.unsubscribe(function () {
+	        logService.consoleLog('Succesfully unsubscribed');
+	        statusService.setSubscribed(false);
+	      }, function () {
+	        logService.consoleLog('ERROR: could not unsubscribe');
+	      });
+	    }
 	  }
 	
 	  function responseListener(searchStr) {
@@ -11177,7 +11246,7 @@
 	          //append string with cyclic redundancy check
 	          var strWithCrc = crcService.appendCRC(str);
 	          $window.bluetoothSerial.write(strWithCrc, function () {
-	            bugout.bugout.log('sent: ' + strWithCrc);
+	            logService.addOne('sent command: ' + strWithCrc);
 	            lastCommandTime = Date.now();
 	            resolve();
 	          }, function () {
@@ -11265,6 +11334,7 @@
 	      }
 	  }
 	
+	  //FIXME this function is called twice
 	  function sendEmergency() {
 	    logService.consoleLog('\n\nsendAndReceiveService.sendEmergency called');
 	    stepMotorNum = shareSettings.getObj().stepMotorNum;
@@ -11272,20 +11342,11 @@
 	    var resetCommand1 = crcService.appendCRC('<y8:y' + stepMotorNum + '>');
 	    bugout.bugout.log('written resetCommand1: ' + resetCommand1);
 	
-	    //TODO test interval
-	
-	    var connectionAvailable = $interval(function () {
-	      bluetoothService.getConnectedValued(function (value) {
-	        if (value) {
-	          $window.bluetoothSerial.write(resetCommand1, function () {
-	            logService.addOne('Program reset command1 sent: ' + resetCommand1);
-	          }, function (err) {
-	            logService.addOne('Error: Program reset command could not be sent. ' + err, true);
-	          });
-	          $interval.cancel(connectionAvailable);
-	        }
-	      });
-	    }, 1000);
+	    $window.bluetoothSerial.write(resetCommand1, function () {
+	      logService.addOne('Program reset command1 sent: ' + resetCommand1);
+	    }, function (err) {
+	      logService.addOne('Error: Program reset command could not be sent. ' + err, true);
+	    });
 	  }
 	
 	  function subscribeEmergency() {
@@ -11378,7 +11439,7 @@
 	}
 
 /***/ },
-/* 311 */
+/* 312 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11525,7 +11586,7 @@
 	}
 
 /***/ },
-/* 312 */
+/* 313 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11591,7 +11652,7 @@
 	};
 
 /***/ },
-/* 313 */
+/* 314 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -11616,7 +11677,7 @@
 	};
 
 /***/ },
-/* 314 */
+/* 315 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11673,7 +11734,7 @@
 	};
 
 /***/ },
-/* 315 */
+/* 316 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11723,7 +11784,7 @@
 	};
 
 /***/ },
-/* 316 */
+/* 317 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11843,135 +11904,184 @@
 	    });
 	  }
 	
-	  self.connectWithRetry = $async(regeneratorRuntime.mark(function _callee2() {
+	  self.connectWithRetry = $async(regeneratorRuntime.mark(function _callee3() {
 	    var _this = this;
 	
-	    var lastConnectedDevice, _loop, i, _ret;
+	    var _ret;
 	
-	    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+	    return regeneratorRuntime.wrap(function _callee3$(_context3) {
 	      while (1) {
-	        switch (_context2.prev = _context2.next) {
+	        switch (_context3.prev = _context3.next) {
 	          case 0:
-	            _context2.prev = 0;
+	            _context3.prev = 0;
+	            return _context3.delegateYield(regeneratorRuntime.mark(function _callee2() {
+	              var lastConnectedDevice, _loop, i, _ret2;
 	
-	            console.log('connect with retry called');
-	            lastConnectedDevice = JSON.parse(getLastConnectedDevice());
-	            _context2.next = 5;
-	            return getConnectedPromise();
-	
-	          case 5:
-	            isConnected = _context2.sent;
-	            _context2.next = 8;
-	            return getEnabledPromise();
-	
-	          case 8:
-	            bluetoothEnabled = _context2.sent;
-	
-	            bugout.bugout.log('lastConnectedDevice: ');
-	            bugout.bugout.log(lastConnectedDevice);
-	            bugout.bugout.log('bluetoothEnabled: ' + bluetoothEnabled);
-	            bugout.bugout.log('isConnected: ' + isConnected);
-	
-	            _loop = regeneratorRuntime.mark(function _callee(i) {
-	              return regeneratorRuntime.wrap(function _callee$(_context) {
+	              return regeneratorRuntime.wrap(function _callee2$(_context2) {
 	                while (1) {
-	                  switch (_context.prev = _context.next) {
+	                  switch (_context2.prev = _context2.next) {
 	                    case 0:
-	                      bugout.bugout.log('connect with retry i: ' + i);
+	                      bugout.bugout.log('connect with retry called, reconnecting with lastConnectedDevice');
+	                      lastConnectedDevice = JSON.parse(getLastConnectedDevice());
+	                      _context2.next = 4;
+	                      return getConnectedPromise();
 	
-	                      if (!(i === 4)) {
-	                        _context.next = 5;
+	                    case 4:
+	                      isConnected = _context2.sent;
+	                      _context2.next = 7;
+	                      return getEnabledPromise();
+	
+	                    case 7:
+	                      bluetoothEnabled = _context2.sent;
+	
+	                      bugout.bugout.log('lastConnectedDevice: ');
+	                      bugout.bugout.log(lastConnectedDevice);
+	                      bugout.bugout.log('bluetoothEnabled: ' + bluetoothEnabled);
+	                      bugout.bugout.log('isConnected: ' + isConnected);
+	
+	                      if (bluetoothEnabled) {
+	                        _context2.next = 15;
 	                        break;
 	                      }
 	
-	                      return _context.abrupt('return', {
-	                        v: new Promise(function (resolve, reject) {
-	                          reject();
-	                        })
+	                      bugout.bugout.log('bluetooth disabled, canceling connectWithRetry');
+	                      return _context2.abrupt('return', {
+	                        v: new Promise.reject()
 	                      });
 	
-	                    case 5:
-	                      if (!(lastConnectedDevice && bluetoothEnabled && !isConnected)) {
-	                        _context.next = 9;
-	                        break;
-	                      }
-	
-	                      _context.next = 8;
-	                      return connectToSelectedDevice(lastConnectedDevice.id, lastConnectedDevice.name).then(function () {
-	                        bugout.bugout.log('resolving connect with retry number: ' + i);
-	                        isConnected = true;
-	                      }, function (err) {
-	                        bugout.bugout.log('continuing connect with retry after fail to connect, err: ' + err);
-	                        isConnected = false;
-	                      });
-	
-	                    case 8:
-	                      bugout.bugout.log('yielded connect with retry number: ' + i);
-	
-	                    case 9:
+	                    case 15:
 	                      if (!isConnected) {
-	                        _context.next = 11;
+	                        _context2.next = 18;
 	                        break;
 	                      }
 	
-	                      return _context.abrupt('return', 'break');
+	                      bugout.bugout.log('already connected, canceling connectWithRetry');
+	                      return _context2.abrupt('return', {
+	                        v: new Promise.reject()
+	                      });
 	
-	                    case 11:
+	                    case 18:
+	                      _loop = regeneratorRuntime.mark(function _callee(i) {
+	                        return regeneratorRuntime.wrap(function _callee$(_context) {
+	                          while (1) {
+	                            switch (_context.prev = _context.next) {
+	                              case 0:
+	                                bugout.bugout.log('connect with retry i: ' + i);
+	
+	                                if (!(i === 4)) {
+	                                  _context.next = 5;
+	                                  break;
+	                                }
+	
+	                                return _context.abrupt('return', {
+	                                  v: {
+	                                    v: new Promise(function (resolve, reject) {
+	                                      reject();
+	                                    })
+	                                  }
+	                                });
+	
+	                              case 5:
+	                                if (!(lastConnectedDevice && bluetoothEnabled && !isConnected)) {
+	                                  _context.next = 9;
+	                                  break;
+	                                }
+	
+	                                _context.next = 8;
+	                                return connectToSelectedDevice(lastConnectedDevice.id, lastConnectedDevice.name).then(function () {
+	                                  bugout.bugout.log('resolving connect with retry number: ' + i);
+	                                  logService.addOne('Connected to your last connected device (' + lastConnectedDevice.name + ') on start-up');
+	                                  isConnected = true;
+	                                }, function (err) {
+	                                  bugout.bugout.log('continuing connect with retry after fail to connect, err: ' + err);
+	                                  isConnected = false;
+	                                });
+	
+	                              case 8:
+	                                bugout.bugout.log('yielded connect with retry number: ' + i);
+	
+	                              case 9:
+	                                if (!isConnected) {
+	                                  _context.next = 11;
+	                                  break;
+	                                }
+	
+	                                return _context.abrupt('return', 'break');
+	
+	                              case 11:
+	                              case 'end':
+	                                return _context.stop();
+	                            }
+	                          }
+	                        }, _callee, _this);
+	                      });
+	                      i = 0;
+	
+	                    case 20:
+	                      if (!(i < 5)) {
+	                        _context2.next = 32;
+	                        break;
+	                      }
+	
+	                      return _context2.delegateYield(_loop(i), 't0', 22);
+	
+	                    case 22:
+	                      _ret2 = _context2.t0;
+	                      _context2.t1 = _ret2;
+	                      _context2.next = _context2.t1 === 'break' ? 26 : 27;
+	                      break;
+	
+	                    case 26:
+	                      return _context2.abrupt('break', 32);
+	
+	                    case 27:
+	                      if (!((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object")) {
+	                        _context2.next = 29;
+	                        break;
+	                      }
+	
+	                      return _context2.abrupt('return', _ret2.v);
+	
+	                    case 29:
+	                      i++;
+	                      _context2.next = 20;
+	                      break;
+	
+	                    case 32:
 	                    case 'end':
-	                      return _context.stop();
+	                      return _context2.stop();
 	                  }
 	                }
-	              }, _callee, _this);
-	            });
-	            i = 0;
+	              }, _callee2, _this);
+	            })(), 't0', 2);
 	
-	          case 15:
-	            if (!(i < 5)) {
-	              _context2.next = 27;
-	              break;
-	            }
+	          case 2:
+	            _ret = _context3.t0;
 	
-	            return _context2.delegateYield(_loop(i), 't0', 17);
-	
-	          case 17:
-	            _ret = _context2.t0;
-	            _context2.t1 = _ret;
-	            _context2.next = _context2.t1 === 'break' ? 21 : 22;
-	            break;
-	
-	          case 21:
-	            return _context2.abrupt('break', 27);
-	
-	          case 22:
 	            if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-	              _context2.next = 24;
+	              _context3.next = 5;
 	              break;
 	            }
 	
-	            return _context2.abrupt('return', _ret.v);
+	            return _context3.abrupt('return', _ret.v);
 	
-	          case 24:
-	            i++;
-	            _context2.next = 15;
+	          case 5:
+	            _context3.next = 10;
 	            break;
 	
-	          case 27:
-	            _context2.next = 32;
-	            break;
-	
-	          case 29:
-	            _context2.prev = 29;
-	            _context2.t2 = _context2['catch'](0);
-	            return _context2.abrupt('return', new Promise(function (resolve, reject) {
-	              reject(_context2.t2);
+	          case 7:
+	            _context3.prev = 7;
+	            _context3.t1 = _context3['catch'](0);
+	            return _context3.abrupt('return', new Promise(function (resolve, reject) {
+	              reject(_context3.t1);
 	            }));
 	
-	          case 32:
+	          case 10:
 	          case 'end':
-	            return _context2.stop();
+	            return _context3.stop();
 	        }
 	      }
-	    }, _callee2, this, [[0, 29]]);
+	    }, _callee3, this, [[0, 7]]);
 	  }));
 	
 	  function turnOn(cb) {
@@ -12074,7 +12184,7 @@
 	exports.bluetoothService = bluetoothService;
 
 /***/ },
-/* 317 */
+/* 318 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12159,7 +12269,7 @@
 	exports.default = logService;
 
 /***/ },
-/* 318 */
+/* 319 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12190,7 +12300,17 @@
 	
 	    //these variables are always needed
 	    vars.return.vars.direction = settings.direction ? 1 : 0;
-	    vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch);
+	    vars.return.vars.startPositionSteps;
+	
+	    //if we are running an actual program, startPosition steps needs to include the width of of the saw blade
+	    if (type === 'runBluetooth') {
+	      vars.return.vars.startPositionSteps = Math.floor((program.startPosition + program.sawWidth) / settings.spindleAdvancement * settings.dipswitch);
+	    }
+	    //  otherwise we are running a move X mm test which does not need to include the saw width
+	    else {
+	        vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch);
+	      }
+	
 	    vars.return.vars.stepsPerRPM = settings.dipswitch;
 	    vars.return.vars.maxRPM = (settings.maxFreq * 60 / settings.dipswitch).toFixed(3);
 	    vars.return.vars.time = settings.time.toFixed(3);
@@ -12237,7 +12357,7 @@
 	}
 
 /***/ },
-/* 319 */
+/* 320 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12296,7 +12416,7 @@
 	}
 
 /***/ },
-/* 320 */
+/* 321 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12338,7 +12458,7 @@
 	}
 
 /***/ },
-/* 321 */
+/* 322 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12390,7 +12510,7 @@
 	}
 
 /***/ },
-/* 322 */
+/* 323 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12448,7 +12568,7 @@
 	};
 
 /***/ },
-/* 323 */
+/* 324 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12458,7 +12578,7 @@
 	});
 	exports.default = crcService;
 	
-	var _crc = __webpack_require__(324);
+	var _crc = __webpack_require__(325);
 	
 	var _crc2 = _interopRequireDefault(_crc);
 	
@@ -12478,7 +12598,7 @@
 	}
 
 /***/ },
-/* 324 */
+/* 325 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12518,7 +12638,7 @@
 	module.exports = crc16;
 
 /***/ },
-/* 325 */
+/* 326 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12598,7 +12718,7 @@
 	};
 
 /***/ },
-/* 326 */
+/* 327 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12616,7 +12736,7 @@
 	};
 
 /***/ },
-/* 327 */
+/* 328 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12634,7 +12754,25 @@
 	};
 
 /***/ },
-/* 328 */
+/* 329 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($rootScope) {
+	  return {
+	    restrict: 'E',
+	    replace: 'true',
+	    templateUrl: './templates/connectionStatus.html'
+	  };
+	};
+
+/***/ },
+/* 330 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12759,56 +12897,6 @@
 	}
 	
 	exports.default = router;
-
-/***/ },
-/* 329 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function ($rootScope, $scope, bluetoothService) {
-	  $scope.deviceName = bluetoothService.getDeviceName();
-	
-	  bluetoothService.getBluetoothEnabledValue(function (val) {
-	    $scope.bluetoothEnabled = val;
-	  });
-	
-	  bluetoothService.getConnectedValue(function (val) {
-	    $scope.isConnected = val;
-	  });
-	
-	  $rootScope.$on('bluetoothValuesUpdated', function (event, valuesObj) {
-	    $scope.bluetoothEnabled = valuesObj.bluetoothEnabled;
-	    $scope.isConnected = valuesObj.isConnected;
-	    $scope.deviceName = valuesObj.deviceName;
-	  });
-	
-	  $rootScope.$on('connectionLost', function () {
-	    $scope.isConnected = false;
-	  });
-	};
-
-/***/ },
-/* 330 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function ($rootScope) {
-	  return {
-	    restrict: 'E',
-	    replace: 'true',
-	    templateUrl: './templates/connectionStatus.html'
-	  };
-	};
 
 /***/ }
 /******/ ]);
