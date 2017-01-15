@@ -62,8 +62,9 @@ export default function ($rootScope, bugout) {
 
   $rootScope.$on('connectedToDevice', () => {
     removeError(['Connection with bluetooth device lost', 'Cannot find paired Bluetooth devices',
-    'No devices found', 'Lost connecting while sending, turning on emergency',
-      'Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device']);
+    'No devices found', 'Lost connection while sending, turning on emergency',
+      'Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device',
+    'Bluetooth disabled while sending, turning on emergency']);
   });
 
   function removeError(msgArr) {

@@ -51,6 +51,8 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
       }
 
       bluetoothEnabled = true;
+      bluetoothDisabledBoolean = false;
+
       emitValues();
 
       if (cb)
@@ -256,10 +258,13 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
 
   //TODO cancel this interval when called, reinitiate when bluetooth is turned on, use getBluetoothEnabledValue
 
+  let bluetoothDisabledBoolean = false;
+
   let bluetoothEnabledInterval = $interval(() => {
     getBluetoothEnabledValue(function (enabled) {
-      if (!enabled) {
-        // bugout.bugout.log('bluetooth disabled from interval');
+      if (!enabled && !bluetoothDisabledBoolean) {
+        bluetoothDisabledBoolean = true;
+        bugout.bugout.log('bluetooth disabled from interval');
         if (statusService.getSending() === true) {
           logService.addOne('Bluetooth disabled while sending, turning on emergency', true);
           emergencyService.on();
@@ -267,6 +272,27 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
       }
     }, true)
   }, 1000);
+
+  // function checkBluetoothEnabledInterval() {
+  //   bluetoothEnabledInterval = $interval(() => {
+  //     getBluetoothEnabledValue(function (enabled) {
+  //       if (!enabled) {
+  //         // bugout.bugout.log('bluetooth disabled from interval');
+  //         if (statusService.getSending() === true) {
+  //           logService.addOne('Bluetooth disabled while sending, turning on emergency', true);
+  //           emergencyService.on();
+  //         }
+  //       }
+  //     }, true)
+  //   }, 1000);
+  // }
+  //
+  // function cancelBluetoothEnabledInterval() {
+  //   if (bluetoothEnabledInterval) {
+  //     $interval.cancel(bluetoothEnabledInterval);
+  //     bugout.bugout.log('canceled bluetoothEnabledInterval');
+  //   }
+  // }
 
   //
   //  Helpers

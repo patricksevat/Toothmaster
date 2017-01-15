@@ -11888,6 +11888,8 @@
 	      }
 	
 	      bluetoothEnabled = true;
+	      bluetoothDisabledBoolean = false;
+	
 	      emitValues();
 	
 	      if (cb) cb(bluetoothEnabled);else return bluetoothEnabled;
@@ -12216,10 +12218,13 @@
 	
 	  //TODO cancel this interval when called, reinitiate when bluetooth is turned on, use getBluetoothEnabledValue
 	
+	  var bluetoothDisabledBoolean = false;
+	
 	  var bluetoothEnabledInterval = $interval(function () {
 	    getBluetoothEnabledValue(function (enabled) {
-	      if (!enabled) {
-	        // bugout.bugout.log('bluetooth disabled from interval');
+	      if (!enabled && !bluetoothDisabledBoolean) {
+	        bluetoothDisabledBoolean = true;
+	        bugout.bugout.log('bluetooth disabled from interval');
 	        if (statusService.getSending() === true) {
 	          logService.addOne('Bluetooth disabled while sending, turning on emergency', true);
 	          emergencyService.on();
@@ -12227,6 +12232,27 @@
 	      }
 	    }, true);
 	  }, 1000);
+	
+	  // function checkBluetoothEnabledInterval() {
+	  //   bluetoothEnabledInterval = $interval(() => {
+	  //     getBluetoothEnabledValue(function (enabled) {
+	  //       if (!enabled) {
+	  //         // bugout.bugout.log('bluetooth disabled from interval');
+	  //         if (statusService.getSending() === true) {
+	  //           logService.addOne('Bluetooth disabled while sending, turning on emergency', true);
+	  //           emergencyService.on();
+	  //         }
+	  //       }
+	  //     }, true)
+	  //   }, 1000);
+	  // }
+	  //
+	  // function cancelBluetoothEnabledInterval() {
+	  //   if (bluetoothEnabledInterval) {
+	  //     $interval.cancel(bluetoothEnabledInterval);
+	  //     bugout.bugout.log('canceled bluetoothEnabledInterval');
+	  //   }
+	  // }
 	
 	  //
 	  //  Helpers
@@ -12765,7 +12791,7 @@
 	  });
 	
 	  $rootScope.$on('connectedToDevice', function () {
-	    removeError(['Connection with bluetooth device lost', 'Cannot find paired Bluetooth devices', 'No devices found', 'Lost connecting while sending, turning on emergency', 'Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device']);
+	    removeError(['Connection with bluetooth device lost', 'Cannot find paired Bluetooth devices', 'No devices found', 'Lost connection while sending, turning on emergency', 'Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device', 'Bluetooth disabled while sending, turning on emergency']);
 	  });
 	
 	  function removeError(msgArr) {
