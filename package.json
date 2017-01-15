@@ -15,6 +15,7 @@
     "gulp-plumber": "^1.1.0",
     "gulp-rename": "^1.2.0",
     "gulp-sass": "^2.0.4",
+    "lodash": "^4.17.4",
     "ng-async": "^1.1.0"
   },
   "devDependencies": {

@@ -76,12 +76,16 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
   });
 
   $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
-    logService.consoleLog('BEFORE LEAVE');
-    if (statusService.getSending() === true && !skipLeaveCheck ) {
-      event.preventDefault();
-      leaveWhileSendingWarning(toState);
+    if (fromState.name === 'app.homing') {
+      logService.consoleLog('BEFORE LEAVE homing');
+      if (statusService.getSending() === true && !skipLeaveCheck ) {
+        event.preventDefault();
+        leaveWhileSendingWarning(toState);
+      }
     }
   });
+
+  //TODO a warning for wait for current command to finish is shown with wrong settings
 
   function leaveWhileSendingWarning(toState) {
     $ionicPopup.alert({
@@ -117,7 +121,7 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
     $scope.bluetoothEnabled = valuesObj.bluetoothEnabled;
     $scope.isConnected = valuesObj.isConnected;
   });
-  
+
   $rootScope.$on('connectionLost', () => {
     $scope.isConnected = false;
   });
@@ -200,16 +204,24 @@ export default function ($rootScope, $scope, $cordovaClipboard, $cordovaBluetoot
       statusService.setSending(false);
       bluetoothResponseListener();
       wydoneListener();
+      checkWydoneEmergencyListener();
+      checkWydoneLeaveListener();
     });
 
-    $rootScope.$on('emergencyOn', () => {
+    let checkWydoneEmergencyListener = $rootScope.$on('emergencyOn', () => {
       $interval.cancel(timer);
       wydoneListener();
+      bluetoothResponseListener();
+      checkWydoneEmergencyListener();
+      checkWydoneLeaveListener();
     });
 
-    $rootScope.$on('$ionicView.leave', () => {
+    let checkWydoneLeaveListener = $scope.$on('$ionicView.leave', () => {
       $interval.cancel(timer);
       wydoneListener();
+      bluetoothResponseListener();
+      checkWydoneEmergencyListener();
+      checkWydoneLeaveListener();
     })
   }
 

@@ -22,7 +22,7 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   //
   //service scope vars
   //
-
+  let valuesChanged = false;
   let bluetoothEnabled;
   let isConnected;
   let retry = 1;
@@ -46,17 +46,23 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
 
   function getBluetoothEnabledValue(cb, skipLog) {
     $cordovaBluetoothSerial.isEnabled().then(function () {
+      if (!bluetoothEnabled) {
+        valuesChanged = true;
+      }
+
       bluetoothEnabled = true;
       emitValues();
-
-      if (!skipLog)
-        bugout.bugout.log('checkBluetoothEnabledService.value ='+bluetoothEnabled);
 
       if (cb)
         cb(bluetoothEnabled);
       else
         return bluetoothEnabled;
+
     }, function () {
+      if (bluetoothEnabled) {
+        valuesChanged = true;
+      }
+
       bluetoothEnabled = false;
       emitValues();
 
@@ -70,10 +76,18 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
 
   function getConnectedValue(cb) {
     $cordovaBluetoothSerial.isConnected().then(function () {
+      if (!isConnected) {
+        valuesChanged = true;
+      }
+
       isConnected = true;
       emitValues();
       return isConnected;
     }, function () {
+      if (isConnected) {
+        valuesChanged = true;
+      }
+
       isConnected = false;
       emitValues();
       bugout.bugout.log('getConnectedValue ='+isConnected);
@@ -84,6 +98,11 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
   }
 
   function emitValues() {
+    if (valuesChanged) {
+      console.log('Values changed. bluetoothEnabled: '+bluetoothEnabled+', isConnected: '+isConnected);
+      valuesChanged = false;
+    }
+
     $rootScope.$emit('bluetoothValuesUpdated', {
       isConnected,
       bluetoothEnabled,
@@ -234,6 +253,8 @@ function bluetoothService(bugout, $cordovaBluetoothSerial, window, logService, s
       bugout.bugout.log('canceled connectionAliveInterval')
     }
   }
+
+  //TODO cancel this interval when called, reinitiate when bluetooth is turned on, use getBluetoothEnabledValue
 
   let bluetoothEnabledInterval = $interval(() => {
     getBluetoothEnabledValue(function (enabled) {

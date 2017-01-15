@@ -22,7 +22,7 @@ module.exports = sendAndReceiveService;
     $rootScope.$on("emergencyOn", function () {
 
       let connectionAvailable = $interval(function () {
-        //TODO test interval
+        //TODO emergencyOn sent a million times, fixme
         bluetoothService.getConnectedValue(function (value) {
           if (value) {
             $interval.cancel(connectionAvailable);

@@ -1,3 +1,5 @@
+import lodash from 'lodash';
+
 export default function ($rootScope, bugout) {
   let errors = [];
   //example error: {level: 'critical', message: 'something went wrong'}
@@ -12,6 +14,11 @@ export default function ($rootScope, bugout) {
     let priorityMessage = false;
     let priorityIndex;
     errors.forEach((errObj, index) => {
+      if (typeof errObj.message === 'undefined') {
+        console.log('UNDEFINED errObj.message:');
+        console.log(errObj);
+      }
+
       if (errObj.message === 'Connection with bluetooth device lost' ||
         errObj.message.search('has been hit. Aborting task.') > -1 ||
         errObj.message === 'You have exceeded the maximum number of allowed steps') {
@@ -24,7 +31,7 @@ export default function ($rootScope, bugout) {
       errors.unshift(newErrorObj);
     }
     else {
-      errors = [errors[0], newErrorObj, errors.slice(1)];
+      errors = lodash.flattenDeep([errors[0], newErrorObj, errors.slice(1)]);
     }
 
     $rootScope.$emit('errorsChanged');
@@ -55,7 +62,7 @@ export default function ($rootScope, bugout) {
 
   $rootScope.$on('connectedToDevice', () => {
     removeError(['Connection with bluetooth device lost', 'Cannot find paired Bluetooth devices',
-    'No devices found', 'Lost connecting while sending, turning on emergency', 
+    'No devices found', 'Lost connecting while sending, turning on emergency',
       'Your smartphone has not been able to connect or has lost connection with the selected Bluetooth device']);
   });
 

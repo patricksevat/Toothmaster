@@ -91,11 +91,15 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
     sendAndReceiveService.subscribe();
   });
 
+  //TODO check if needed to cancel listener, now multiple listeners are created
+
   $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
-    logService.consoleLog('BEFORE LEAVE');
-    if (statusService.getSending() === true && !skipLeaveCheck ) {
-      event.preventDefault();
-      leaveWhileSendingWarning(toState);
+    if (fromState.name === 'app.runBluetooth') {
+      logService.consoleLog('BEFORE LEAVE runBluetoothCtrl');
+      if (statusService.getSending() === true && !skipLeaveCheck) {
+        event.preventDefault();
+        leaveWhileSendingWarning(toState);
+      }
     }
   });
 
@@ -368,18 +372,24 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       movedToStartPosition();
       bluetoothResponseListener();
       wydoneListener();
+      wydoneEmergencyListener();
+      wydoneLeaveListener();
     });
 
-    $rootScope.$on('emergencyOn', () => {
+    let wydoneEmergencyListener = $rootScope.$on('emergencyOn', () => {
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();
+      wydoneEmergencyListener();
+      wydoneLeaveListener();
     });
 
-    $rootScope.$on('$ionicView.leave', () => {
+    let wydoneLeaveListener = $scope.$on('$ionicView.leave', () => {
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();
+      wydoneEmergencyListener();
+      wydoneLeaveListener();
     })
   }
 
@@ -461,18 +471,24 @@ export default function($rootScope, $scope, $cordovaClipboard, $cordovaBluetooth
       checkDoneReceivedWydone();
       bluetoothResponseListener();
       wydoneListener();
+      checkdoneEmergencyListener();
+      checkDoneLeaveListener();
     });
 
-    $rootScope.$on('emergencyOn', () => {
+    let checkdoneEmergencyListener = $rootScope.$on('emergencyOn', () => {
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();
+      checkdoneEmergencyListener();
+      checkDoneLeaveListener();
     });
 
-    $rootScope.$on('$ionicView.leave', () => {
+    let checkDoneLeaveListener = $scope.$on('$ionicView.leave', () => {
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();
+      checkdoneEmergencyListener();
+      checkDoneLeaveListener();
     })
   }
 

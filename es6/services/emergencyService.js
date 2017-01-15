@@ -19,11 +19,13 @@ export default function (buttonService, statusService, $rootScope, bugout) {
   emergency.reset = reset;
 
   function emergencyOn(cb) {
-    bugout.bugout.log('emergencyService.on called');
-    statusService.setEmergency(true);
-    buttonService.setEmergencyValues();
-    $rootScope.$emit('emergencyOn');
-    if (cb) cb();
+    if (!statusService.getEmergency()) {
+      bugout.bugout.log('emergencyService.on called');
+      statusService.setEmergency(true);
+      buttonService.setEmergencyValues();
+      $rootScope.$emit('emergencyOn');
+      if (cb) cb();
+    }
   }
 
   function emergencyOff(cb) {
@@ -46,7 +48,7 @@ export default function (buttonService, statusService, $rootScope, bugout) {
     });
     if (cb) cb();
   }
-  
+
   function reset() {
     $rootScope.$emit("resetEmergency");
   }

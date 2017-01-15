@@ -69,9 +69,9 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       setButtons({'showResetButton': true});
     }
   });
-
+  
   $scope.$on('$ionicView.leave', function () {
-    logService.consoleLog('leaveView in bluetoothConnectionCtrl fired');
+    logService.consoleLog('leaveView in bluetoothTestCtrl fired');
     $scope.retriesNeeded = 0;
     $scope.completedTest = 0;
     sentSettingsForTest = false;
@@ -84,10 +84,12 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
   });
 
   $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams, fromState, fromStateParams) {
-    logService.consoleLog('BEFORE LEAVE');
-    if (statusService.getSending() === true && !skipLeaveCheck ) {
-      event.preventDefault();
-      leaveWhileSendingWarning(toState);
+    if (fromState.name === 'app.test') {
+      logService.consoleLog('BEFORE LEAVE bluetoothTestCtrl');
+      if (statusService.getSending() === true && !skipLeaveCheck ) {
+        event.preventDefault();
+        leaveWhileSendingWarning(toState);
+      }
     }
   });
 
@@ -224,7 +226,10 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       $interval.cancel(timer);
       bluetoothResponseListener();
       wydoneListener();
+      checkWydoneEmergencyLister();
+      checkWydoneLeaveListener();
 
+      //TODO test if listeners are cancelled correctly
       if (type === 'moveXMm')
         completedMoveXMm();
       else if (type === 'stressTest')
@@ -234,16 +239,20 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
 
     });
 
-    $rootScope.$on('emergencyOn', () => {
+    let checkWydoneEmergencyLister = $rootScope.$on('emergencyOn', () => {
       bluetoothResponseListener();
       wydoneListener();
+      checkWydoneEmergencyLister();
+      checkWydoneLeaveListener();
       $interval.cancel(timer);
     });
 
-    $rootScope.$on('$ionicView.leave', () => {
+    let checkWydoneLeaveListener = $scope.$on('$ionicView.leave', () => {
       bugout.bugout.log('ionicView.leave in checkWydone in bluetoothTestCtrl');
       bluetoothResponseListener();
       wydoneListener();
+      checkWydoneEmergencyLister();
+      checkWydoneLeaveListener();
       $interval.cancel(timer);
     })
   }
@@ -282,6 +291,8 @@ export default function ($rootScope, $scope, $ionicPopup, $interval, $timeout, s
       bugout.bugout.log('progress: '+$scope.progress);
     }
   }
+
+  //TODO tests start running even when settings are wrong
 
   $scope.stressTest = $async(function* () {
     if (statusService.getEmergency() === true) {
