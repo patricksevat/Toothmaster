@@ -65,7 +65,7 @@ angular.module('Toothmaster', ['ionic', 'toothmasterControllers', 'ngCordova', '
   .directive('connectionStatus', [connectionStatus])
 
   .run(function($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-    bugout.bugout.log('version 1.1.0.9, localStorage:');
+    bugout.bugout.log('version 1.1.1.0, localStorage:');
     bugout.bugout.log($window.localStorage);
       $rootScope.$on('$stateChangeStart',
         function(event, toState, toParams, fromState, fromParams, options){

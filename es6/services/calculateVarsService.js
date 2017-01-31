@@ -20,16 +20,7 @@ export default function calculateVarsService(shareProgram, shareSettings) {
 
     //these variables are always needed
     vars.return.vars.direction = (settings.direction) ? 1:0;
-    vars.return.vars.startPositionSteps;
-
-    //if we are running an actual program, startPosition steps needs to include the width of of the saw blade
-    if (type === 'runBluetooth') {
-      vars.return.vars.startPositionSteps = Math.floor((program.startPosition + program.sawWidth) / settings.spindleAdvancement * settings.dipswitch);
-    }
-    //  otherwise we are running a move X mm test which does not need to include the saw width
-    else {
-      vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch)
-    }
+    vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch)
 
     vars.return.vars.stepsPerRPM = settings.dipswitch;
     vars.return.vars.maxRPM = (settings.maxFreq*60/settings.dipswitch).toFixed(3);
