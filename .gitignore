@@ -4,3 +4,5 @@ ignore/
 .idea/workspace.xml
 removed/
 secret/
+testResults/
+documentation/

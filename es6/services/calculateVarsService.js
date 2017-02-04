@@ -20,7 +20,8 @@ export default function calculateVarsService(shareProgram, shareSettings) {
 
     //these variables are always needed
     vars.return.vars.direction = (settings.direction) ? 1:0;
-    vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch)
+    vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch);
+    console.log('startPositionSteps', vars.return.vars.startPositionSteps, 'program.startPosition', program.startPosition, 'settings.spindleAdvancement', settings.spindleAdvancement, 'settings.dipswitch', settings.dipswitch);
 
     vars.return.vars.stepsPerRPM = settings.dipswitch;
     vars.return.vars.maxRPM = (settings.maxFreq*60/settings.dipswitch).toFixed(3);

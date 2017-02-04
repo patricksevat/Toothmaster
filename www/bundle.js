@@ -8242,15 +8242,15 @@
 	
 	var _errorService2 = _interopRequireDefault(_errorService);
 	
-	var _errorDirective = __webpack_require__(327);
+	var _errorDirective = __webpack_require__(329);
 	
 	var _errorDirective2 = _interopRequireDefault(_errorDirective);
 	
-	var _modalDirective = __webpack_require__(328);
+	var _modalDirective = __webpack_require__(330);
 	
 	var _modalDirective2 = _interopRequireDefault(_modalDirective);
 	
-	var _connectionStatus = __webpack_require__(329);
+	var _connectionStatus = __webpack_require__(331);
 	
 	var _connectionStatus2 = _interopRequireDefault(_connectionStatus);
 	
@@ -8258,7 +8258,7 @@
 	
 	var _ngAsync2 = _interopRequireDefault(_ngAsync);
 	
-	var _router = __webpack_require__(330);
+	var _router = __webpack_require__(332);
 	
 	var _router2 = _interopRequireDefault(_router);
 	
@@ -8283,7 +8283,7 @@
 	  var bugout = new debugout();
 	  this.bugout = bugout;
 	}).service('shareSettings', ['$ionicPopup', 'logService', '$state', _shareSettingsService2.default]).service('shareProgram', ['bugout', '$ionicPopup', '$state', _shareProgramService2.default]).service('skipService', _skipService2.default).service('buttonService', ['bugout', _buttonService2.default]).service('emergencyService', ['buttonService', 'statusService', '$rootScope', 'bugout', _emergencyService2.default]).service('bluetoothService', ['bugout', '$cordovaBluetoothSerial', '$window', 'logService', 'shareSettings', 'buttonService', '$rootScope', '$interval', '$async', 'statusService', 'emergencyService', _bluetoothService.bluetoothService]).service('logService', ['bugout', 'errorService', _logService2.default]).service('calculateVarsService', ['shareProgram', 'shareSettings', _calculateVarsService2.default]).service('logModalService', ['bugout', _logModalService2.default]).service('statusService', ['bugout', _statusService2.default]).service('pauseService', ['statusService', 'bluetoothService', 'logService', 'buttonService', 'bugout', '$async', _pauseService2.default]).service('sendAndReceiveService', ['statusService', 'emergencyService', '$window', 'logService', '$rootScope', 'buttonService', 'crcService', 'shareSettings', '$timeout', '$async', 'bugout', 'bluetoothService', '$interval', _sendAndReceiveService2.default]).service('crcService', [_crcService2.default]).service('errorService', ['$rootScope', 'bugout', _errorService2.default]).service('modalService', ['$ionicModal', '$rootScope', 'logService', _modalService2.default]).directive('errorHeader', ['$rootScope', _errorDirective2.default]).directive('modals', [_modalDirective2.default]).directive('connectionStatus', [_connectionStatus2.default]).run(function ($ionicPlatform, $rootScope, $state, $window, $ionicHistory, skipService, pauseService, bluetoothService, bugout) {
-	  bugout.bugout.log('version 1.1.0.9, localStorage:');
+	  bugout.bugout.log('version 1.1.1.0, localStorage:');
 	  bugout.bugout.log($window.localStorage);
 	  $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams, options) {
 	    bugout.bugout.log('startChangeStart, fromState: ' + fromState.name);
@@ -12388,16 +12388,8 @@
 	
 	    //these variables are always needed
 	    vars.return.vars.direction = settings.direction ? 1 : 0;
-	    vars.return.vars.startPositionSteps;
-	
-	    //if we are running an actual program, startPosition steps needs to include the width of of the saw blade
-	    if (type === 'runBluetooth') {
-	      vars.return.vars.startPositionSteps = Math.floor((program.startPosition + program.sawWidth) / settings.spindleAdvancement * settings.dipswitch);
-	    }
-	    //  otherwise we are running a move X mm test which does not need to include the saw width
-	    else {
-	        vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch);
-	      }
+	    vars.return.vars.startPositionSteps = Math.floor(program.startPosition / settings.spindleAdvancement * settings.dipswitch);
+	    console.log('startPositionSteps', vars.return.vars.startPositionSteps, 'program.startPosition', program.startPosition, 'settings.spindleAdvancement', settings.spindleAdvancement, 'settings.dipswitch', settings.dipswitch);
 	
 	    vars.return.vars.stepsPerRPM = settings.dipswitch;
 	    vars.return.vars.maxRPM = (settings.maxFreq * 60 / settings.dipswitch).toFixed(3);
@@ -12810,7 +12802,7 @@
 	  }
 	};
 	
-	var _lodash = __webpack_require__(331);
+	var _lodash = __webpack_require__(327);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -12818,187 +12810,6 @@
 
 /***/ },
 /* 327 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function ($rootScope) {
-	  return {
-	    restrict: 'E',
-	    replace: 'true',
-	    templateUrl: './templates/errorHeader.html'
-	  };
-	};
-
-/***/ },
-/* 328 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function () {
-	  return {
-	    restrict: 'E',
-	    replace: 'true',
-	    templateUrl: './templates/modals.html'
-	  };
-	};
-
-/***/ },
-/* 329 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	exports.default = function ($rootScope) {
-	  return {
-	    restrict: 'E',
-	    replace: 'true',
-	    templateUrl: './templates/connectionStatus.html'
-	  };
-	};
-
-/***/ },
-/* 330 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	function router($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
-	  // $ionicConfigProvider.views.maxCache(1);
-	
-	  /**
-	   * Important, for app, every path is relative to index.html
-	   * */
-	
-	  $stateProvider.state('app', {
-	    name: 'app',
-	    url: '/app',
-	    abstract: true,
-	    templateUrl: './templates/menu.html'
-	  }).state('app.settings', {
-	    name: 'settings',
-	    url: '/settings',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/settings.html',
-	        controller: 'SettingsCtrl'
-	      }
-	    }
-	  }).state('app.home', {
-	    name: 'home',
-	    url: '/home',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/home.html'
-	      }
-	    }
-	  }).state('app.safety-slide', {
-	    url: '/safety-slide',
-	    name: 'safety-slide',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/safety-slide.html',
-	        controller: 'SafetySlides'
-	      }
-	    }
-	  }).state('app.program', {
-	    name: 'program',
-	    url: '/program',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/program.html',
-	        controller: 'ProgramController'
-	      }
-	    }
-	  }).state('app.homing', {
-	    name: 'homing',
-	    url: '/homing',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/homing.html',
-	        controller: 'homingCtrl'
-	      }
-	    }
-	  }).state('app.runBluetooth', {
-	    name: 'runBluetooth',
-	    url: '/runBluetooth',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/runBluetooth.html',
-	        controller: 'runBluetoothCtrl'
-	      }
-	    }
-	  }).state('app.test', {
-	    name: 'test',
-	    url: '/test',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/test.html',
-	        controller: 'testCtrl'
-	      }
-	    }
-	  }).state('app.website', {
-	    name: 'website',
-	    url: '/website',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/website.html'
-	      }
-	    }
-	  }).state('app.bluetoothConnection', {
-	    name: 'bluetoothConnection',
-	    url: '/bluetoothConnection',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/bluetoothConnection.html',
-	        controller: 'bluetoothConnectionCtrl'
-	      }
-	    }
-	  }).state('app.asyncTest', {
-	    name: 'asyncTest',
-	    url: '/asyncTest',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/asyncTest.html',
-	        controller: 'asyncCtrl',
-	        controllerAs: 'async'
-	      }
-	    }
-	  }).state('app.crcTest', {
-	    name: 'crcTest',
-	    url: '/crcTest',
-	    views: {
-	      'menuContent': {
-	        templateUrl: './templates/crctest.html',
-	        controller: 'crcTestCtrl',
-	        controllerAs: 'crc'
-	      }
-	    }
-	  });
-	  // if none of the above states are matched, use this as the fallback
-	  $urlRouterProvider.otherwise('/app/program');
-	}
-	
-	exports.default = router;
-
-/***/ },
-/* 331 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -30086,10 +29897,10 @@
 	  }
 	}.call(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(332)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(328)(module)))
 
 /***/ },
-/* 332 */
+/* 328 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -30103,6 +29914,187 @@
 		return module;
 	}
 
+
+/***/ },
+/* 329 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($rootScope) {
+	  return {
+	    restrict: 'E',
+	    replace: 'true',
+	    templateUrl: './templates/errorHeader.html'
+	  };
+	};
+
+/***/ },
+/* 330 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function () {
+	  return {
+	    restrict: 'E',
+	    replace: 'true',
+	    templateUrl: './templates/modals.html'
+	  };
+	};
+
+/***/ },
+/* 331 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	exports.default = function ($rootScope) {
+	  return {
+	    restrict: 'E',
+	    replace: 'true',
+	    templateUrl: './templates/connectionStatus.html'
+	  };
+	};
+
+/***/ },
+/* 332 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function router($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+	  // $ionicConfigProvider.views.maxCache(1);
+	
+	  /**
+	   * Important, for app, every path is relative to index.html
+	   * */
+	
+	  $stateProvider.state('app', {
+	    name: 'app',
+	    url: '/app',
+	    abstract: true,
+	    templateUrl: './templates/menu.html'
+	  }).state('app.settings', {
+	    name: 'settings',
+	    url: '/settings',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/settings.html',
+	        controller: 'SettingsCtrl'
+	      }
+	    }
+	  }).state('app.home', {
+	    name: 'home',
+	    url: '/home',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/home.html'
+	      }
+	    }
+	  }).state('app.safety-slide', {
+	    url: '/safety-slide',
+	    name: 'safety-slide',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/safety-slide.html',
+	        controller: 'SafetySlides'
+	      }
+	    }
+	  }).state('app.program', {
+	    name: 'program',
+	    url: '/program',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/program.html',
+	        controller: 'ProgramController'
+	      }
+	    }
+	  }).state('app.homing', {
+	    name: 'homing',
+	    url: '/homing',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/homing.html',
+	        controller: 'homingCtrl'
+	      }
+	    }
+	  }).state('app.runBluetooth', {
+	    name: 'runBluetooth',
+	    url: '/runBluetooth',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/runBluetooth.html',
+	        controller: 'runBluetoothCtrl'
+	      }
+	    }
+	  }).state('app.test', {
+	    name: 'test',
+	    url: '/test',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/test.html',
+	        controller: 'testCtrl'
+	      }
+	    }
+	  }).state('app.website', {
+	    name: 'website',
+	    url: '/website',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/website.html'
+	      }
+	    }
+	  }).state('app.bluetoothConnection', {
+	    name: 'bluetoothConnection',
+	    url: '/bluetoothConnection',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/bluetoothConnection.html',
+	        controller: 'bluetoothConnectionCtrl'
+	      }
+	    }
+	  }).state('app.asyncTest', {
+	    name: 'asyncTest',
+	    url: '/asyncTest',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/asyncTest.html',
+	        controller: 'asyncCtrl',
+	        controllerAs: 'async'
+	      }
+	    }
+	  }).state('app.crcTest', {
+	    name: 'crcTest',
+	    url: '/crcTest',
+	    views: {
+	      'menuContent': {
+	        templateUrl: './templates/crctest.html',
+	        controller: 'crcTestCtrl',
+	        controllerAs: 'crc'
+	      }
+	    }
+	  });
+	  // if none of the above states are matched, use this as the fallback
+	  $urlRouterProvider.otherwise('/app/program');
+	}
+	
+	exports.default = router;
 
 /***/ }
 /******/ ]);
