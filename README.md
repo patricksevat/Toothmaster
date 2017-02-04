@@ -69,7 +69,7 @@ Contributions on these sections are particularly welcome:
 - Jointmaster communicates using serial communication over Bluetooth.
 - The PCB can be ordered [here](http://jointmaster.eu/product/jointmaster-usb-solution-low-budget-kit/)
 - Alternatively you can flash your own PCB (STM, Arduino, Raspberry Pi) with the software found here **(TODO add link)**
-- The PCB flashed with software has its own commands: [here](https://github.com/patricksevat/Toothmaster/PCB-communication.md) 
+- The PCB flashed with software has its own commands: [here](https://github.com/patricksevat/Toothmaster/blob/master/PCB-communication.md) 
 
 ## Contact
 
