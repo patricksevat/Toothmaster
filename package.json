@@ -45,5 +45,6 @@
   ],
   "cordovaPlatforms": [
     "android"
-  ]
+  ],
+  "license": "GNU GPL v3"
 }

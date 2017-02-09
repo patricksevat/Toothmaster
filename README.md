@@ -23,8 +23,8 @@ If you prefer a Windows based USB solution for creating your Mortise-Tenon joint
 
 #### Development && debugging
 
-- Run `npm install`
 - If you have Nodejs and Ionic installed run this command in a new folder `git clone https://github.com/patricksevat/Toothmaster.git`
+- Run `npm install`
 - Run `webpack -w` to watch your source code changes, and let this terminal/command prompt run in background
 - Open a new terminal/command prompt
 - Enable [adb debugging on your android device](https://developer.android.com/studio/command-line/adb.html#Enabling)
@@ -37,6 +37,7 @@ If you prefer a Windows based USB solution for creating your Mortise-Tenon joint
 - As soon as you have a new version you are content with you can run `ionic build --android`
 - Your .apk will be available under `/platforms/android/build/outputs/apk`
 - You can now move this .apk to your phone and install it on your phone 
+- Optional: create a single .apk (rather than an armv7 and x86 .apk): [instructions on stack overflow](http://stackoverflow.com/questions/32535551/building-combined-armv7-x86-apk-after-crosswalk-integration-in-an-ionic-project)
 
 #### Operating Systems besides Android
 
@@ -61,14 +62,14 @@ Pull requests are most welcome.
 Contributions on these sections are particularly welcome:
 
 - Tests
-- Improvements in bluetooth communication stability
+- Improvements in bluetooth communication stability (extensive effort has been put in to make this as stable as possible, but could be further improved, ideas: use [buffered commands](https://github.com/patricksevat/Toothmaster/blob/master/PCB-communication.md) or maybe [RxJS](https://github.com/Reactive-Extensions/RxJS)
 - Adding JSDoc
 
 ## PCB communication
 
 - Jointmaster communicates using serial communication over Bluetooth.
 - The PCB can be ordered [here](http://jointmaster.eu/product/jointmaster-usb-solution-low-budget-kit/)
-- Alternatively you can flash your own PCB (STM, Arduino, Raspberry Pi) with the software found here **(TODO add link)**
+- Alternatively you can flash your own PCB (STM, Arduino, Raspberry Pi) with the software found [here](https://github.com/marcel631/Jointmaster) 
 - The PCB flashed with software has its own commands: [here](https://github.com/patricksevat/Toothmaster/blob/master/PCB-communication.md) 
 
 ## Contact
@@ -78,4 +79,14 @@ Feel free to open an issue if anything is unclear.
 You can also contact us via `p.m.c.sevat <at> gmail <dot> com` regarding specific questions abou the code in this repository or fill in [this contact form](http://jointmaster.eu/contact/) for any questions regarding the required hardware or the PCB software.
 
 For more general information see [http://jointmaster.eu/](http://jointmaster.eu/). This website also contains useful blogs and videos on using Toothmaster.  
+
+## License
+
+All software is published under GNU GPL v3 license. This means that you are allow to modify, share and use my source and other stuff in personal or commercial use. If you modify source code, it has to stay under GNU GPL v3 license too. I reserve a right to shut down this website at any time.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
 
